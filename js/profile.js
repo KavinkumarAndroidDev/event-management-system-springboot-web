@@ -3,11 +3,82 @@ import { showToast, setupGenericPagination } from './utils.js';
 
 export function initProfilePage() {
     const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
-        window.location.href = 'login.html';
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    if (user && user.role && user.role.name !== 'ATTENDEE') {
+        window.location.href = '../index.html';
         return;
     }
-    const user = JSON.parse(userStr);
+
+    if (!user) {
+        // Handle Guest View
+        const logoutBtn = document.getElementById('profileLogoutBtn');
+        if (logoutBtn) logoutBtn.classList.add('d-none');
+
+        document.getElementById('sidebar-avatar').textContent = 'GU';
+        document.getElementById('sidebar-name').textContent = 'Guest User';
+        document.getElementById('sidebar-email').textContent = 'Please log in to sync.';
+
+        ['view-overview', 'view-profile', 'view-registrations', 'view-past-events', 'view-payments'].forEach(s => {
+            const el = document.getElementById(s);
+            if (el) {
+                el.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center py-5 h-100 container" style="max-width: 400px;">
+                    <div class="bg-neutral-100 rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i data-lucide="lock" width="40" class="text-neutral-400"></i>
+                    </div>
+                    <h5 class="fw-bold text-neutral-900 mb-2">Login Required</h5>
+                    <p class="text-neutral-400 mb-4 text-center">Log in to view your tickets, payments, and settings.</p>
+
+                    <form id="profileLoginForm-${s}" class="w-100" novalidate>
+                        <div class="mb-3 text-start">
+                            <label class="form-label fw-medium text-neutral-900 small">Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="john@example.com" required>
+                        </div>
+                        <div class="mb-4 text-start">
+                            <label class="form-label fw-medium text-neutral-900 small">Password</label>
+                            <input type="password" class="form-control" name="password" placeholder="••••••••" required>
+                        </div>
+                        <div class="d-flex flex-column gap-3">
+                            <button type="submit" class="btn btn-primary rounded-pill w-100">Log in now</button>
+                            <a href="signup.html" class="btn btn-outline-dark rounded-pill w-100">Create an account</a>
+                        </div>
+                    </form>
+                </div>`;
+
+                setTimeout(() => {
+                    const inlineForm = document.getElementById(`profileLoginForm-${s}`);
+                    if (inlineForm) {
+                        inlineForm.onsubmit = async (subEvent) => {
+                            subEvent.preventDefault();
+                            inlineForm.classList.add('was-validated');
+                            if (inlineForm.checkValidity()) {
+                                const email = inlineForm.querySelector('input[type="email"]').value;
+                                const pwd = inlineForm.querySelector('input[type="password"]').value;
+
+                                const { performLogin } = await import('./auth.js');
+                                const success = performLogin(email, pwd, false, () => {
+                                    window.location.reload();
+                                });
+
+                                if (success) {
+                                    const submitBtn = inlineForm.querySelector('button[type="submit"]');
+                                    submitBtn.disabled = true;
+                                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
+                                } else {
+                                    inlineForm.querySelector('input[type="password"]').value = '';
+                                    inlineForm.classList.remove('was-validated');
+                                }
+                            }
+                        };
+                    }
+                }, 0);
+            }
+        });
+
+        if (window.lucide) lucide.createIcons();
+        return; // Halt further profile initialization
+    }
 
     // Populate Sidebar
     const initials = user.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -26,31 +97,71 @@ export function initProfilePage() {
     document.getElementById('profile-dob').value = user.profile.dateOfBirth || '';
     if (user.profile.gender) document.getElementById('profile-gender').value = user.profile.gender;
 
+    // Profile Completion Calculation
+    const fieldsToTrack = ['fullName', 'email', 'phone', 'dateOfBirth', 'gender', 'profileImage'];
+    const completedFields = fieldsToTrack.filter(field => user.profile[field] && String(user.profile[field]).trim() !== '');
+    const completionPercentage = Math.round((completedFields.length / fieldsToTrack.length) * 100);
+
+    const completionWidget = document.getElementById('profile-completion-widget');
+    if (completionWidget) {
+        if (completionPercentage === 100) {
+            completionWidget.classList.add('d-none');
+        } else {
+            completionWidget.classList.remove('d-none');
+            const percentText = document.getElementById('profile-completion-text');
+            const progressBar = document.getElementById('profile-completion-bar');
+            if (percentText) percentText.textContent = `${completionPercentage}%`;
+            if (progressBar) progressBar.style.width = `${completionPercentage}%`;
+        }
+    }
+
     // Sidebar Navigation
     const navLinks = document.querySelectorAll('.nav-link[data-section]');
+    function switchSection(section) {
+        navLinks.forEach(link => {
+            if (link.dataset.section === section) {
+                link.classList.add('active-nav-item', 'text-primary');
+                link.classList.remove('text-neutral-900', 'hover-bg-neutral-50');
+            } else {
+                link.classList.remove('active-nav-item', 'text-primary');
+                link.classList.add('text-neutral-900', 'hover-bg-neutral-50');
+            }
+        });
+
+        ['overview', 'profile', 'registrations', 'past-events', 'payments'].forEach(s => {
+            document.getElementById(`view-${s}`)?.classList.add('d-none');
+        });
+
+        if (section === 'overview') document.getElementById('view-overview').classList.remove('d-none');
+        if (section === 'profile') document.getElementById('view-profile').classList.remove('d-none');
+        if (section === 'registrations') renderRegistrations();
+        if (section === 'past-events') renderPastEvents();
+        if (section === 'payments') renderPayments();
+    }
+
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const section = link.dataset.section;
-
-            navLinks.forEach(l => {
-                l.classList.remove('active-nav-item', 'text-primary');
-                l.classList.add('text-neutral-900', 'hover-bg-neutral-50');
-            });
-            link.classList.add('active-nav-item', 'text-primary');
-            link.classList.remove('text-neutral-900', 'hover-bg-neutral-50');
-
-            ['overview', 'profile', 'registrations', 'past-events', 'payments'].forEach(s => {
-                document.getElementById(`view-${s}`)?.classList.add('d-none');
-            });
-
-            if (section === 'overview') document.getElementById('view-overview').classList.remove('d-none');
-            if (section === 'profile') document.getElementById('view-profile').classList.remove('d-none');
-            if (section === 'registrations') renderRegistrations();
-            if (section === 'past-events') renderPastEvents();
-            if (section === 'payments') renderPayments();
+            switchSection(link.dataset.section);
         });
     });
+
+    // Overview "See All" Buttons
+    const viewAllRegistrationsBtn = document.getElementById('btn-view-all-registrations');
+    if (viewAllRegistrationsBtn) {
+        viewAllRegistrationsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('registrations');
+        });
+    }
+
+    const viewAllPaymentsBtn = document.getElementById('btn-view-all-payments');
+    if (viewAllPaymentsBtn) {
+        viewAllPaymentsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection('payments');
+        });
+    }
 
     // Logout handlers
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
@@ -71,61 +182,76 @@ export function initProfilePage() {
 
     // Populate Upcoming Events
     const container = document.getElementById('profile-upcoming-events');
-    if (container && state.events) {
-        const events = state.events.slice(0, 2);
-        container.innerHTML = events.map(event => {
-            const date = new Date(event.schedule.startDateTime);
-            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            const minPrice = Math.min(...event.tickets.map(t => t.price));
-            return `
-                <div class="card-custom p-3">
-                    <div class="d-flex gap-3">
-                        <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 120px; height: 80px;" alt="${event.title}">
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="fw-bold mb-1">${event.title}</h6>
-                                    <div class="small text-neutral-400 mb-2">
-                                        <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
+    if (container && state.events && state.registrations) {
+        const userRegistrations = state.registrations.filter(r => r.userId === user.id);
+        const now = new Date();
+        const upcomingEvents = userRegistrations
+            .map(reg => state.events.find(e => e.id === reg.eventId))
+            .filter(e => e && new Date(e.schedule.startDateTime) > now)
+            .sort((a, b) => new Date(a.schedule.startDateTime) - new Date(b.schedule.startDateTime))
+            .slice(0, 2);
+
+        if (upcomingEvents.length === 0) {
+            container.innerHTML = '<div class="text-neutral-400 py-3">No upcoming events.</div>';
+        } else {
+            container.innerHTML = upcomingEvents.map(event => {
+                const date = new Date(event.schedule.startDateTime);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const minPrice = Math.min(...event.tickets.map(t => t.price));
+                return `
+                    <div class="card-custom p-3">
+                        <div class="d-flex gap-3">
+                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 120px; height: 80px;" alt="${event.title}">
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">${event.title}</h6>
+                                        <div class="small text-neutral-400 mb-2">
+                                            <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
+                                        </div>
                                     </div>
+                                    <a href="events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
                                 </div>
-                                <a href="events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between mt-1">
-                                <div class="small text-neutral-600">1 Ticket • Standard</div>
-                                <div class="fw-bold text-primary">₹${minPrice}</div>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <div class="small text-neutral-600">1 Ticket • Standard</div>
+                                    <div class="fw-bold text-primary">₹${minPrice}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+            }).join('');
+        }
     }
 
     // Populate Recent Payments (overview widget)
     const paymentsContainer = document.getElementById('profile-recent-payments');
     if (paymentsContainer && state.payments) {
         const recentPayments = state.payments.filter(p => p.userId === user.id).slice(0, 4);
-        paymentsContainer.innerHTML = recentPayments.map(pay => {
-            let badgeClass = '';
-            if (pay.status === 'Confirmed') badgeClass = 'border-success text-success';
-            else if (pay.status === 'Refunded') badgeClass = 'border-warning text-warning';
-            else if (pay.status === 'Failed') badgeClass = 'border-danger text-danger';
+        if (recentPayments.length === 0) {
+            paymentsContainer.innerHTML = '<div class="text-neutral-400 py-3">No recent payments.</div>';
+        } else {
+            paymentsContainer.innerHTML = recentPayments.map(pay => {
+                let badgeClass = '';
+                if (pay.status === 'Confirmed') badgeClass = 'border-success text-success';
+                else if (pay.status === 'Refunded') badgeClass = 'border-warning text-warning';
+                else if (pay.status === 'Failed') badgeClass = 'border-danger text-danger';
 
-            return `
-            <div class="col-md-6">
-                <div class="card-custom p-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <div class="fw-bold text-truncate" style="max-width: 150px;">${pay.eventTitle}</div>
-                            <div class="small text-neutral-400">Order #${pay.id.split('-')[1]}</div>
+                return `
+                <div class="col-md-6">
+                    <div class="card-custom p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="fw-bold text-truncate" style="max-width: 150px;">${pay.eventTitle}</div>
+                                <div class="small text-neutral-400">Order #${pay.id.split('-')[1]}</div>
+                            </div>
+                            <span class="badge bg-transparent border ${badgeClass} rounded-pill px-3">${pay.status}</span>
                         </div>
-                        <span class="badge bg-transparent border ${badgeClass} rounded-pill px-3">${pay.status}</span>
+                        <div class="fw-bold">₹${pay.amount}</div>
                     </div>
-                    <div class="fw-bold">₹${pay.amount}</div>
-                </div>
-            </div>`;
-        }).join('');
+                </div>`;
+            }).join('');
+        }
     }
 
     // Profile Update Handler
@@ -234,9 +360,9 @@ function renderRegistrations() {
                                 <div class="small text-neutral-400"><i data-lucide="map-pin" width="14" class="me-1"></i> ${reg.location}</div>
                             </div>
                             ${isCancelled
-                                ? `<span class="badge bg-danger-subtle text-danger rounded-pill px-3">Cancelled</span>`
-                                : `<button class="btn btn-outline-danger btn-sm rounded-pill px-3 btn-cancel-reg" data-id="${reg.id}">Cancel</button>`
-                            }
+                    ? `<span class="badge bg-danger-subtle text-danger rounded-pill px-3">Cancelled</span>`
+                    : `<button class="btn btn-outline-danger btn-sm rounded-pill px-3 btn-cancel-reg" data-id="${reg.id}">Cancel</button>`
+                }
                         </div>
                         <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top border-neutral-100">
                             <div class="small text-neutral-600">${reg.quantity} x ${reg.ticketType}</div>
@@ -314,9 +440,9 @@ function renderPastEvents() {
                                 <div class="small text-neutral-400"><i data-lucide="map-pin" width="14" class="me-1"></i> ${evt.location}</div>
                             </div>
                             ${evt.feedbackSubmitted
-                                ? `<div class="d-flex align-items-center gap-1 text-success small fw-medium bg-white px-3 py-1 rounded-pill border border-neutral-100"><i data-lucide="check-circle" width="14"></i> Rated: ${'★'.repeat(evt.rating)}</div>`
-                                : `<button class="btn btn-outline-primary btn-sm rounded-pill px-3 btn-feedback" data-id="${evt.id}">Submit Feedback</button>`
-                            }
+                    ? `<div class="d-flex align-items-center gap-1 text-success small fw-medium bg-white px-3 py-1 rounded-pill border border-neutral-100"><i data-lucide="check-circle" width="14"></i> Rated: ${'★'.repeat(evt.rating)}</div>`
+                    : `<button class="btn btn-outline-primary btn-sm rounded-pill px-3 btn-feedback" data-id="${evt.id}">Submit Feedback</button>`
+                }
                         </div>
                     </div>
                 </div>

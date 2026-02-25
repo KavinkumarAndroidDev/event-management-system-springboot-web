@@ -2340,6 +2340,19 @@
       "status": "CONFIRMED",
       "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
     },
+        {
+      "id": "REG-5",
+      "userId": "USR-2001",
+      "eventId": "EVT-5001",
+      "eventName": "AI Tech Summit 2026",
+      "date": "2026-04-15T09:00:00",
+      "location": "Chennai Trade Centre, Chennai",
+      "ticketType": "Standard",
+      "quantity": 1,
+      "price": 1499,
+      "status": "CONFIRMED",
+      "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
+    },
     {
       "id": "REG-2",
       "userId": "USR-1001",

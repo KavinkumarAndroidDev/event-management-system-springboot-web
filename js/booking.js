@@ -1,9 +1,23 @@
 import { state } from './state.js';
+import { showToast } from './utils.js';
 
 export function initBookingPage() {
+    // Auth Check
+    const userStr = localStorage.getItem('currentUser');
+    if (!userStr) {
+        window.location.href = '../login.html';
+        return;
+    }
+
+    const user = JSON.parse(userStr);
+    if (user.role && user.role.name !== 'ATTENDEE') {
+        window.location.href = '../../index.html';
+        return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
-    
+
     if (!eventId || !state.events) return;
 
     const event = state.events.find(e => e.id === eventId);
@@ -20,9 +34,8 @@ export function initBookingPage() {
         date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
     // Update Summary Image
-    const summaryImg = document.getElementById('summary-event-image');
+    const summaryImg = document.getElementById('summary-event-img');
     if (summaryImg) {
-        // Use a slight timeout to ensure DOM is ready if needed, or just set directly
         summaryImg.setAttribute('src', event.media.thumbnail);
         summaryImg.setAttribute('alt', event.title);
         summaryImg.style.objectFit = 'cover';
@@ -31,6 +44,7 @@ export function initBookingPage() {
     // Render Tickets
     const container = document.getElementById('tickets-container');
     const cart = {};
+    let currentDiscount = 0; // Discount percentage
 
     event.tickets.forEach(ticket => {
         const card = document.createElement('div');
@@ -71,13 +85,24 @@ export function initBookingPage() {
         const countSpan = actionDiv.querySelector('.count');
         const card = actionDiv.closest('.card-custom');
 
+        // Calculate total current tickets
+        const totalTickets = Object.values(cart).reduce((a, b) => a + b, 0);
+
         if (e.target.closest('.btn-add')) {
+            if (totalTickets >= 10) {
+                showToast('Limit Reached', 'You can only book up to 10 tickets at a time.', 'warning');
+                return;
+            }
             cart[id] = 1;
             card.classList.add('selected');
             btnAdd.classList.add('d-none');
             qtyControl.classList.remove('d-none');
             countSpan.textContent = 1;
         } else if (e.target.closest('.btn-plus')) {
+            if (totalTickets >= 10) {
+                showToast('Limit Reached', 'You can only book up to 10 tickets at a time.', 'warning');
+                return;
+            }
             cart[id] = (cart[id] || 0) + 1;
             countSpan.textContent = cart[id];
         } else if (e.target.closest('.btn-minus')) {
@@ -96,26 +121,79 @@ export function initBookingPage() {
 
     // Update Sticky Summary
     function updateSummary(cart, tickets) {
-        let total = 0;
+        let subtotal = 0;
         let count = 0;
         Object.keys(cart).forEach(id => {
             const ticket = tickets.find(t => t.id === id);
             if (ticket) {
-                total += ticket.price * cart[id];
+                subtotal += ticket.price * cart[id];
                 count += cart[id];
             }
         });
 
         const sticky = document.getElementById('sticky-summary');
+
+        // Calculate financial breakdowns
+        const discountAmount = (subtotal * currentDiscount) / 100;
+        const subtotalAfterDiscount = subtotal - discountAmount;
+        const taxAmount = subtotalAfterDiscount * 0.18; // 18% tax
+        const total = subtotalAfterDiscount + taxAmount;
+
         if (count > 0) {
             sticky.classList.add('visible');
-            document.getElementById('sticky-total').textContent = `₹${total}`;
+            document.getElementById('sticky-total').textContent = `₹${total.toFixed(2)}`;
             document.getElementById('sticky-count').textContent = `${count} Ticket${count > 1 ? 's' : ''}`;
-            document.getElementById('pay-btn-amount').textContent = `₹${total}`;
-            document.getElementById('summary-total').textContent = `₹${total}`;
+
+            // Populate Right side summary box metrics
+            const subtotalEl = document.getElementById('summary-subtotal');
+            if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+
+            const taxEl = document.getElementById('summary-tax');
+            if (taxEl) taxEl.textContent = `₹${taxAmount.toFixed(2)}`;
+
+            const totalEl = document.getElementById('summary-total');
+            if (totalEl) totalEl.textContent = `₹${total.toFixed(2)}`;
+
+            const payBtnAmount = document.getElementById('pay-btn-amount');
+            if (payBtnAmount) payBtnAmount.textContent = `₹${total.toFixed(2)}`;
+
+            const discountRow = document.getElementById('summary-discount-row');
+            if (discountRow && currentDiscount > 0) {
+                discountRow.classList.remove('d-none');
+                document.getElementById('summary-discount').textContent = `-₹${discountAmount.toFixed(2)}`;
+            } else if (discountRow) {
+                discountRow.classList.add('d-none');
+            }
+
         } else {
             sticky.classList.remove('visible');
+            currentDiscount = 0; // Reset discount if cart empty
+            if (document.getElementById('summary-discount-row')) document.getElementById('summary-discount-row').classList.add('d-none');
         }
+    }
+
+    // Discount Code Logic
+    const btnApplyDiscount = document.getElementById('btn-apply-discount');
+    if (btnApplyDiscount) {
+        btnApplyDiscount.addEventListener('click', () => {
+            const codeInput = document.getElementById('discount-code').value.trim();
+            if (!codeInput) return;
+
+            if (event.pricing && event.pricing.offers) {
+                const offer = event.pricing.offers.find(o => o.code.toUpperCase() === codeInput.toUpperCase());
+                if (offer) {
+                    currentDiscount = offer.discountPercentage;
+                    showToast('Success', `Offer applied! ${currentDiscount}% off.`, 'success');
+                    updateSummary(cart, event.tickets);
+                } else {
+                    currentDiscount = 0;
+                    showToast('Invalid Code', 'The offer code entered is not valid.', 'danger');
+                    updateSummary(cart, event.tickets);
+                }
+            } else {
+                showToast('Error', 'No offers available for this event.', 'warning');
+            }
+        });
     }
 
     // Proceed to Payment
@@ -131,42 +209,54 @@ export function initBookingPage() {
 
             // Render booking summary items
             const summaryContainer = document.getElementById('booking-summary-items');
-            summaryContainer.innerHTML = '';
-            Object.keys(cart).forEach(id => {
-                const ticket = event.tickets.find(t => t.id === id);
-                const qty = cart[id];
-                summaryContainer.innerHTML += `
-                    <div class="d-flex justify-content-between small">
-                        <span class="text-neutral-600">${qty} x ${ticket.type}</span>
-                        <span class="fw-medium">₹${ticket.price * qty}</span>
-                    </div>
-                `;
-            });
+            if (summaryContainer) {
+                summaryContainer.innerHTML = '';
+                Object.keys(cart).forEach(id => {
+                    const ticket = event.tickets.find(t => t.id === id);
+                    const qty = cart[id];
+                    summaryContainer.innerHTML += `
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-neutral-600">${qty} x ${ticket.type}</span>
+                            <span class="fw-medium">₹${ticket.price * qty}</span>
+                        </div>
+                    `;
+                });
+            }
         });
     }
 
     // Payment Option Selection Logic
-    const paymentOptions = document.querySelectorAll('.payment-option');
+    const paymentOptions = document.querySelectorAll('.payment-method-card');
     paymentOptions.forEach(option => {
         option.addEventListener('click', () => {
             // Reset all options
             paymentOptions.forEach(opt => {
-                opt.classList.remove('border-primary', 'bg-primary-subtle');
+                opt.classList.remove('border-primary', 'bg-primary-subtle', 'bg-opacity-10');
                 const radio = opt.querySelector('input[type="radio"]');
                 if (radio) radio.checked = false;
             });
             // Select clicked option
-            option.classList.add('border-primary', 'bg-primary-subtle');
+            option.classList.add('border-primary', 'bg-primary-subtle', 'bg-opacity-10');
             const radio = option.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
         });
     });
 
-    // Handle Payment
+    // Handle Payment with Validation
     const paymentForm = document.getElementById('payment-form');
     if (paymentForm) {
+        // Enforce Novalidate to handle manually
+        paymentForm.setAttribute('novalidate', true);
+
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
+
+            if (!paymentForm.checkValidity()) {
+                e.stopPropagation();
+                paymentForm.classList.add('was-validated');
+                return; // Stop processing if validaton fails
+            }
+
             const btn = document.getElementById('btn-pay-now');
             const originalText = btn.innerHTML;
             btn.disabled = true;
@@ -181,3 +271,4 @@ export function initBookingPage() {
         });
     }
 }
+

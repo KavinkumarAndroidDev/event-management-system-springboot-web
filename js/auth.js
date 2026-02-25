@@ -1,11 +1,86 @@
 import { state } from './state.js';
 import { showToast } from './utils.js';
 
+export function performLogin(email, password, rememberMe = false, onRedirect = null) {
+    if (!state.users || state.users.length === 0) {
+        showToast('System Error', 'User data not loaded yet. Please try again.', 'warning');
+        return false;
+    }
+
+    const user = state.users.find(u => u.profile.email === email && u.password === password);
+
+    if (user) {
+        if (user.accountStatus.status !== 'ACTIVE') {
+            // Create the suspended modal dynamically if it doesn't exist
+            let modalEl = document.getElementById('suspendedAccountModal');
+            if (!modalEl) {
+                modalEl = document.createElement('div');
+                modalEl.id = 'suspendedAccountModal';
+                modalEl.className = 'modal fade';
+                modalEl.tabIndex = -1;
+                modalEl.innerHTML = `
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                            <div class="modal-header border-0 pb-0">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center pt-0 pb-4 px-4">
+                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex p-3 mb-3">
+                                    <i data-lucide="ban" width="32" height="32"></i>
+                                </div>
+                                <h4 class="fw-bold mb-2">Account Suspended</h4>
+                                <p class="text-neutral-600 mb-4">Your account is currently suspended. Please contact support to resolve this issue.</p>
+                                <button type="button" class="btn btn-primary w-100 rounded-pill mb-2" data-bs-dismiss="modal">Close</button>
+                                <a href="contact.html" class="btn btn-outline-dark w-100 rounded-pill">Contact Support</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modalEl);
+                if (window.lucide) lucide.createIcons();
+            }
+            const bsModal = new bootstrap.Modal(modalEl);
+            bsModal.show();
+            return false;
+        }
+
+        if (rememberMe) {
+            localStorage.setItem('rememberedEmail', email);
+        }
+
+        const sessionUser = { ...user };
+        delete sessionUser.password;
+        localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+
+        showToast('Success', `Welcome back, ${user.profile.fullName}!`, 'success');
+
+        setTimeout(() => {
+            if (onRedirect) {
+                onRedirect(user);
+            } else {
+                const role = user.role.name;
+                if (role === 'ATTENDEE') {
+                    window.location.href = '../index.html';
+                } else if (role === 'ORGANIZER') {
+                    window.location.href = 'organizer-dashboard.html';
+                } else if (role === 'ADMIN') {
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    window.location.href = '../index.html';
+                }
+            }
+        }, 1000);
+        return true;
+    } else {
+        showToast('Error', 'Invalid email or password.', 'danger');
+        return false;
+    }
+}
+
 export function setupLoginForm() {
     const form = document.getElementById('loginForm');
     if (!form) return;
 
-    // Pre-fill email if "Remember Me" was used
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
         const emailInput = form.querySelector('input[type="email"]');
@@ -17,66 +92,26 @@ export function setupLoginForm() {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         e.stopPropagation();
-
         form.classList.add('was-validated');
 
         if (form.checkValidity()) {
             const emailInput = form.querySelector('input[type="email"]');
             const passwordInput = form.querySelector('input[type="password"]');
             const rememberMe = document.getElementById('rememberMe');
-            
+
             const email = emailInput.value;
             const password = passwordInput.value;
+            const remember = rememberMe ? rememberMe.checked : false;
 
-            // Check if data is loaded
-            if (!state.users || state.users.length === 0) {
-                showToast('System Error', 'User data not loaded yet. Please try again.', 'warning');
-                return;
-            }
+            const success = performLogin(email, password, remember);
 
-            const user = state.users.find(u => u.profile.email === email && u.password === password);
-
-            if (user) {
-                // Check Account Status
-                if (user.accountStatus.status !== 'ACTIVE') {
-                    showToast('Access Denied', 'Your account is currently ' + user.accountStatus.status.toLowerCase() + '.', 'danger');
-                    return;
-                }
-
-                // Handle Remember Me
-                if (rememberMe && rememberMe.checked) {
-                    localStorage.setItem('rememberedEmail', email);
-                } else {
-                    localStorage.removeItem('rememberedEmail');
-                }
-
-                // Login Success: Store user session (excluding password)
-                const sessionUser = { ...user };
-                delete sessionUser.password;
-                localStorage.setItem('currentUser', JSON.stringify(sessionUser));
-
-                showToast('Success', `Welcome back, ${user.profile.fullName}!`, 'success');
-                
-                // Simulate login delay & UI feedback
+            if (success) {
                 const btn = form.querySelector('button[type="submit"]');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...';
-                
-                // RBAC Redirection
-                setTimeout(() => {
-                    const role = user.role.name;
-                    if (role === 'ATTENDEE') {
-                        window.location.href = '../index.html';
-                    } else if (role === 'ORGANIZER') {
-                        window.location.href = 'organizer-dashboard.html'; 
-                    } else if (role === 'ADMIN') {
-                        window.location.href = 'admin-dashboard.html';
-                    } else {
-                        window.location.href = '../index.html';
-                    }
-                }, 1000);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...';
+                }
             } else {
-                showToast('Error', 'Invalid email or password.', 'danger');
                 passwordInput.value = '';
                 form.classList.remove('was-validated');
             }
@@ -109,7 +144,7 @@ export function setupSignupForm() {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         form.classList.add('was-validated');
 
         if (form.checkValidity()) {
@@ -158,7 +193,7 @@ export function setupForgotPassword() {
             const newPass = document.getElementById('fpNewPassword').value;
 
             const user = state.users.find(u => u.profile.email === email && u.password === oldPass);
-            
+
             if (!user) {
                 showToast('Error', 'Invalid email or old password.', 'danger');
                 return;
@@ -189,21 +224,21 @@ export function setupPasswordToggles() {
     document.querySelectorAll('.toggle-password').forEach(btn => {
         const wrapper = btn.closest('.input-group') || btn.closest('.position-relative');
         if (!wrapper) return;
-        
+
         const input = wrapper.querySelector('input');
         if (input && btn) {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const isPassword = input.type === 'password';
                 input.type = isPassword ? 'text' : 'password';
-                
+
                 if (window.lucide && window.lucide.createIcons) {
                     const iconName = isPassword ? 'eye' : 'eye-off';
                     btn.innerHTML = `<i data-lucide="${iconName}"></i>`;
                     window.lucide.createIcons({
                         root: btn,
                         attrs: {
-                            width: 20, 
+                            width: 20,
                             height: 20,
                             "stroke-width": 1.5
                         }
@@ -217,7 +252,7 @@ export function setupPasswordToggles() {
 export function setupPasswordStrength() {
     const passwordInput = document.querySelector('#signupForm input[type="password"]');
     const strengthMeter = document.getElementById('passwordStrength');
-    
+
     if (!passwordInput || !strengthMeter) return;
 
     const progressBar = strengthMeter.querySelector('.progress-bar');
@@ -260,7 +295,7 @@ export function setupPasswordStrength() {
         if (hasSpecial) strength += 25;
 
         progressBar.style.width = strength + '%';
-        
+
         if (strength <= 25) {
             progressBar.className = 'progress-bar bg-danger';
         } else if (strength <= 50) {

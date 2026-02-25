@@ -1,4 +1,5 @@
 import { state } from './state.js';
+import { performLogin } from './auth.js';
 
 export function initializeEvents() {
     const events = state.events;
@@ -32,7 +33,7 @@ export function createEventCard(event) {
     const date = new Date(event.schedule.startDateTime);
     const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
+
     const path = window.location.pathname;
     let link = 'html/events/event-details.html?id=' + event.id;
 
@@ -73,7 +74,7 @@ export function populateSingleEvent(event) {
     };
 
     setText('event-title', event.title);
-    if(event.category) {
+    if (event.category) {
         setText('event-category', event.category.name);
         const iconEl = document.getElementById('event-category-icon');
         // Check if iconEl exists and hasn't been replaced by SVG yet, or is an SVG
@@ -87,29 +88,69 @@ export function populateSingleEvent(event) {
             if (window.lucide) lucide.createIcons({ root: newIcon.parentElement });
         }
     }
-    
+
     const startDate = new Date(event.schedule.startDateTime);
     const endDate = new Date(event.schedule.endDateTime);
     const dateStr = `${startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, ${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
     setText('event-date', dateStr);
     setText('event-location', `${event.venue.name}, ${event.venue.address.city}`);
-    
+
     const minPrice = Math.min(...event.tickets.map(t => t.price));
     setText('event-price', minPrice === 0 ? 'Free' : `₹${minPrice}`);
-    
+
     setText('event-description', event.fullDescription);
     setText('venue-name', event.venue.name);
     setText('venue-address', `${event.venue.address.street}, ${event.venue.address.city}, ${event.venue.address.pincode}`);
 
     const heroImg = document.getElementById('event-hero-image');
     if (heroImg) heroImg.src = event.media.thumbnail;
-    
+
     setText('breadcrumb-active', event.title);
     document.title = `${event.title} - SyncEvent`;
 
     const bookBtn = document.querySelector('.btn-primary');
     if (bookBtn && bookBtn.textContent.includes('Book tickets')) {
-        bookBtn.onclick = () => window.location.href = `booking.html?id=${event.id}`;
+        bookBtn.onclick = (e) => {
+            e.preventDefault();
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) {
+                const modalEl = document.getElementById('loginRequiredModal');
+                if (modalEl) {
+                    const bsModal = new bootstrap.Modal(modalEl);
+                    bsModal.show();
+
+                    const loginForm = document.getElementById('modalLoginForm');
+                    if (loginForm) {
+                        loginForm.onsubmit = (subEvent) => {
+                            subEvent.preventDefault();
+                            subEvent.stopPropagation();
+                            loginForm.classList.add('was-validated');
+                            if (loginForm.checkValidity()) {
+                                const email = loginForm.querySelector('input[type="email"]').value;
+                                const pwd = loginForm.querySelector('input[type="password"]').value;
+                                const success = performLogin(email, pwd, false, (user) => {
+                                    // Custom redirect after success
+                                    window.location.href = `booking.html?id=${event.id}`;
+                                });
+
+                                if (success) {
+                                    const submitBtn = loginForm.querySelector('button[type="submit"]');
+                                    submitBtn.disabled = true;
+                                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
+                                } else {
+                                    loginForm.querySelector('input[type="password"]').value = '';
+                                    loginForm.classList.remove('was-validated');
+                                }
+                            }
+                        };
+                    }
+                } else {
+                    window.location.href = '../../html/login.html';
+                }
+            } else {
+                window.location.href = `booking.html?id=${event.id}`;
+            }
+        };
     }
 }
 
@@ -117,7 +158,7 @@ function setupPagination(events) {
     const itemsPerPage = 9;
     let currentPage = 1;
     let paginationContainer = document.getElementById('pagination-controls');
-    
+
     if (!paginationContainer) return;
 
     const newContainer = paginationContainer.cloneNode(false);
@@ -128,7 +169,7 @@ function setupPagination(events) {
         const start = (page - 1) * itemsPerPage;
         const end = start + itemsPerPage;
         const pageEvents = events.slice(start, end);
-        
+
         const eventsGrid = document.getElementById('events-grid');
         if (eventsGrid) {
             eventsGrid.innerHTML = pageEvents.map(e => createEventCard(e)).join('');
@@ -177,7 +218,7 @@ export function setupGlobalInteractions() {
 
     // Filter Pills (Visual Toggle)
     document.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.addEventListener('click', function() {
+        pill.addEventListener('click', function () {
             const group = this.closest('.d-flex');
             if (group) {
                 group.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
@@ -186,7 +227,7 @@ export function setupGlobalInteractions() {
             if (document.getElementById('events-grid')) filterEvents();
         });
     });
-    
+
     // Sidebar Checkboxes
     document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(box => {
         box.addEventListener('change', () => {
@@ -197,18 +238,18 @@ export function setupGlobalInteractions() {
 
 function filterEvents(query) {
     if (!state.events) return;
-    
+
     let filtered = state.events;
-    
+
     // 1. Search Query
     if (typeof query !== 'string') {
         const searchInput = document.querySelector('input[type="search"]');
         query = searchInput ? searchInput.value.toLowerCase() : '';
     }
-    
+
     if (query) {
-        filtered = filtered.filter(e => 
-            e.title.toLowerCase().includes(query) || 
+        filtered = filtered.filter(e =>
+            e.title.toLowerCase().includes(query) ||
             e.venue.address.city.toLowerCase().includes(query) ||
             (e.category && e.category.name.toLowerCase().includes(query))
         );

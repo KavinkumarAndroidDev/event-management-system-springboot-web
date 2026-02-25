@@ -33,7 +33,7 @@
               <li><button class="dropdown-item" type="button">Madurai</button></li>
             </ul>
           </div>
-        </nav>
+        </div>
 
         <div class="header-right">
           <div id="guestState" class="auth-state">
@@ -86,9 +86,11 @@
                 </div>
                 <div class="mb-4">
                   <label class="form-label fw-medium text-neutral-900 small">Message</label>
-                  <textarea class="form-control bg-neutral-50 border-0" rows="5" placeholder="Tell us about your greivances..."></textarea>
+                  <textarea class="form-control bg-neutral-50 border-0" rows="5"
+                    placeholder="Tell us about your greivances..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
+                <button type="submit"
+                  class="btn btn-primary w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
                   Send Message
                   <i data-lucide="arrow-right" width="18" height="18"></i>
                 </button>
@@ -105,11 +107,12 @@
                 <p class="text-neutral-400 mb-4 small" style="max-width: 400px;">
                   Have questions? We're here to help. Reach out to us through any of these channels.
                 </p>
-                
+
                 <div class="d-flex flex-column gap-4">
                   <!-- Email -->
                   <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3" style="width: 48px; height: 48px;">
+                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3"
+                      style="width: 48px; height: 48px;">
                       <i data-lucide="mail" class="text-primary" width="20" height="20"></i>
                     </div>
                     <div>
@@ -119,7 +122,8 @@
                   </div>
                   <!-- Phone -->
                   <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3" style="width: 48px; height: 48px;">
+                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3"
+                      style="width: 48px; height: 48px;">
                       <i data-lucide="phone" class="text-primary" width="20" height="20"></i>
                     </div>
                     <div>
@@ -129,7 +133,8 @@
                   </div>
                   <!-- Location -->
                   <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3" style="width: 48px; height: 48px;">
+                    <div class="d-flex align-items-center justify-content-center bg-white shadow-sm rounded-3"
+                      style="width: 48px; height: 48px;">
                       <i data-lucide="map-pin" class="text-primary" width="20" height="20"></i>
                     </div>
                     <div>
@@ -178,11 +183,11 @@
         <div>
           <h4 class="footer-col-title">Navigation</h4>
           <div class="footer-links">
-            <a class="footer-link" href="index.html">Home</a>
-            <a class="footer-link" href="events/events.html">Events</a>
-            <a class="footer-link" href="about.html">About</a>
-            <a class="footer-link" href="contact.html">FAQ</a>
-            <a class="footer-link" href="contact.html">Contact</a>
+            <a class="footer-link" href="../index.html">Home</a>
+            <a class="footer-link" href="../html/events/events.html">Events</a>
+            <a class="footer-link" href="../html/about.html">About</a>
+            <a class="footer-link" href="../html/contact.html" target="_blank">FAQ</a>
+            <a class="footer-link" href="../html/contact.html" target="_blank">Contact</a>
           </div>
         </div>
 
@@ -248,20 +253,11 @@
 
   <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    const toggleAuth = document.getElementById('toggleAuth');
-    const guestState = document.getElementById('guestState');
-    const userState = document.getElementById('userState');
-
-    toggleAuth.addEventListener('click', () => {
-      guestState.classList.toggle('d-none');
-      userState.classList.toggle('d-none');
-    });
-  </script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     lucide.createIcons();
   </script>
+  <script type="module" src="../js/main.js"></script>
 
 </body>
 

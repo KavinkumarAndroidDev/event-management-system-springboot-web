@@ -1,6 +1,6 @@
 import { setGlobalData } from './state.js';
-import { injectToastContainer, initializeBootstrapComponents } from './utils.js';
-import { updateNavbar } from './navbar.js';
+import { injectToastContainer, initializeBootstrapComponents, injectSignOutModal } from './utils.js';
+import { injectComponents } from './components.js';
 import { setupLoginForm, setupSignupForm, setupForgotPassword, setupPasswordStrength, setupPasswordToggles } from './auth.js';
 import { setupOrganizerForm, setupFileUploads } from './organizer.js';
 import { initializeEvents, setupGlobalInteractions } from './events.js';
@@ -12,14 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Determine Path to Data using import.meta.url for reliability
     const dataUrl = new URL('../json/data.json', import.meta.url);
-    
+
     // 2. Fetch Data
     fetch(dataUrl)
         .then(response => response.json())
         .then(data => {
             setGlobalData(data);
             initializeEvents();
-            
+
             if (document.getElementById('booking-event-title')) initBookingPage();
             if (document.getElementById('profile-upcoming-events')) initProfilePage();
         })
@@ -33,11 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setupFileUploads();
     setupForgotPassword();
     setupPasswordStrength();
-    updateNavbar();
+    injectComponents();
     setupGlobalInteractions();
-    
-    // 4. Inject Toast Container
+
+    // 4. Inject Containers
     injectToastContainer();
+    injectSignOutModal();
 
     // 5. Initialize Icons (Global)
     if (window.lucide) lucide.createIcons();

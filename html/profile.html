@@ -13,32 +13,41 @@
             color: #17B978 !important;
             font-weight: 700 !important;
         }
+
         .hover-bg-neutral-50:hover {
             background-color: #F9FAFB;
         }
+
         .registration-card {
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .registration-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 24px rgba(17, 24, 39, 0.12);
         }
+
         .registration-card.cancelled {
             background-color: #F9FAFB;
             border-color: #E5E7EB;
         }
+
         .emoji-option {
             transition: transform 0.2s;
         }
+
         .emoji-option:hover {
             transform: scale(1.1);
             background-color: #F3F4F6;
         }
+
         .emoji-option.selected {
-            background-color: #D1FAE5; /* bg-success-subtleish */
+            background-color: #D1FAE5;
+            /* bg-success-subtleish */
             border: 1px solid #10B981;
             transform: scale(1.1);
         }
+
         .pagination-btn {
             width: 36px;
             height: 36px;
@@ -51,19 +60,23 @@
             color: #111827;
             transition: all 0.2s;
         }
+
         .pagination-btn:hover:not(:disabled) {
             background-color: #F3F4F6;
             border-color: #D1D5DB;
         }
+
         .pagination-btn.active {
             background-color: #17B978;
             border-color: #17B978;
             color: #fff;
         }
+
         .pagination-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .filter-select {
             background-color: #fff;
             border: 1px solid #E5E7EB;
@@ -74,6 +87,7 @@
             height: 40px;
             background-position: right 1rem center;
         }
+
         .filter-select:focus {
             border-color: #17B978;
             box-shadow: 0 0 0 2px rgba(23, 185, 120, 0.1);
@@ -131,22 +145,32 @@
                             </div>
                         </div>
                         <hr class="border-neutral-100 my-2">
-                        
+
                         <!-- Nav -->
                         <nav class="nav flex-column gap-1">
-                            <a href="#" class="nav-link d-flex align-items-center gap-2 active-nav-item rounded-3 px-3 py-2 text-primary" data-section="overview">
+                            <a href="#"
+                                class="nav-link d-flex align-items-center gap-2 active-nav-item rounded-3 px-3 py-2 text-primary"
+                                data-section="overview">
                                 <i data-lucide="layout-dashboard" width="18"></i> Overview
                             </a>
-                            <a href="#" class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50" data-section="profile">
+                            <a href="#"
+                                class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50"
+                                data-section="profile">
                                 <i data-lucide="user" width="18"></i> Profile
                             </a>
-                            <a href="#" class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50" data-section="registrations">
+                            <a href="#"
+                                class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50"
+                                data-section="registrations">
                                 <i data-lucide="ticket" width="18"></i> My Registrations
                             </a>
-                            <a href="#" class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50" data-section="past-events">
+                            <a href="#"
+                                class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50"
+                                data-section="past-events">
                                 <i data-lucide="history" width="18"></i> Past Events
                             </a>
-                            <a href="#" class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50" data-section="payments">
+                            <a href="#"
+                                class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 text-neutral-900 hover-bg-neutral-50"
+                                data-section="payments">
                                 <i data-lucide="credit-card" width="18"></i> Payments
                             </a>
                         </nav>
@@ -158,7 +182,8 @@
                             <button class="btn btn-outline-danger w-100 rounded-pill" id="profileLogoutBtn">
                                 <i data-lucide="log-out" width="18" class="me-2"></i> Sign Out
                             </button>
-                            <div class="d-flex align-items-center justify-content-between p-3 bg-white border border-neutral-100 rounded-3">
+                            <div
+                                class="d-flex align-items-center justify-content-between p-3 bg-white border border-neutral-100 rounded-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <i data-lucide="moon" width="18" class="text-neutral-900"></i>
                                     <span class="small fw-medium text-neutral-900">Dark Mode</span>
@@ -176,16 +201,19 @@
                     <!-- View: Overview -->
                     <div id="view-overview">
                         <!-- Profile Completion -->
-                        <div class="card-custom mb-4">
+                        <div class="card-custom mb-4" id="profile-completion-widget">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                                 <div class="flex-grow-1">
                                     <h5 class="fw-bold mb-1">Complete your profile</h5>
-                                    <p class="text-neutral-400 small mb-3">Complete your profile to get personalized event recommendations.</p>
+                                    <p class="text-neutral-400 small mb-3">Complete your profile to get personalized
+                                        event recommendations.</p>
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="progress flex-grow-1" style="height: 8px; max-width: 200px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar bg-primary" id="profile-completion-bar"
+                                                role="progressbar" style="width: 70%" aria-valuenow="70"
+                                                aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
-                                        <span class="small fw-bold text-primary">70%</span>
+                                        <span class="small fw-bold text-primary" id="profile-completion-text">70%</span>
                                     </div>
                                 </div>
                                 <button class="btn btn-primary rounded-pill">Complete Profile</button>
@@ -196,7 +224,7 @@
                         <div class="mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="fw-bold mb-0">Upcoming Events</h5>
-                                <a href="events/events.html" class="btn btn-text small">See All</a>
+                                <button class="btn btn-text small" id="btn-view-all-registrations">See All</button>
                             </div>
                             <div class="d-flex flex-column gap-3" id="profile-upcoming-events">
                                 <!-- Injected via JS -->
@@ -205,7 +233,10 @@
 
                         <!-- Recent Payments -->
                         <div>
-                            <h5 class="fw-bold mb-3">Recent Payments</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0">Recent Payments</h5>
+                                <button class="btn btn-text small" id="btn-view-all-payments">See All</button>
+                            </div>
                             <div class="row g-3" id="profile-recent-payments">
                                 <!-- Injected via JS -->
                             </div>
@@ -218,8 +249,12 @@
                             <!-- Header with Avatar -->
                             <div class="d-flex align-items-center gap-4 mb-4">
                                 <div class="position-relative">
-                                    <img src="" id="profile-settings-avatar" class="rounded-circle object-fit-cover bg-neutral-100" width="80" height="80" alt="Profile">
-                                    <button class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm border d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; padding: 0;">
+                                    <img src="" id="profile-settings-avatar"
+                                        class="rounded-circle object-fit-cover bg-neutral-100" width="80" height="80"
+                                        alt="Profile">
+                                    <button
+                                        class="btn btn-sm btn-light position-absolute bottom-0 end-0 rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+                                        style="width: 32px; height: 32px; padding: 0;">
                                         <i data-lucide="camera" width="16"></i>
                                     </button>
                                 </div>
@@ -228,7 +263,7 @@
                                     <p class="text-neutral-400 mb-0" id="profile-settings-email-display">...</p>
                                 </div>
                             </div>
-                            
+
                             <hr class="border-neutral-100 my-4">
 
                             <form id="profile-form" style="max-width: 800px;">
@@ -237,7 +272,8 @@
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label">Email</label>
-                                        <input type="email" class="form-control bg-neutral-50" id="profile-email" readonly disabled>
+                                        <input type="email" class="form-control bg-neutral-50" id="profile-email"
+                                            readonly disabled>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Phone</label>
@@ -270,7 +306,8 @@
 
                                 <!-- Actions -->
                                 <div class="d-flex gap-3 mt-5">
-                                    <button type="button" class="btn btn-outline-danger rounded-pill flex-fill" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                    <button type="button" class="btn btn-outline-danger rounded-pill flex-fill"
+                                        data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                                         Change Password
                                     </button>
                                     <button type="submit" class="btn btn-primary rounded-pill flex-fill">
@@ -290,8 +327,11 @@
                         <!-- Filter Row -->
                         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
                             <div class="position-relative flex-grow-1" style="max-width: 300px;">
-                                <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="16"></i>
-                                <input type="text" class="form-control rounded-pill ps-5" placeholder="Search registrations..." style="height: 40px; font-size: 0.875rem;">
+                                <i data-lucide="search"
+                                    class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
+                                    width="16"></i>
+                                <input type="text" class="form-control rounded-pill ps-5"
+                                    placeholder="Search registrations..." style="height: 40px; font-size: 0.875rem;">
                             </div>
                             <select class="form-select filter-select w-auto">
                                 <option selected>All Venues</option>
@@ -313,9 +353,10 @@
                         <div id="registrations-list" class="d-flex flex-column gap-3">
                             <!-- Injected via JS -->
                         </div>
-                        
+
                         <!-- Pagination -->
-                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5" id="registrations-pagination">
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5"
+                            id="registrations-pagination">
                             <!-- Pagination controls will be populated by JS -->
                         </div>
                     </div>
@@ -329,8 +370,11 @@
                         <!-- Filter Row (Simplified for Past Events) -->
                         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
                             <div class="position-relative flex-grow-1" style="max-width: 300px;">
-                                <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="16"></i>
-                                <input type="text" class="form-control rounded-pill ps-5" placeholder="Search history..." style="height: 40px; font-size: 0.875rem;">
+                                <i data-lucide="search"
+                                    class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
+                                    width="16"></i>
+                                <input type="text" class="form-control rounded-pill ps-5"
+                                    placeholder="Search history..." style="height: 40px; font-size: 0.875rem;">
                             </div>
                             <select class="form-select filter-select w-auto">
                                 <option selected>All Years</option>
@@ -346,9 +390,10 @@
                         <div id="past-events-list" class="d-flex flex-column gap-3">
                             <!-- Injected via JS -->
                         </div>
-                        
+
                         <!-- Pagination -->
-                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5" id="past-events-pagination">
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5"
+                            id="past-events-pagination">
                             <!-- Pagination controls will be populated by JS -->
                         </div>
                     </div>
@@ -362,8 +407,11 @@
                         <!-- Filter Row -->
                         <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
                             <div class="position-relative flex-grow-1" style="max-width: 300px;">
-                                <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="16"></i>
-                                <input type="text" class="form-control rounded-pill ps-5" placeholder="Search payments..." style="height: 40px; font-size: 0.875rem;">
+                                <i data-lucide="search"
+                                    class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
+                                    width="16"></i>
+                                <input type="text" class="form-control rounded-pill ps-5"
+                                    placeholder="Search payments..." style="height: 40px; font-size: 0.875rem;">
                             </div>
                             <select class="form-select filter-select w-auto">
                                 <option selected>All Statuses</option>
@@ -382,7 +430,8 @@
                         </div>
 
                         <!-- Pagination -->
-                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5" id="payments-pagination">
+                        <div class="d-flex justify-content-center align-items-center gap-2 mt-5"
+                            id="payments-pagination">
                             <!-- Injected via JS -->
                         </div>
                     </div>
@@ -414,9 +463,12 @@
                                     <div class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
                                 </div>
                                 <ul class="list-unstyled mt-2 mb-0 small text-neutral-400" style="font-size: 0.75rem;">
-                                    <li id="cp-req-length"><i data-lucide="circle" width="10" height="10" class="me-1"></i> 8+ characters</li>
-                                    <li id="cp-req-upper"><i data-lucide="circle" width="10" height="10" class="me-1"></i> 1 uppercase</li>
-                                    <li id="cp-req-number"><i data-lucide="circle" width="10" height="10" class="me-1"></i> 1 number</li>
+                                    <li id="cp-req-length"><i data-lucide="circle" width="10" height="10"
+                                            class="me-1"></i> 8+ characters</li>
+                                    <li id="cp-req-upper"><i data-lucide="circle" width="10" height="10"
+                                            class="me-1"></i> 1 uppercase</li>
+                                    <li id="cp-req-number"><i data-lucide="circle" width="10" height="10"
+                                            class="me-1"></i> 1 number</li>
                                 </ul>
                             </div>
                         </div>
@@ -427,8 +479,10 @@
                     </form>
                 </div>
                 <div class="modal-footer border-0 pt-0 w-100 d-flex gap-2">
-                    <button type="button" class="btn btn-outline-dark rounded-pill flex-fill" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" form="changePasswordForm" class="btn btn-danger rounded-pill flex-fill">Change Password</button>
+                    <button type="button" class="btn btn-outline-dark rounded-pill flex-fill"
+                        data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" form="changePasswordForm" class="btn btn-danger rounded-pill flex-fill">Change
+                        Password</button>
                 </div>
             </div>
         </div>
@@ -443,8 +497,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body pt-3">
-                    <p class="text-neutral-600 mb-4">Are you sure you want to cancel your ticket for <strong id="cancel-event-name" class="text-neutral-900"></strong>? This action cannot be undone.</p>
-                    
+                    <p class="text-neutral-600 mb-4">Are you sure you want to cancel your ticket for <strong
+                            id="cancel-event-name" class="text-neutral-900"></strong>? This action cannot be undone.</p>
+
                     <div class="bg-neutral-50 p-3 rounded-3 mb-4 border border-neutral-100">
                         <div class="d-flex justify-content-between mb-2 small">
                             <span class="text-neutral-600">Total Paid</span>
@@ -460,14 +515,17 @@
                             <span class="text-success" id="cancel-refund">₹0</span>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between align-items-center">
-                        <a href="#" class="small text-decoration-none text-primary fw-medium">View cancellation policy</a>
+                        <a href="#" class="small text-decoration-none text-primary fw-medium">View cancellation
+                            policy</a>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0 w-100 d-flex gap-2">
-                    <button type="button" class="btn btn-outline-dark rounded-pill flex-fill" data-bs-dismiss="modal">Abort</button>
-                    <button type="button" class="btn btn-danger rounded-pill flex-fill" id="confirmCancelBtn">Confirm Cancellation</button>
+                    <button type="button" class="btn btn-outline-dark rounded-pill flex-fill"
+                        data-bs-dismiss="modal">Abort</button>
+                    <button type="button" class="btn btn-danger rounded-pill flex-fill" id="confirmCancelBtn">Confirm
+                        Cancellation</button>
                 </div>
             </div>
         </div>
@@ -482,8 +540,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body pt-3">
-                    <p class="text-neutral-600 mb-4 small">How was <strong id="feedback-event-name" class="text-neutral-900">Event Name</strong>? Your feedback helps us improve.</p>
-                    
+                    <p class="text-neutral-600 mb-4 small">How was <strong id="feedback-event-name"
+                            class="text-neutral-900">Event Name</strong>? Your feedback helps us improve.</p>
+
                     <!-- Emoji Scale -->
                     <div class="d-flex justify-content-between mb-4 gap-1" id="emoji-rating-container">
                         <div class="emoji-option rounded-3 p-2 text-center cursor-pointer flex-fill" data-value="1">
@@ -509,13 +568,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-medium text-neutral-900 small">Additional Feedback (Optional)</label>
-                        <textarea class="form-control" id="feedback-text" rows="3" placeholder="Tell us what you liked or what could be improved..." maxlength="500"></textarea>
+                        <label class="form-label fw-medium text-neutral-900 small">Additional Feedback
+                            (Optional)</label>
+                        <textarea class="form-control" id="feedback-text" rows="3"
+                            placeholder="Tell us what you liked or what could be improved..."
+                            maxlength="500"></textarea>
                         <div class="text-end small text-neutral-400 mt-1" id="feedback-char-count">0/500</div>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-primary rounded-pill w-100" id="submitFeedbackBtn" disabled>Submit Feedback</button>
+                    <button type="button" class="btn btn-primary rounded-pill w-100" id="submitFeedbackBtn"
+                        disabled>Submit Feedback</button>
                 </div>
             </div>
         </div>
@@ -528,12 +591,15 @@
                 <div class="modal-body p-0">
                     <h4 class="fw-bold text-neutral-900 mb-2">Sign out</h4>
                     <p class="text-neutral-600 mb-4">Do you want to sign out your current account from SyncEvent?</p>
-                    
+
                     <div class="d-flex justify-content-center gap-3 mt-4">
-                        <button type="button" class="btn btn-outline-dark rounded-pill" style="width: 160px;" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-outline-dark rounded-pill" style="width: 160px;"
+                            data-bs-dismiss="modal">
                             Cancel
                         </button>
-                        <button type="button" class="btn btn-danger rounded-pill d-flex align-items-center justify-content-center gap-2" style="width: 200px;" id="confirmSignOutBtn">
+                        <button type="button"
+                            class="btn btn-danger rounded-pill d-flex align-items-center justify-content-center gap-2"
+                            style="width: 200px;" id="confirmSignOutBtn">
                             Signout
                             <i data-lucide="arrow-right" width="18"></i>
                         </button>
@@ -547,4 +613,5 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script type="module" src="../js/main.js"></script>
 </body>
+
 </html>
