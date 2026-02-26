@@ -218,7 +218,7 @@
         "name": "ATTENDEE"
       },
       "accountStatus": {
-        "status": "ACTIVE"
+        "status": "SUSPENDED"
       }
     },
     {
@@ -362,7 +362,7 @@
           "price": 4999,
           "currency": "INR",
           "totalQuantity": 50,
-          "availableQuantity": 12,
+          "availableQuantity": 10,
           "benefits": [
             "VIP lounge",
             "Meet speakers",
@@ -2777,6 +2777,19 @@
       "price": 1768.82,
       "status": "CONFIRMED",
       "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
+    },
+    {
+      "id": "REG-1772070348919",
+      "userId": "USR-1004",
+      "eventId": "EVT-5001",
+      "eventName": "AI Tech Summit 2026",
+      "date": "2026-04-15T09:00:00",
+      "location": "Chennai Trade Centre, Chennai",
+      "ticketType": "VIP",
+      "quantity": 2,
+      "price": 5898.82,
+      "status": "CONFIRMED",
+      "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
     }
   ],
   "payments": [
@@ -2828,6 +2841,16 @@
       "tickets": "STANDARD x 1",
       "method": "PAYCARD",
       "amount": 1768.82,
+      "status": "Confirmed"
+    },
+    {
+      "id": "PAY-1772070348919",
+      "userId": "USR-1004",
+      "eventTitle": "AI Tech Summit 2026",
+      "date": "2026-02-26T01:45:48.919Z",
+      "tickets": "VIP x 2",
+      "method": "PAYCARD",
+      "amount": 5898.82,
       "status": "Confirmed"
     }
   ]

@@ -5,7 +5,7 @@ export function initBookingPage() {
     // Auth Check
     const userStr = localStorage.getItem('currentUser');
     if (!userStr) {
-        window.location.href = '../login.html';
+        window.location.href = '../auth/login.html';
         return;
     }
 

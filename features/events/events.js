@@ -11,6 +11,47 @@ export function initializeEvents() {
         featuredContainer.innerHTML = featured.map(e => createEventCard(e)).join('');
     }
 
+    // Top Organizers (Homepage)
+    const organizersGrid = document.getElementById('top-organizers-grid');
+    if (organizersGrid && events) {
+        // Extract unique organizers from events and sort by rating
+        const uniqueOrganizersMap = new Map();
+        events.forEach(e => {
+            if (e.organizer && !uniqueOrganizersMap.has(e.organizer.id)) {
+                uniqueOrganizersMap.set(e.organizer.id, e.organizer);
+            }
+        });
+        const topOrganizers = Array.from(uniqueOrganizersMap.values())
+            .sort((a, b) => b.rating - a.rating)
+            .slice(0, 3);
+
+        organizersGrid.innerHTML = topOrganizers.map(org => `
+            <div class="col">
+                <div class="card card-custom border-0 shadow-sm p-4 h-100 text-center rounded-4 d-flex flex-column align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;">
+                        ${org.name.charAt(0)}
+                    </div>
+                    <div class="mt-auto w-100">
+                        <div class="fw-bold text-neutral-900 fs-5 mb-1">${org.name}</div>
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                <i data-lucide="check-circle" width="12"></i> Verified
+                            </span>
+                            <span class="d-flex align-items-center text-warning fw-semibold bg-warning bg-opacity-10 px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
+                                <i data-lucide="star" class="fill-warning me-1" width="12"></i> ${org.rating}
+                            </span>
+                        </div>
+                        <a href="mailto:${org.contactEmail}" class="btn btn-outline-primary rounded-pill w-100 btn-sm">Contact Organizer</a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        if (window.lucide) {
+            lucide.createIcons({ root: organizersGrid });
+        }
+    }
+
     // Events Page: All Events
     const eventsGrid = document.getElementById('events-grid');
     if (eventsGrid && events) {
@@ -109,22 +150,29 @@ export function populateSingleEvent(event) {
     const organizerCard = document.getElementById('event-organizer-card');
     if (organizerCard && event.organizer) {
         organizerCard.innerHTML = `
-            <div class="card-custom p-4 border border-neutral-100 shadow-sm bg-white w-100 d-flex flex-column flex-sm-row align-items-sm-center gap-4">
-                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;">
-                    ${event.organizer.name.charAt(0)}
-                </div>
-                <div class="flex-grow-1">
-                    <h4 class="fw-bold mb-1 text-neutral-900">${event.organizer.name}</h4>
-                    <div class="d-flex align-items-center gap-3 small text-neutral-500 mb-2 mt-2">
-                        <span class="d-flex align-items-center text-warning fw-medium bg-warning bg-opacity-10 px-2 py-1 rounded-pill">
-                            <i data-lucide="star" class="fill-warning me-1" width="14"></i> ${event.organizer.rating}
-                        </span>
-                        <span class="d-flex align-items-center gap-1 text-primary fw-medium"><i data-lucide="award" width="14"></i> Verified Organizer</span>
+            <div class="card-custom p-4 border-0 shadow-sm bg-white w-100 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-4" style="border-radius: 16px;">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 80px; height: 80px; font-size: 2.2rem;">
+                        ${event.organizer.name.charAt(0)}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h4 class="fw-bold mb-0 text-neutral-900">${event.organizer.name}</h4>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
+                                <i data-lucide="check-circle" width="12"></i> Verified
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center text-neutral-500 small mt-2">
+                            <span class="d-flex align-items-center text-warning fw-semibold bg-warning bg-opacity-10 px-2 py-1 rounded-pill me-3">
+                                <i data-lucide="star" class="fill-warning me-1" width="14"></i> ${event.organizer.rating} Rating
+                            </span>
+                            <span>10+ Past Events</span>
+                        </div>
                     </div>
                 </div>
-                <div class="mt-3 mt-sm-0 w-100" style="max-width: 200px;">
-                    <a href="mailto:${event.organizer.contactEmail}" class="btn btn-outline-primary rounded-pill w-100 d-flex align-items-center justify-content-center gap-2">
-                        <i data-lucide="mail" width="16"></i> Contact
+                <div class="w-100" style="max-width: 220px;">
+                    <a href="mailto:${event.organizer.contactEmail}" class="btn btn-outline-primary rounded-pill w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                        <i data-lucide="mail" width="18"></i> Contact Organizer
                     </a>
                 </div>
             </div>
@@ -135,31 +183,68 @@ export function populateSingleEvent(event) {
     const policiesList = document.getElementById('event-policies-list');
     if (policiesList && event.policies) {
         policiesList.innerHTML = `
-            <div class="col-12">
-                <div class="card-custom p-4 border border-neutral-100 shadow-sm bg-white">
-                    <div class="row g-4">
-                        <div class="col-md-6 d-flex gap-3">
-                            <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
-                                <i data-lucide="rotate-ccw" width="24"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-2 text-neutral-900">Refund Policy</h6>
-                                <p class="text-neutral-500 small mb-0 lh-base">${event.policies.refundPolicy}</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 d-flex gap-3">
-                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
-                                <i data-lucide="shield-check" width="24"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-2 text-neutral-900">Terms & Conditions</h6>
-                                <p class="text-neutral-500 small mb-0 lh-base">${event.policies.termsAndConditions}</p>
-                            </div>
-                        </div>
+            <div class="col-md-6">
+                <div class="card-custom h-100 p-4 border-0 shadow-sm bg-white d-flex flex-column gap-3" style="border-radius: 16px; transition: transform 0.2s; cursor: default;">
+                    <i data-lucide="rotate-ccw" width="32" class="text-danger flex-shrink-0"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2 text-neutral-900">Refund Policy</h5>
+                        <p class="text-neutral-500 small mb-0 lh-lg">${event.policies.refundPolicy}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom h-100 p-4 border-0 shadow-sm bg-white d-flex flex-column gap-3" style="border-radius: 16px; transition: transform 0.2s; cursor: default;">
+                    <i data-lucide="file-check-2" width="32" class="text-success flex-shrink-0"></i>
+                    <div>
+                        <h5 class="fw-bold mb-2 text-neutral-900">Terms & Conditions</h5>
+                        <p class="text-neutral-500 small mb-0 lh-lg">${event.policies.termsAndConditions}</p>
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    // Populate Event Guide
+    const guideList = document.getElementById('event-guide-list');
+    if (guideList) {
+        const guideItems = [];
+
+        // 1. Duration
+        if (event.schedule && event.schedule.startDateTime && event.schedule.endDateTime) {
+            const durationMs = new Date(event.schedule.endDateTime) - new Date(event.schedule.startDateTime);
+            const durationHours = Math.round(durationMs / (1000 * 60 * 60));
+            if (durationHours > 0) {
+                guideItems.push({ icon: 'clock', title: 'Duration', value: `${durationHours} Hrs` });
+            }
+        }
+
+        // 2. Capacity
+        if (event.venue && event.venue.capacity) {
+            guideItems.push({ icon: 'users', title: 'Capacity', value: `${event.venue.capacity} People` });
+        }
+
+        // 3. Category
+        if (event.category) {
+            guideItems.push({ icon: event.category.icon || 'star', title: 'Category', value: event.category.name });
+        }
+
+        guideList.innerHTML = guideItems.map(item => `
+            <div class="col-md-4">
+                <div class="card-custom h-100 d-flex align-items-center gap-3 p-3 border-0 shadow-sm" style="border-radius: 12px; background: white;">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i data-lucide="${item.icon}" width="24"></i>
+                    </div>
+                    <div>
+                        <div class="caption text-neutral-400 small fw-medium mb-1">${item.title}</div>
+                        <div class="fw-bold text-neutral-900">${item.value}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        if (window.lucide) {
+            lucide.createIcons({ root: guideList });
+        }
     }
 
     // Populate Tickets Count Only

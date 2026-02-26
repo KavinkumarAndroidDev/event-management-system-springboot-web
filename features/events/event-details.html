@@ -104,7 +104,7 @@
                 <!-- Organizer Section -->
                 <div class="mt-5">
                     <h3 class="mb-3">Organizer</h3>
-                    <div class="card-custom d-flex align-items-center gap-3" id="event-organizer-card">
+                    <div id="event-organizer-card">
                         <!-- JS Injected -->
                     </div>
                 </div>
@@ -123,37 +123,9 @@
                 <div class="mt-5">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3>Event Guide</h3>
-                        <button class="btn btn-text">See all <i data-lucide="chevron-right"
-                                class="btn-icon"></i></button>
                     </div>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="card-custom d-flex align-items-center gap-3">
-                                <div class="icon-container"><i data-lucide="clock"></i></div>
-                                <div>
-                                    <div class="caption text-neutral-400">Duration</div>
-                                    <div class="fw-bold">12 Hrs</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card-custom d-flex align-items-center gap-3">
-                                <div class="icon-container"><i data-lucide="ticket"></i></div>
-                                <div>
-                                    <div class="caption text-neutral-400">Tickets Needed For</div>
-                                    <div class="fw-bold">2 yrs & above</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card-custom d-flex align-items-center gap-3">
-                                <div class="icon-container"><i data-lucide="users"></i></div>
-                                <div>
-                                    <div class="caption text-neutral-400">Entry Allowed For</div>
-                                    <div class="fw-bold">All ages</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="row g-3" id="event-guide-list">
+                        <!-- JS Injected -->
                     </div>
                 </div>
 
@@ -174,17 +146,84 @@
                 </div>
 
                 <!-- Accordion Sections -->
-                <div class="mt-5 d-flex flex-column gap-3">
-                    <!-- Collapsed Card -->
-                    <div class="card-custom d-flex justify-content-between align-items-center cursor-pointer"
-                        data-bs-toggle="collapse" data-bs-target="#faqCollapse" role="button" aria-expanded="false">
-                        <h3 class="mb-0 fs-5">Frequently Asked Questions</h3>
-                        <i data-lucide="chevron-down"></i>
-                    </div>
-                    <div class="collapse" id="faqCollapse">
-                        <div class="card-custom mt-2">
-                            <p class="text-neutral-400 mb-0">Q: Is parking available?<br>A: Yes, ample parking is
-                                provided at the venue.</p>
+                <div class="mt-5 mb-5">
+                    <h3 class="mb-4">Frequently Asked Questions</h3>
+                    <div class="accordion" id="eventFaqAccordion">
+                        <!-- FAQ 1 -->
+                        <div class="accordion-item border-0 bg-transparent mb-3">
+                            <h2 class="accordion-header" id="faqHeadingOne">
+                                <button
+                                    class="accordion-button collapsed card-custom border-0 shadow-sm fw-semibold text-neutral-900"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseOne"
+                                    aria-expanded="false" aria-controls="faqCollapseOne" style="border-radius: 12px;">
+                                    Is parking available at the venue?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseOne" class="accordion-collapse collapse" aria-labelledby="faqHeadingOne"
+                                data-bs-parent="#eventFaqAccordion">
+                                <div
+                                    class="accordion-body text-neutral-500 bg-white shadow-sm mt-2 rounded-3 border border-neutral-100">
+                                    Yes, ample parking is provided at the venue. Valet parking is also available for VIP
+                                    ticket holders.
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FAQ 2 -->
+                        <div class="accordion-item border-0 bg-transparent mb-3">
+                            <h2 class="accordion-header" id="faqHeadingTwo">
+                                <button
+                                    class="accordion-button collapsed card-custom border-0 shadow-sm fw-semibold text-neutral-900"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseTwo"
+                                    aria-expanded="false" aria-controls="faqCollapseTwo" style="border-radius: 12px;">
+                                    Are outside food and drinks allowed?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo"
+                                data-bs-parent="#eventFaqAccordion">
+                                <div
+                                    class="accordion-body text-neutral-500 bg-white shadow-sm mt-2 rounded-3 border border-neutral-100">
+                                    Outside food and drinks are strictly prohibited. However, we have a variety of food
+                                    stalls and refreshment counters available inside.
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FAQ 3 -->
+                        <div class="accordion-item border-0 bg-transparent mb-3">
+                            <h2 class="accordion-header" id="faqHeadingThree">
+                                <button
+                                    class="accordion-button collapsed card-custom border-0 shadow-sm fw-semibold text-neutral-900"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseThree"
+                                    aria-expanded="false" aria-controls="faqCollapseThree" style="border-radius: 12px;">
+                                    Is the event wheelchair accessible?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseThree" class="accordion-collapse collapse"
+                                aria-labelledby="faqHeadingThree" data-bs-parent="#eventFaqAccordion">
+                                <div
+                                    class="accordion-body text-neutral-500 bg-white shadow-sm mt-2 rounded-3 border border-neutral-100">
+                                    Yes! The venue is fully accessible, including dedicated wheelchair-friendly parking
+                                    spots, ramps, and accessible restrooms.
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FAQ 4 -->
+                        <div class="accordion-item border-0 bg-transparent mb-3">
+                            <h2 class="accordion-header" id="faqHeadingFour">
+                                <button
+                                    class="accordion-button collapsed card-custom border-0 shadow-sm fw-semibold text-neutral-900"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapseFour"
+                                    aria-expanded="false" aria-controls="faqCollapseFour" style="border-radius: 12px;">
+                                    Can I cancel or transfer my ticket?
+                                </button>
+                            </h2>
+                            <div id="faqCollapseFour" class="accordion-collapse collapse"
+                                aria-labelledby="faqHeadingFour" data-bs-parent="#eventFaqAccordion">
+                                <div
+                                    class="accordion-body text-neutral-500 bg-white shadow-sm mt-2 rounded-3 border border-neutral-100">
+                                    Please refer to the specific Event Policies section above regarding refunds. Ticket
+                                    transfers are generally permitted up to 24 hours before the event.
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

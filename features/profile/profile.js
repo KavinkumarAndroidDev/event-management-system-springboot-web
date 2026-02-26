@@ -56,7 +56,7 @@ export function initProfilePage() {
                                 const email = inlineForm.querySelector('input[type="email"]').value;
                                 const pwd = inlineForm.querySelector('input[type="password"]').value;
 
-                                const { performLogin } = await import('./auth.js');
+                                const { performLogin } = await import('../auth/auth.js');
                                 const success = performLogin(email, pwd, false, () => {
                                     window.location.reload();
                                 });
@@ -193,21 +193,20 @@ export function initProfilePage() {
     if (container && state.events && state.registrations) {
         const userRegistrations = state.registrations.filter(r => r.userId === user.id);
         const now = new Date();
-        const upcomingEvents = userRegistrations
-            .map(reg => state.events.find(e => e.id === reg.eventId))
-            .filter(e => e && new Date(e.schedule.startDateTime) > now)
-            .sort((a, b) => new Date(a.schedule.startDateTime) - new Date(b.schedule.startDateTime))
-            .slice(0, 2);
+        const upcomingData = userRegistrations
+            .map(reg => ({ reg, event: state.events.find(e => e.id === reg.eventId) }))
+            .filter(item => item.event && item.reg.status !== 'CANCELLED' && new Date(item.event.schedule.startDateTime) > now)
+            .sort((a, b) => new Date(a.event.schedule.startDateTime) - new Date(b.event.schedule.startDateTime))
+            .slice(0, 3);
 
-        if (upcomingEvents.length === 0) {
+        if (upcomingData.length === 0) {
             container.innerHTML = '<div class="text-neutral-400 py-3">No upcoming events.</div>';
         } else {
-            container.innerHTML = upcomingEvents.map(event => {
+            container.innerHTML = upcomingData.map(({ reg, event }) => {
                 const date = new Date(event.schedule.startDateTime);
                 const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const minPrice = Math.min(...event.tickets.map(t => t.price));
                 return `
-                    <div class="card-custom p-3">
+                    <div class="card-custom p-3 mb-3">
                         <div class="d-flex gap-3">
                             <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 120px; height: 80px;" alt="${event.title}">
                             <div class="flex-grow-1">
@@ -218,11 +217,11 @@ export function initProfilePage() {
                                             <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
                                         </div>
                                     </div>
-                                    <a href="../events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
+                                    <a href="../events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill px-3">View</a>
                                 </div>
-                                <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <div class="small text-neutral-600">1 Ticket • Standard</div>
-                                    <div class="fw-bold text-primary">₹${minPrice}</div>
+                                <div class="d-flex align-items-center justify-content-between mt-1 pt-2 border-top border-neutral-100">
+                                    <div class="small text-neutral-600">${reg.quantity} Ticket${reg.quantity > 1 ? 's' : ''} • ${reg.ticketType}</div>
+                                    <div class="fw-bold text-primary">₹${reg.price}</div>
                                 </div>
                             </div>
                         </div>

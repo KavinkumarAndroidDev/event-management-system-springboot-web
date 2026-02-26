@@ -31,7 +31,7 @@ export function performLogin(email, password, rememberMe = false, onRedirect = n
                                 <h4 class="fw-bold mb-2">Account Suspended</h4>
                                 <p class="text-neutral-600 mb-4">Your account is currently suspended. Please contact support to resolve this issue.</p>
                                 <button type="button" class="btn btn-primary w-100 rounded-pill mb-2" data-bs-dismiss="modal">Close</button>
-                                <a href="contact.html" class="btn btn-outline-dark w-100 rounded-pill">Contact Support</a>
+                                <a href="../about/contact.html" class="btn btn-outline-dark w-100 rounded-pill">Contact Support</a>
                             </div>
                         </div>
                     </div>
