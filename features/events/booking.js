@@ -1,5 +1,5 @@
-import { state } from './state.js';
-import { showToast } from './utils.js';
+import { state } from '../../scripts/shared/state.js';
+import { showToast } from '../../scripts/shared/utils.js';
 
 export function initBookingPage() {
     // Auth Check
@@ -292,12 +292,104 @@ export function initBookingPage() {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
 
-            setTimeout(() => {
-                const modal = new bootstrap.Modal(document.getElementById('successModal'));
-                modal.show();
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }, 1500);
+            const paymentMethodEl = document.querySelector('.payment-method-card input[type="radio"]:checked');
+            const method = paymentMethodEl ? paymentMethodEl.id.replace('pay-', '').toUpperCase() : 'CARD';
+
+            // Calculate total one more time
+            let subtotal = 0;
+            Object.keys(cart).forEach(id => {
+                const ticket = event.tickets.find(t => t.id === id);
+                if (ticket) subtotal += ticket.price * cart[id];
+            });
+            const discountAmount = (subtotal * currentDiscount) / 100;
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            const taxAmount = subtotalAfterDiscount * 0.18;
+            const totalAmount = subtotalAfterDiscount + taxAmount;
+
+            const regId = 'REG-' + Date.now();
+            const payId = 'PAY-' + Date.now();
+
+            let firstTicketName = Object.keys(cart).length > 0 ? event.tickets.find(t => t.id === Object.keys(cart)[0]).type.replace('_', ' ') : 'General';
+            let totalTicketsQty = Object.values(cart).reduce((a, b) => a + b, 0);
+
+            const registrationData = {
+                id: regId,
+                userId: user.id,
+                eventId: event.id,
+                eventName: event.title,
+                date: event.schedule.startDateTime,
+                location: `${event.venue.name}, ${event.venue.address.city}`,
+                ticketType: firstTicketName,
+                quantity: totalTicketsQty,
+                price: subtotalAfterDiscount + taxAmount,
+                status: 'CONFIRMED',
+                img: event.media.thumbnail
+            };
+
+            const paymentData = {
+                id: payId,
+                userId: user.id,
+                eventTitle: event.title,
+                date: new Date().toISOString(),
+                tickets: `${firstTicketName} x ${totalTicketsQty}`,
+                method: method,
+                amount: totalAmount,
+                status: 'Confirmed'
+            };
+
+            // 1. Deduct ticket quantities
+            const updatedTickets = event.tickets.map(ticket => {
+                if (cart[ticket.id]) {
+                    return { ...ticket, availableQuantity: Math.max(0, ticket.availableQuantity - cart[ticket.id]) };
+                }
+                return ticket;
+            });
+
+            // 2. Perform all API calls in parallel
+            Promise.all([
+                fetch('http://localhost:3000/registrations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registrationData)
+                }).then(r => r.json()),
+                fetch('http://localhost:3000/payments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(paymentData)
+                }).then(r => r.json()),
+                fetch(`http://localhost:3000/events/${event.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tickets: updatedTickets })
+                }).then(r => r.json())
+            ])
+                .then(([newReg, newPay, updatedEvent]) => {
+                    state.registrations.push(newReg);
+                    state.payments.push(newPay);
+
+                    // Update the global state with the new event ticket counts
+                    const eventIndex = state.events.findIndex(e => e.id === event.id);
+                    if (eventIndex !== -1) {
+                        state.events[eventIndex] = updatedEvent;
+                    }
+
+                    const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                    modal.show();
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+
+                    // Close modal and redirect after 3 seconds
+                    setTimeout(() => {
+                        modal.hide();
+                        window.location.href = '../profile/profile.html';
+                    }, 3000);
+                })
+                .catch(err => {
+                    console.error('Booking Error:', err);
+                    showToast('Payment Failed', 'There was an issue processing your booking.', 'danger');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
         });
     }
 }

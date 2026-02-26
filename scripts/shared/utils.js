@@ -73,10 +73,10 @@ export function injectSignOutModal() {
         confirmBtn.addEventListener('click', () => {
             localStorage.removeItem('currentUser');
             let path = window.location.pathname;
-            if (path.includes('/html/events/')) {
+            if (path.includes('/features/events/')) {
                 window.location.href = '../../index.html';
-            } else if (path.includes('/html/')) {
-                window.location.href = '../index.html';
+            } else if (path.includes('/features/')) {
+                window.location.href = '../../index.html';
             } else {
                 window.location.href = 'index.html';
             }

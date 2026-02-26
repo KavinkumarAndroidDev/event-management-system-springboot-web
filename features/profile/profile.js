@@ -1,12 +1,12 @@
-import { state } from './state.js';
-import { showToast, setupGenericPagination } from './utils.js';
+import { state } from '../../scripts/shared/state.js';
+import { showToast, setupGenericPagination } from '../../scripts/shared/utils.js';
 
 export function initProfilePage() {
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
 
     if (user && user.role && user.role.name !== 'ATTENDEE') {
-        window.location.href = '../index.html';
+        window.location.href = '../../index.html';
         return;
     }
 
@@ -41,7 +41,7 @@ export function initProfilePage() {
                         </div>
                         <div class="d-flex flex-column gap-3">
                             <button type="submit" class="btn btn-primary rounded-pill w-100">Log in now</button>
-                            <a href="signup.html" class="btn btn-outline-dark rounded-pill w-100">Create an account</a>
+                            <a href="../auth/signup.html" class="btn btn-outline-dark rounded-pill w-100">Create an account</a>
                         </div>
                     </form>
                 </div>`;
@@ -184,7 +184,7 @@ export function initProfilePage() {
     if (confirmSignOutBtn) {
         confirmSignOutBtn.addEventListener('click', () => {
             localStorage.removeItem('currentUser');
-            window.location.href = '../index.html';
+            window.location.href = '../../index.html';
         });
     }
 
@@ -218,7 +218,7 @@ export function initProfilePage() {
                                             <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
                                         </div>
                                     </div>
-                                    <a href="events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
+                                    <a href="../events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill">View</a>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
                                     <div class="small text-neutral-600">1 Ticket • Standard</div>

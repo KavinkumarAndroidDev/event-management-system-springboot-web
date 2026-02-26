@@ -153,7 +153,119 @@
         "eventsCreated": 2,
         "eventsAttended": 15,
         "totalSpent": 0,
-        "averageRatingGiven": 4.0
+        "averageRatingGiven": 4
+      }
+    },
+    {
+      "id": "USR-1004",
+      "password": "Admin@123",
+      "profile": {
+        "fullName": "Kavinkumar R",
+        "email": "r.kavinkumar.dev@gmail.com",
+        "phone": "+918610715319",
+        "gender": "UNKNOWN",
+        "dateOfBirth": "2000-01-01",
+        "profileImage": "https://dummyimage.com/200x200/10B981/ffffff&text=KR",
+        "bio": "New user"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": false,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-02-26T00:37:19.194Z",
+        "createdAt": "2026-02-26T00:37:19.195Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": false
+        },
+        "interestedCategories": []
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 0,
+        "totalSpent": 0,
+        "averageRatingGiven": 0
+      }
+    },
+    {
+      "id": "USR-1772066586101",
+      "password": "Password123!",
+      "profile": {
+        "fullName": "John Doe",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "johndoe@test.com",
+        "phone": "9999999999"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE"
+      },
+      "accountStatus": {
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "id": "USR-1006",
+      "password": "Password123!",
+      "profile": {
+        "fullName": "Jane Smith",
+        "email": "janesmith@test.com",
+        "phone": "8888888888",
+        "gender": "UNKNOWN",
+        "dateOfBirth": "2000-01-01",
+        "profileImage": "https://dummyimage.com/200x200/10B981/ffffff&text=JS",
+        "bio": "New user"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": false,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-02-26T00:48:49.779Z",
+        "createdAt": "2026-02-26T00:48:49.782Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": false
+        },
+        "interestedCategories": []
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 0,
+        "totalSpent": 0,
+        "averageRatingGiven": 0
       }
     }
   ],
@@ -1044,7 +1156,7 @@
           "pincode": "600005"
         },
         "geoLocation": {
-          "lat": 13.0500,
+          "lat": 13.05,
           "lng": 80.2824
         },
         "capacity": 10000,
@@ -1597,7 +1709,7 @@
         "views": 3400,
         "likes": 289,
         "shares": 45,
-        "averageRating": 5.0,
+        "averageRating": 5,
         "totalRatings": 8
       },
       "registrationStats": {
@@ -2206,7 +2318,7 @@
         "views": 3800,
         "likes": 312,
         "shares": 56,
-        "averageRating": 5.0,
+        "averageRating": 5,
         "totalRatings": 6
       },
       "registrationStats": {
@@ -2366,7 +2478,7 @@
         },
         "geoLocation": {
           "lat": 28.4744,
-          "lng": 77.5030
+          "lng": 77.503
         },
         "capacity": 5000,
         "amenities": [
@@ -2639,6 +2751,32 @@
       "feedbackSubmitted": true,
       "rating": 5,
       "status": "COMPLETED"
+    },
+    {
+      "id": "REG-1772066342990",
+      "userId": "USR-1004",
+      "eventId": "EVT-5001",
+      "eventName": "AI Tech Summit 2026",
+      "date": "2026-04-15T09:00:00",
+      "location": "Chennai Trade Centre, Chennai",
+      "ticketType": "EARLY BIRD",
+      "quantity": 2,
+      "price": 2947.64,
+      "status": "CONFIRMED",
+      "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
+    },
+    {
+      "id": "REG-1772067068430",
+      "userId": "USR-1006",
+      "eventId": "EVT-5001",
+      "eventName": "AI Tech Summit 2026",
+      "date": "2026-04-15T09:00:00",
+      "location": "Chennai Trade Centre, Chennai",
+      "ticketType": "STANDARD",
+      "quantity": 1,
+      "price": 1768.82,
+      "status": "CONFIRMED",
+      "img": "https://dummyimage.com/600x400/4F46E5/ffffff&text=AI+Summit"
     }
   ],
   "payments": [
@@ -2671,6 +2809,26 @@
       "method": "Net Banking",
       "amount": 1499,
       "status": "Failed"
+    },
+    {
+      "id": "PAY-1772066342990",
+      "userId": "USR-1004",
+      "eventTitle": "AI Tech Summit 2026",
+      "date": "2026-02-26T00:39:02.990Z",
+      "tickets": "EARLY BIRD x 2",
+      "method": "PAYCARD",
+      "amount": 2947.64,
+      "status": "Confirmed"
+    },
+    {
+      "id": "PAY-1772067068430",
+      "userId": "USR-1006",
+      "eventTitle": "AI Tech Summit 2026",
+      "date": "2026-02-26T00:51:08.430Z",
+      "tickets": "STANDARD x 1",
+      "method": "PAYCARD",
+      "amount": 1768.82,
+      "status": "Confirmed"
     }
   ]
 }

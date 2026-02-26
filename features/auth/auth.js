@@ -1,5 +1,5 @@
-import { state } from './state.js';
-import { showToast } from './utils.js';
+import { state } from '../../scripts/shared/state.js';
+import { showToast } from '../../scripts/shared/utils.js';
 
 export function performLogin(email, password, rememberMe = false, onRedirect = null) {
     if (!state.users || state.users.length === 0) {
@@ -60,13 +60,13 @@ export function performLogin(email, password, rememberMe = false, onRedirect = n
             } else {
                 const role = user.role.name;
                 if (role === 'ATTENDEE') {
-                    window.location.href = '../index.html';
+                    window.location.href = '../../index.html';
                 } else if (role === 'ORGANIZER') {
-                    window.location.href = 'organizer-dashboard.html';
+                    window.location.href = '../organizer/organizer-dashboard.html';
                 } else if (role === 'ADMIN') {
                     window.location.href = 'admin-dashboard.html';
                 } else {
-                    window.location.href = '../index.html';
+                    window.location.href = '../../index.html';
                 }
             }
         }, 1000);
@@ -150,7 +150,12 @@ export function setupSignupForm() {
         form.classList.add('was-validated');
 
         if (form.checkValidity()) {
+            const inputs = form.querySelectorAll('input');
+            const firstName = inputs[0].value;
+            const lastName = inputs[1].value;
             const email = form.querySelector('input[type="email"]').value;
+            const phone = form.querySelector('input[type="tel"]').value;
+            const password = passwordInputs[0].value;
 
             // Edge Case: Email exists
             const exists = state.users.some(u => u.profile.email === email);
@@ -159,10 +164,70 @@ export function setupSignupForm() {
                 return;
             }
 
-            showToast('Success', 'Account created successfully! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 1500);
+            // Create new user object
+            const newUser = {
+                id: 'USR-' + (1000 + state.users.length + 1),
+                password: password,
+                profile: {
+                    fullName: `${firstName} ${lastName}`,
+                    email: email,
+                    phone: phone,
+                    gender: "UNKNOWN",
+                    dateOfBirth: "2000-01-01",
+                    profileImage: `https://dummyimage.com/200x200/10B981/ffffff&text=${firstName.charAt(0)}${lastName.charAt(0)}`,
+                    bio: "New user"
+                },
+                role: {
+                    id: "ROLE-2",
+                    name: "ATTENDEE",
+                    permissions: ["VIEW_EVENTS", "REGISTER_EVENT", "BOOK_TICKETS", "WRITE_REVIEWS", "SAVE_EVENTS"]
+                },
+                accountStatus: {
+                    status: "ACTIVE",
+                    isEmailVerified: false,
+                    isPhoneVerified: false,
+                    failedLoginAttempts: 0,
+                    lastLogin: new Date().toISOString(),
+                    createdAt: new Date().toISOString()
+                },
+                preferences: {
+                    language: "en",
+                    notifications: { email: true, sms: false, push: false },
+                    interestedCategories: []
+                },
+                statistics: {
+                    eventsCreated: 0,
+                    eventsAttended: 0,
+                    totalSpent: 0,
+                    averageRatingGiven: 0
+                }
+            };
+
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating...';
+
+            // POST to JSON server
+            fetch('http://localhost:3000/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newUser)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    state.users.push(data); // update local state
+                    showToast('Success', 'Account created successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('Signup error:', err);
+                    showToast('Error', 'Failed to create account. Please try again.', 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                });
         } else {
             showToast('Error', 'Please fill in all required fields correctly.', 'danger');
         }

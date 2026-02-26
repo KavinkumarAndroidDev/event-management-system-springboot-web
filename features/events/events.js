@@ -1,5 +1,5 @@
-import { state } from './state.js';
-import { performLogin } from './auth.js';
+import { state } from '../../scripts/shared/state.js';
+import { performLogin } from '../auth/auth.js';
 
 export function initializeEvents() {
     const events = state.events;
@@ -35,12 +35,12 @@ export function createEventCard(event) {
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
     const path = window.location.pathname;
-    let link = 'html/events/event-details.html?id=' + event.id;
+    let link = 'features/events/event-details.html?id=' + event.id;
 
-    if (path.includes('/html/events/')) {
+    if (path.includes('/features/events/')) {
         link = 'event-details.html?id=' + event.id;
-    } else if (path.includes('/html/')) {
-        link = 'events/event-details.html?id=' + event.id;
+    } else if (path.includes('/features/')) {
+        link = '../events/event-details.html?id=' + event.id;
     }
 
     return `
@@ -221,7 +221,7 @@ export function populateSingleEvent(event) {
                         };
                     }
                 } else {
-                    window.location.href = '../../html/login.html';
+                    window.location.href = '../auth/login.html';
                 }
             } else {
                 window.location.href = `booking.html?id=${event.id}`;

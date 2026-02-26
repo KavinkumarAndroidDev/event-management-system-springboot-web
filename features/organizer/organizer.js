@@ -1,4 +1,4 @@
-import { showToast } from './utils.js';
+import { showToast } from '../../scripts/shared/utils.js';
 
 export function setupOrganizerForm() {
     const form = document.getElementById('organizerForm');

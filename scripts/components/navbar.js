@@ -1,11 +1,11 @@
 export function injectComponents() {
   const path = window.location.pathname;
-  const isInHtmlDir = path.includes('/html/');
-  const isInEventsDir = path.includes('/events/');
+  const isInFeaturesDir = path.includes('/features/');
+  const isInEventsDir = path.includes('/features/events/');
 
   let rootPath = './';
   if (isInEventsDir) rootPath = '../../';
-  else if (isInHtmlDir) rootPath = '../';
+  else if (isInFeaturesDir) rootPath = '../../';
 
   const userStr = localStorage.getItem('currentUser');
   const user = userStr ? JSON.parse(userStr) : null;
@@ -28,7 +28,7 @@ function injectHeader(rootPath, user) {
     const firstName = user.profile.fullName.split(' ')[0];
 
     rightContent = `
-            <a href="${rootPath}html/notifications.html" class="icon-circle btn p-0 me-2 text-decoration-none d-inline-flex align-items-center justify-content-center">
+            <a href="${rootPath}features/notifications/notifications.html" class="icon-circle btn p-0 me-2 text-decoration-none d-inline-flex align-items-center justify-content-center">
                 <i data-lucide="bell" width="20" height="20"></i>
             </a>
             <div class="dropdown d-inline-block">
@@ -37,7 +37,7 @@ function injectHeader(rootPath, user) {
                     <span class="welcome-text d-none d-sm-inline-block">Welcome, ${firstName}</span>
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="${rootPath}html/profile.html">My Profile</a></li>
+                    <li><a class="dropdown-item" href="${rootPath}features/profile/profile.html">My Profile</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><button class="dropdown-item text-danger" id="logoutBtn">Logout</button></li>
                 </ul>
@@ -46,8 +46,8 @@ function injectHeader(rootPath, user) {
   } else {
     rightContent = `
             <div id="guestState" class="auth-state">
-                <a href="${rootPath}html/login.html" class="btn btn-text">Login</a>
-                <a href="${rootPath}html/signup.html" class="btn btn-primary">
+                <a href="${rootPath}features/auth/login.html" class="btn btn-text">Login</a>
+                <a href="${rootPath}features/auth/signup.html" class="btn btn-primary">
                     <span>Signup</span>
                     <svg class="btn-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                         <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -67,9 +67,9 @@ function injectHeader(rootPath, user) {
         </div>
         <div class="header-center nav-links d-flex align-items-center">
           <a href="${rootPath}index.html" class="btn btn-text nav-link-btn text-neutral-900">Home</a>
-          <a href="${rootPath}html/events/events.html" class="btn btn-text nav-link-btn text-neutral-900">Events</a>
-          <a href="${rootPath}html/about.html" class="btn btn-text nav-link-btn text-neutral-900">About</a>
-          <a href="${rootPath}html/contact.html" class="btn btn-text nav-link-btn text-neutral-900">Contact</a>
+          <a href="${rootPath}features/events/events.html" class="btn btn-text nav-link-btn text-neutral-900">Events</a>
+          <a href="${rootPath}features/about/about.html" class="btn btn-text nav-link-btn text-neutral-900">About</a>
+          <a href="${rootPath}features/about/contact.html" class="btn btn-text nav-link-btn text-neutral-900">Contact</a>
         </div>
         <div class="header-right">
             ${rightContent}
@@ -103,7 +103,7 @@ function injectOrganizerCTA(rootPath) {
                         <span class="text-white-50 small">Got a show, event, activity or a great experience? Partner with us & get listed on SyncEvent</span>
                     </div>
                 </div>
-                <button class="btn btn-success rounded-pill px-4 d-flex align-items-center gap-2" onclick="window.location.href='${rootPath}html/organizer-signup.html'">
+                <button class="btn btn-success rounded-pill px-4 d-flex align-items-center gap-2" onclick="window.location.href='${rootPath}features/organizer/organizer-signup.html'">
                     Register now! <i data-lucide="arrow-right" width="18" height="18"></i>
                 </button>
             </div>
@@ -126,10 +126,10 @@ function injectFooter(rootPath) {
           <h4 class="footer-col-title">Navigation</h4>
           <div class="footer-links">
             <a class="footer-link" href="${rootPath}index.html">Home</a>
-            <a class="footer-link" href="${rootPath}html/events/events.html">Events</a>
-            <a class="footer-link" href="${rootPath}html/about.html">About</a>
-            <a class="footer-link" href="${rootPath}html/contact.html" target="_blank">FAQ</a>
-            <a class="footer-link" href="${rootPath}html/contact.html" target="_blank">Contact</a>
+            <a class="footer-link" href="${rootPath}features/events/events.html">Events</a>
+            <a class="footer-link" href="${rootPath}features/about/about.html">About</a>
+            <a class="footer-link" href="${rootPath}features/about/contact.html" target="_blank">FAQ</a>
+            <a class="footer-link" href="${rootPath}features/about/contact.html" target="_blank">Contact</a>
           </div>
         </div>
         <div>
