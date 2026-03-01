@@ -134,7 +134,26 @@
             </div>
         </section>
 
-        <!-- STATE 2: PAYMENT -->
+        <!-- STATE 2: GUEST BLOCKED -->
+        <section id="step-guest-blocked" class="container-custom d-none text-center py-5" style="max-width: 600px;">
+            <div class="mb-4 mt-5">
+                <div class="bg-warning-subtle text-warning rounded-circle d-inline-flex align-items-center justify-content-center p-4 mb-4"
+                    style="width: 80px; height: 80px;">
+                    <i data-lucide="lock" width="40" height="40"></i>
+                </div>
+                <h3 class="fw-bold text-neutral-900 mb-2">Login Required</h3>
+                <p class="text-neutral-500 mb-4 px-md-5">You must be logged in to book tickets for this event. Please
+                    login or create an account to continue.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button
+                        class="btn btn-outline-light border-neutral-200 text-neutral-700 fw-medium rounded-pill px-4"
+                        onclick="history.back()">Go Back</button>
+                    <a href="../auth/login.html" class="btn btn-primary fw-medium rounded-pill px-4">Login Now</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATE 3: PAYMENT -->
         <section id="step-payment" class="container-custom d-none">
             <div class="row g-5">
                 <!-- Left: Payment Form -->
@@ -144,112 +163,38 @@
                         <i data-lucide="arrow-left" width="16" height="16"></i> Back to Tickets
                     </a>
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="mb-0 fw-bold">Payment</h3>
-                        <div
-                            class="d-flex align-items-center gap-2 text-success small bg-success-subtle px-3 py-1 rounded-pill">
-                            <i data-lucide="lock" width="14" height="14"></i>
-                            <span class="fw-medium">Secure Payment</span>
-                        </div>
+                        <h3 class="mb-0 fw-bold">Complete Booking</h3>
                     </div>
                     <hr class="border-neutral-100 mb-4">
 
-                    <form id="payment-form">
-                        <div class="mb-4">
-                            <label class="form-label fw-medium text-neutral-900">Payment Method</label>
-                            <div class="d-flex gap-3">
-                                <div
-                                    class="form-check card-custom p-3 d-flex align-items-center justify-content-center gap-2 cursor-pointer flex-fill payment-method-card border-primary bg-primary-subtle bg-opacity-10">
-                                    <input class="form-check-input mt-0" type="radio" name="paymentMethod" id="payCard"
-                                        checked>
-                                    <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer"
-                                        for="payCard">
-                                        <i data-lucide="credit-card" width="20" height="20" class="text-primary"></i>
-                                        <span class="fw-medium">Card</span>
-                                    </label>
-                                </div>
-                                <div
-                                    class="form-check card-custom p-3 d-flex align-items-center justify-content-center gap-2 cursor-pointer flex-fill payment-method-card">
-                                    <input class="form-check-input mt-0" type="radio" name="paymentMethod" id="payBank">
-                                    <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer"
-                                        for="payBank">
-                                        <i data-lucide="landmark" width="20" height="20" class="text-neutral-400"></i>
-                                        <span class="fw-medium">Bank</span>
-                                    </label>
-                                </div>
-                                <div
-                                    class="form-check card-custom p-3 d-flex align-items-center justify-content-center gap-2 cursor-pointer flex-fill payment-method-card">
-                                    <input class="form-check-input mt-0" type="radio" name="paymentMethod"
-                                        id="payTransfer">
-                                    <label class="form-check-label d-flex align-items-center gap-2 cursor-pointer"
-                                        for="payTransfer">
-                                        <i data-lucide="arrow-right-left" width="20" height="20"
-                                            class="text-neutral-400"></i>
-                                        <span class="fw-medium">Transfer</span>
-                                    </label>
-                                </div>
+                    <!-- Event Summary Card (Moved from Right) -->
+                    <div class="card-custom mb-4 bg-white border-neutral-100 shadow-sm d-flex gap-3 p-3">
+                        <img src="" id="summary-event-img" class="rounded-3 object-fit-cover"
+                            style="width: 100px; height: 100px;" alt="Event">
+                        <div class="d-flex flex-column justify-content-center">
+                            <h5 class="fw-bold text-neutral-900 mb-1" id="summary-event-title">Loading...</h5>
+                            <div class="small text-neutral-500 fw-medium mb-1" id="summary-event-category">Category
+                            </div>
+                            <div class="small text-neutral-500 d-flex align-items-center gap-1 mb-1">
+                                <i data-lucide="calendar" width="14" height="14"></i>
+                                <span id="summary-event-date">Date</span>
+                            </div>
+                            <div class="small text-neutral-500 d-flex align-items-center gap-1">
+                                <i data-lucide="map-pin" width="14" height="14"></i>
+                                <span id="summary-event-location">Location</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-medium text-neutral-900">Card Number</label>
-                            <div class="position-relative">
-                                <input type="text" class="form-control" placeholder="0000 0000 0000 0000" required
-                                    minlength="16" maxlength="16" pattern="\d{16}" style="padding-right: 3rem;">
-                                <div class="position-absolute top-50 end-0 translate-middle-y pe-3 d-flex gap-1">
-                                    <div class="bg-neutral-100 rounded-1" style="width: 24px; height: 16px;"></div>
-                                    <div class="bg-neutral-100 rounded-1" style="width: 24px; height: 16px;"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <h5 class="fw-bold mb-3">Adjust Tickets</h5>
+                    <div id="payment-ticket-controls" class="d-flex flex-column gap-3 mb-4">
+                        <!-- Populated dynamically by JS based on cart -->
+                    </div>
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-neutral-900">Expiry Date</label>
-                                <input type="text" class="form-control" placeholder="MM/YY" required
-                                    pattern="(0[1-9]|1[0-2])\/?([0-9]{2})" maxlength="5">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium text-neutral-900">CVV</label>
-                                <input type="password" class="form-control" placeholder="123" required minlength="3"
-                                    maxlength="3" pattern="\d{3}">
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="saveCard">
-                                <label class="form-check-label text-neutral-600 small" for="saveCard">
-                                    Save this card for faster payments
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 mb-3" id="btn-pay-now">
-                            Pay <span id="pay-btn-amount">₹0</span>
-                        </button>
-
-                        <p class="text-center text-neutral-400 caption">
-                            By clicking "Pay", you agree to our Terms & Conditions.
-                        </p>
-                    </form>
                 </div>
 
                 <!-- Right: Summary -->
                 <div class="col-lg-5">
-                    <!-- Event Summary Card -->
-                    <div class="card-custom mb-3">
-                        <div class="d-flex gap-3">
-                            <img src="" id="summary-event-img" class="rounded-3 object-fit-cover"
-                                style="width: 80px; height: 80px;" alt="Event">
-                            <div>
-                                <h6 class="fw-bold text-neutral-900 mb-1" id="summary-event-title">Loading...</h6>
-                                <div class="small text-neutral-400 mb-1" id="summary-event-category">Category</div>
-                                <div class="small text-neutral-400" id="summary-event-date">Date</div>
-                                <div class="small text-neutral-400" id="summary-event-location">Location</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Booking Summary Card -->
                     <div class="card-custom mb-4">
                         <h5 class="fw-bold mb-4">Booking Summary</h5>
@@ -281,10 +226,15 @@
                             <span class="fw-medium" id="summary-tax">₹0</span>
                         </div>
                         <hr class="border-neutral-100 my-3">
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
                             <span class="fw-bold text-neutral-900 fs-5">Total</span>
                             <span class="fw-bold text-primary fs-4" id="summary-total">₹0</span>
                         </div>
+                        <button type="button"
+                            class="btn btn-primary btn-lg w-100 rounded-pill py-3 px-4 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm"
+                            id="btn-pay-now">
+                            Pay <span id="pay-btn-amount">₹0</span> <i data-lucide="arrow-right" class="ms-2"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -312,34 +262,43 @@
                 <div class="d-flex justify-content-center mb-4">
                     <div class="bg-success-subtle text-success rounded-circle p-3 d-flex align-items-center justify-content-center"
                         style="width: 80px; height: 80px;">
-                        <i data-lucide="check" width="40" height="40"></i>
+                        <i data-lucide="check-circle-2" width="48" height="48"></i>
                     </div>
                 </div>
-                <h4 class="fw-bold text-neutral-900 mb-2">Booking Confirmed!</h4>
-                <p class="text-neutral-400 mb-4">Your tickets have been sent to your email.</p>
-                <div class="d-flex flex-column gap-2">
-                    <a href="../../index.html" class="btn btn-primary rounded-pill w-100">Go to Home</a>
-                    <button class="btn btn-text text-neutral-600 w-100">View Ticket</button>
+                <h4 class="fw-bold text-neutral-900 mb-2">Payment Successful!</h4>
+                <p class="text-neutral-500 mb-4">Your booking has been confirmed securely.</p>
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <button class="btn btn-primary rounded-pill w-100 py-3 fw-bold" id="btn-success-view-tickets">View
+                        Tickets</button>
+                    <a href="../../index.html"
+                        class="btn btn-light rounded-pill w-100 py-3 text-neutral-700 fw-medium border-neutral-200">Go
+                        to Home</a>
                 </div>
+                <p class="text-neutral-400 mb-0" style="font-size: 0.70rem;">
+                    Ref: <span id="success-ref-id" class="font-monospace">...</span>
+                </p>
             </div>
         </div>
     </div>
 
     <!-- Failure Modal -->
-    <div class="modal fade" id="failureModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="failureModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 p-4 text-center">
                 <div class="d-flex justify-content-center mb-4">
                     <div class="bg-danger-subtle text-danger rounded-circle p-3 d-flex align-items-center justify-content-center"
                         style="width: 80px; height: 80px;">
-                        <i data-lucide="x" width="40" height="40"></i>
+                        <i data-lucide="alert-circle" width="48" height="48"></i>
                     </div>
                 </div>
                 <h4 class="fw-bold text-neutral-900 mb-2">Payment Failed</h4>
-                <p class="text-neutral-400 mb-4">Your payment has failed. Please try again.</p>
+                <p class="text-neutral-500 mb-4" id="failure-reason-text">There was an issue processing your payment
+                    securely.</p>
                 <div class="d-flex flex-column gap-2">
-                    <button class="btn btn-danger rounded-pill w-100" data-bs-dismiss="modal">Try Again</button>
-                    <button class="btn btn-text text-neutral-600 w-100" onclick="history.back()">Cancel Booking</button>
+                    <button class="btn btn-danger rounded-pill w-100 py-3 fw-bold" id="btn-failure-retry"
+                        data-bs-dismiss="modal">Retry Payment</button>
+                    <button class="btn btn-light rounded-pill w-100 py-3 text-neutral-700 fw-medium border-neutral-200"
+                        onclick="window.location.reload()">Cancel Booking</button>
                 </div>
             </div>
         </div>
@@ -348,6 +307,8 @@
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- External Script Dependencies -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="../../scripts/core/app.js"></script>
 </body>
 

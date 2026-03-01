@@ -14,7 +14,7 @@ export function injectComponents() {
   injectOrganizerCTA(rootPath);
   injectFooter(rootPath);
 
-  if (window.lucide) lucide.createIcons();
+  if (window.initIcons) window.initIcons();
 }
 
 function injectHeader(rootPath, user) {
@@ -58,36 +58,57 @@ function injectHeader(rootPath, user) {
   }
 
   header.innerHTML = `
-    <div class="container-custom">
-      <div class="header-inner">
-        <div class="header-left">
-          <a class="brand" href="${rootPath}index.html">
-            <img src="${rootPath}assets/logo.SVG" alt="SyncEvent">
-          </a>
-        </div>
-        <div class="header-center nav-links d-flex align-items-center">
-          <a href="${rootPath}index.html" class="btn btn-text nav-link-btn text-neutral-900">Home</a>
-          <a href="${rootPath}features/events/events.html" class="btn btn-text nav-link-btn text-neutral-900">Events</a>
-          <a href="${rootPath}features/about/about.html" class="btn btn-text nav-link-btn text-neutral-900">About</a>
-          <a href="${rootPath}features/about/contact.html" class="btn btn-text nav-link-btn text-neutral-900">Contact</a>
-        </div>
-        <div class="header-right">
-            ${rightContent}
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3">
+      <div class="container-custom w-100 px-0 d-flex align-items-center justify-content-between">
+        
+        <!-- Logo -->
+        <a class="navbar-brand py-0 m-0" href="${rootPath}index.html">
+          <img src="${rootPath}assets/logo.SVG" alt="SyncEvent" height="32">
+        </a>
+        
+        <!-- Hamburger Toggle -->
+        <button class="navbar-toggler border-0 shadow-none px-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <i data-lucide="menu" width="28" height="28" class="text-neutral-900"></i>
+        </button>
+        
+        <!-- Collapsible Content -->
+        <div class="collapse navbar-collapse bg-white" id="navbarContent">
+            
+            <!-- Centered Links -->
+            <ul class="navbar-nav mx-auto mb-3 mb-lg-0 gap-1 gap-lg-3 text-center mt-3 mt-lg-0">
+                <li class="nav-item">
+                    <a href="${rootPath}index.html" class="nav-link text-neutral-900 fw-medium">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="${rootPath}features/events/events.html" class="nav-link text-neutral-900 fw-medium">Events</a>
+                </li>
+                <li class="nav-item">
+                    <a href="${rootPath}features/about/about.html" class="nav-link text-neutral-900 fw-medium">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="${rootPath}features/about/contact.html" class="nav-link text-neutral-900 fw-medium">Contact</a>
+                </li>
+            </ul>
+            
+            <!-- Right Actions (Auth/Profile) -->
+            <div class="d-flex align-items-center justify-content-center gap-3 pb-3 pb-lg-0">
+                ${rightContent}
+            </div>
+
         </div>
       </div>
-    </div>`;
+    </nav>`;
 
-  if (user) {
-    setTimeout(() => {
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-          const modalEl = document.getElementById('signOutModal');
-          if (modalEl) new bootstrap.Modal(modalEl).show();
-        });
-      }
-    }, 0);
-  }
+  // Handle Logout Logic
+  setTimeout(() => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        const modalEl = document.getElementById('signOutModal');
+        if (modalEl) new window.bootstrap.Modal(modalEl).show();
+      });
+    }
+  }, 0);
 }
 
 function injectOrganizerCTA(rootPath) {

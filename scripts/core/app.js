@@ -1,11 +1,22 @@
 import { setGlobalData } from '../shared/state.js';
 import { injectToastContainer, initializeBootstrapComponents, injectSignOutModal } from '../shared/utils.js';
 import { injectComponents } from '../components/navbar.js';
-import { setupLoginForm, setupSignupForm, setupForgotPassword, setupPasswordStrength, setupPasswordToggles } from '../../features/auth/auth.js';
+import { setupLoginForm, setupSignupForm } from '../../features/auth/auth.js';
 import { setupOrganizerForm, setupFileUploads } from '../../features/organizer/organizer.js';
+import { setupContactForm } from '../../features/about/contact.js';
 import { initializeEvents, setupGlobalInteractions } from '../../features/events/events.js';
 import { initBookingPage } from '../../features/events/booking.js';
 import { initProfilePage } from '../../features/profile/profile.js';
+
+// Safe Lucide initializer
+// NOTE: The Lucide CDN UMD build exposes lucide.createIcons() but does NOT support
+// a { root } option — passing unknown options silently breaks icon rendering.
+// We always call createIcons() with no arguments to re-scan the entire document.
+window.initIcons = () => {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('SyncEvent App Initialized');
@@ -31,10 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLoginForm();
     setupSignupForm();
     setupOrganizerForm();
-    setupPasswordToggles();
+    setupContactForm();
     setupFileUploads();
-    setupForgotPassword();
-    setupPasswordStrength();
     injectComponents();
     setupGlobalInteractions();
 
@@ -43,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     injectSignOutModal();
 
     // 5. Initialize Icons (Global)
-    if (window.lucide) lucide.createIcons();
+    window.initIcons();
 
     // 6. Initialize Bootstrap Components
     initializeBootstrapComponents();

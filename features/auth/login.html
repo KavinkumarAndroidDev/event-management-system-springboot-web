@@ -14,96 +14,76 @@
     <div class="row w-100 g-5 align-items-stretch">
 
       <!-- 2. Left Column: Authentication Panel -->
-      <div class="col-lg-6 d-flex flex-column justify-content-center">
+      <div class="col-12 col-lg-6 d-flex flex-column justify-content-center mx-auto">
         <div class="w-100 mx-auto" style="max-width: 480px;">
 
           <!-- 2.1 Brand Area -->
-          <div class="mb-5">
-            <a href="../../index.html" class="d-flex align-items-center gap-2 text-decoration-none">
+          <div class="text-center mb-4">
+            <a href="../../index.html" class="d-inline-block text-decoration-none transition-scale">
               <img src="../../assets/logo.SVG" alt="SyncEvent" height="56">
             </a>
           </div>
 
           <!-- 2.2 Page Heading Section -->
-          <div class="mb-4">
-            <h1 class="h2 fw-bold text-neutral-900 mb-2">Login</h1>
-            <p class="text-neutral-400 mb-0">Login to access your account</p>
+          <div class="text-center mb-5">
+            <h1 class="h2 fw-bold text-neutral-900 mb-2">Welcome Back</h1>
+            <p class="text-neutral-500 mb-0">Login with OTP to access your account</p>
           </div>
 
-          <!-- 2.3 Form Fields -->
-          <form id="loginForm" novalidate>
-            <!-- Email Field -->
-            <div class="mb-3">
-              <label class="form-label fw-medium text-neutral-900">Email</label>
-              <input type="email" class="form-control" id="email" placeholder="john@example.com" required>
-            </div>
+          <!-- 2.3 Form Container -->
+          <div id="login-form-container"></div>
 
-            <!-- Password Field -->
-            <div class="mb-3">
-              <label class="form-label fw-medium text-neutral-900">Password</label>
-              <div class="input-group has-validation">
-                <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                <span class="input-group-text bg-white border-start-0 text-neutral-400 toggle-password"
-                  style="cursor: pointer">
-                  <i data-lucide="eye-off"></i>
-                </span>
-              </div>
-            </div>
+          <!-- 2.6 Signup Redirect Text -->
+          <div class="text-center mb-4 mt-2">
+            <span class="text-neutral-400">Don’t have an account? <a href="signup.html"
+                class="text-primary text-decoration-none fw-medium">Sign up</a></span>
+          </div>
 
-            <!-- 2.4 Remember + Forgot Row -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="rememberMe">
-                <label class="form-check-label text-neutral-900" for="rememberMe">Remember me</label>
-              </div>
-              <a href="#" class="text-danger text-decoration-none fw-medium" data-bs-toggle="modal"
-                data-bs-target="#forgotPasswordModal">Forgot Password?</a>
-            </div>
+          <!-- 2.7 Divider Area -->
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="flex-grow-1 border-top border-neutral-100"></div>
+            <span class="text-neutral-400 small">Or login with</span>
+            <div class="flex-grow-1 border-top border-neutral-100"></div>
+          </div>
 
-            <!-- 2.5 Primary Login Button -->
-            <button type="submit" class="btn btn-primary w-100 rounded-pill mb-4">Login</button>
-
-            <!-- 2.6 Signup Redirect Text -->
-            <div class="text-center mb-4">
-              <span class="text-neutral-400">Don’t have an account? <a href="signup.html"
-                  class="text-primary text-decoration-none fw-medium">Sign up</a></span>
+          <!-- 2.8 Social Login Buttons -->
+          <div class="row g-3 ">
+            <div class="col">
+              <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
+                <i data-lucide="facebook" width="20" height="20"></i>
+              </button>
             </div>
-
-            <!-- 2.7 Divider Area -->
-            <div class="d-flex align-items-center gap-3 mb-4">
-              <div class="flex-grow-1 border-top border-neutral-100"></div>
-              <span class="text-neutral-400 small">Or login with</span>
-              <div class="flex-grow-1 border-top border-neutral-100"></div>
+            <div class="col">
+              <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
+                <i data-lucide="chrome" width="20" height="20"></i>
+              </button>
             </div>
-
-            <!-- 2.8 Social Login Buttons -->
-            <div class="row g-3 ">
-              <div class="col">
-                <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
-                  <i data-lucide="facebook" width="20" height="20"></i>
-                </button>
-              </div>
-              <div class="col">
-                <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
-                  <i data-lucide="chrome" width="20" height="20"></i>
-                </button>
-              </div>
-              <div class="col">
-                <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
-                  <i data-lucide="apple" width="20" height="20"></i>
-                </button>
-              </div>
+            <div class="col">
+              <button type="button" class="btn btn-outline-light border-neutral-100 w-100 text-neutral-900">
+                <i data-lucide="apple" width="20" height="20"></i>
+              </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
 
       <!-- 3. Right Column: Image Panel -->
-      <div class="col-lg-6">
+      <div class="col-lg-6 d-none d-lg-block">
         <div class="rounded-4 overflow-hidden position-relative"
           style="position: sticky; top: 3rem; height: calc(100vh - 6rem);">
+          <!-- Overlay & Gradient -->
+          <div class="position-absolute inset-0 z-1"
+            style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.1) 100%); width: 100%; height: 100%;">
+          </div>
+
+          <!-- Brand Tagline -->
+          <div class="position-absolute bottom-0 start-0 p-5 z-2">
+            <h3 class="text-white fw-medium mb-0" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Discover events that
+              move you.</h3>
+          </div>
+
           <div id="loginCarousel" class="carousel slide h-100" data-bs-ride="carousel">
-            <div class="carousel-indicators mb-4">
+            <div class="carousel-indicators mb-4 z-2">
               <button type="button" data-bs-target="#loginCarousel" data-bs-slide-to="0" class="active"
                 aria-current="true" aria-label="Slide 1"></button>
               <button type="button" data-bs-target="#loginCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
@@ -123,61 +103,24 @@
                   alt="Login Visual 3">
               </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#loginCarousel" data-bs-slide="prev">
+            <button class="carousel-control-prev z-2" type="button" data-bs-target="#loginCarousel"
+              data-bs-slide="prev">
               <span class="carousel-control-prev-icon" aria-hidden="true"></span>
               <span class="visually-hidden">Previous</span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#loginCarousel" data-bs-slide="next">
+            <button class="carousel-control-next z-2" type="button" data-bs-target="#loginCarousel"
+              data-bs-slide="next">
               <span class="carousel-control-next-icon" aria-hidden="true"></span>
               <span class="visually-hidden">Next</span>
             </button>
           </div>
         </div>
       </div>
-    </div>
-    </div>
 
     </div>
   </main>
 
-  <!-- Forgot Password Modal -->
-  <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg rounded-4">
-        <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold text-neutral-900">Reset Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body pt-2">
-          <p class="text-neutral-400 small mb-4">Please enter your details to reset your password.</p>
-          <form id="forgotPasswordForm" novalidate>
-            <div class="mb-3">
-              <label class="form-label fw-medium text-neutral-900 small">Email Address</label>
-              <input type="email" class="form-control" id="fpEmail" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-medium text-neutral-900 small">Old Password</label>
-              <input type="password" class="form-control" id="fpOldPassword" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-medium text-neutral-900 small">New Password</label>
-              <input type="password" class="form-control" id="fpNewPassword" required minlength="6">
-              <div class="form-text small text-muted">
-                Min 6 chars, 1 uppercase, 1 lowercase, 1 special char.
-              </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label fw-medium text-neutral-900 small">Confirm New Password</label>
-              <input type="password" class="form-control" id="fpConfirmPassword" required minlength="6">
-            </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary rounded-pill">Reset Password</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
   <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>

@@ -54,31 +54,39 @@
           <div class="col-lg-6">
             <div class="card border-0 shadow-sm p-4 rounded-4 h-100">
               <h4 class="fw-bold text-neutral-900 mb-4">Send us a Message</h4>
-              <form>
+              <form id="contactForm" novalidate>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Your Name</label>
-                    <input type="text" class="form-control bg-neutral-50 border-0" placeholder="John Doe">
+                    <input type="text" class="form-control bg-neutral-50 border-0" placeholder="John Doe" required>
+                    <div class="invalid-feedback">Please enter your name.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Email Address</label>
-                    <input type="email" class="form-control bg-neutral-50 border-0" placeholder="john@example.com">
+                    <input type="email" class="form-control bg-neutral-50 border-0" placeholder="john@example.com"
+                      required>
+                    <div class="invalid-feedback">Please enter a valid email.</div>
                   </div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Phone Number</label>
-                    <input type="tel" class="form-control bg-neutral-50 border-0" placeholder="+91 98765 43210">
+                    <input type="tel" class="form-control bg-neutral-50 border-0" placeholder="+91 98765 43210"
+                      required>
+                    <div class="invalid-feedback">Please enter your phone number.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Subject</label>
-                    <input type="text" class="form-control bg-neutral-50 border-0" placeholder="How can we help?">
+                    <input type="text" class="form-control bg-neutral-50 border-0" placeholder="How can we help?"
+                      required>
+                    <div class="invalid-feedback">Please enter a subject.</div>
                   </div>
                 </div>
                 <div class="mb-4">
                   <label class="form-label fw-medium text-neutral-900 small">Message</label>
                   <textarea class="form-control bg-neutral-50 border-0" rows="5"
-                    placeholder="Tell us about your greivances..."></textarea>
+                    placeholder="Tell us about your greivances..." required></textarea>
+                  <div class="invalid-feedback">Please write a message.</div>
                 </div>
                 <button type="submit"
                   class="btn btn-primary w-100 rounded-pill py-2 d-flex align-items-center justify-content-center gap-2">
@@ -154,6 +162,18 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full-Width Map Section Below Contact Form and Info -->
+        <div class="row mt-5">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden rounded-4" style="height: 400px;">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.196397365287!2d76.95304667503774!3d11.023862289141066!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba858546b1c09eb%3A0xe5eb604daac7847c!2sRS%20Puram%2C%20Coimbatore%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
           </div>
         </div>
@@ -246,7 +266,7 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
-    lucide.createIcons();
+    if (window.initIcons) window.initIcons(); else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
   </script>
   <script type="module" src="../../scripts/core/app.js"></script>
 

@@ -8,7 +8,10 @@ export function initializeEvents() {
     const featuredContainer = document.getElementById('featured-events');
     if (featuredContainer && events) {
         const featured = events.filter(e => e.status.isFeatured).slice(0, 5);
-        featuredContainer.innerHTML = featured.map(e => createEventCard(e)).join('');
+        featuredContainer.innerHTML = '';
+        featured.forEach(e => {
+            featuredContainer.appendChild(createEventCard(e));
+        });
     }
 
     // Top Organizers (Homepage)
@@ -25,30 +28,36 @@ export function initializeEvents() {
             .sort((a, b) => b.rating - a.rating)
             .slice(0, 3);
 
-        organizersGrid.innerHTML = topOrganizers.map(org => `
-            <div class="col">
+        organizersGrid.innerHTML = '';
+        topOrganizers.forEach(org => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            col.innerHTML = `
                 <div class="card card-custom border-0 shadow-sm p-4 h-100 text-center rounded-4 d-flex flex-column align-items-center">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;">
-                        ${org.name.charAt(0)}
-                    </div>
+                    <div class="org-avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;"></div>
                     <div class="mt-auto w-100">
-                        <div class="fw-bold text-neutral-900 fs-5 mb-1">${org.name}</div>
+                        <div class="org-name fw-bold text-neutral-900 fs-5 mb-1"></div>
                         <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
                             <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
                                 <i data-lucide="check-circle" width="12"></i> Verified
                             </span>
                             <span class="d-flex align-items-center text-warning fw-semibold bg-warning bg-opacity-10 px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
-                                <i data-lucide="star" class="fill-warning me-1" width="12"></i> ${org.rating}
+                                <i data-lucide="star" class="fill-warning me-1" width="12"></i> <span class="org-rating"></span>
                             </span>
                         </div>
-                        <a href="mailto:${org.contactEmail}" class="btn btn-outline-primary rounded-pill w-100 btn-sm">Contact Organizer</a>
+                        <a href="#" class="org-contact btn btn-outline-primary rounded-pill w-100 btn-sm">Contact Organizer</a>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            col.querySelector('.org-avatar').textContent = org.name.charAt(0);
+            col.querySelector('.org-name').textContent = org.name;
+            col.querySelector('.org-rating').textContent = org.rating;
+            col.querySelector('.org-contact').href = `mailto:${org.contactEmail}`;
+            organizersGrid.appendChild(col);
+        });
 
         if (window.lucide) {
-            lucide.createIcons({ root: organizersGrid });
+            if (window.initIcons) window.initIcons({ root: organizersGrid });
         }
     }
 
@@ -84,28 +93,30 @@ export function createEventCard(event) {
         link = '../events/event-details.html?id=' + event.id;
     }
 
-    return `
-    <div class="col">
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML = `
         <div class="card border-0 shadow-sm h-100 event-card" style="border-radius:16px; overflow:hidden;">
-            <img src="${event.media.thumbnail}" class="card-img-top" style="height:200px; object-fit:cover;" alt="${event.title}">
+            <img src="" class="card-img-top ec-img" style="height:200px; object-fit:cover;" alt="Event Image">
             <div class="card-body p-3 d-flex flex-column">
-                <div class="text-primary fw-semibold small mb-2">
-                    ${dateStr} • ${timeStr}
-                </div>
-                <h6 class="fw-semibold text-neutral-900 mb-2" style="line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
-                    ${event.title}
-                </h6>
-                <p class="text-neutral-400 small text-truncate mb-2">
-                    ${event.venue.name}, ${event.venue.address.city}
-                </p>
-                <div class="fw-semibold text-neutral-900 small mt-auto">
-                    ${minPrice === 0 ? 'Free' : '₹' + minPrice + ' onwards'}
-                </div>
+                <div class="ec-datetime text-primary fw-semibold small mb-2"></div>
+                <h6 class="ec-title fw-semibold text-neutral-900 mb-2" style="line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"></h6>
+                <p class="ec-location text-neutral-400 small text-truncate mb-2"></p>
+                <div class="ec-price fw-semibold text-neutral-900 small mt-auto"></div>
             </div>
-            <a href="${link}" class="stretched-link"></a>
+            <a href="" class="stretched-link ec-link"></a>
         </div>
-    </div>
     `;
+
+    col.querySelector('.ec-img').src = event.media.thumbnail;
+    col.querySelector('.ec-img').alt = event.title;
+    col.querySelector('.ec-datetime').textContent = `${dateStr} • ${timeStr}`;
+    col.querySelector('.ec-title').textContent = event.title;
+    col.querySelector('.ec-location').textContent = `${event.venue.name}, ${event.venue.address.city}`;
+    col.querySelector('.ec-price').textContent = minPrice === 0 ? 'Free' : '₹' + minPrice + ' onwards';
+    col.querySelector('.ec-link').href = link;
+
+    return col;
 }
 
 export function populateSingleEvent(event) {
@@ -126,7 +137,7 @@ export function populateSingleEvent(event) {
             // Preserve classes if any (e.g. text-primary)
             newIcon.className = iconEl.getAttribute('class') || '';
             iconEl.replaceWith(newIcon);
-            if (window.lucide) lucide.createIcons({ root: newIcon.parentElement });
+            if (window.initIcons) window.initIcons({ root: newIcon.parentElement });
         }
     }
 
@@ -150,33 +161,41 @@ export function populateSingleEvent(event) {
     const organizerCard = document.getElementById('event-organizer-card');
     if (organizerCard && event.organizer) {
         organizerCard.innerHTML = `
-            <div class="card-custom p-4 border-0 shadow-sm bg-white w-100 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-4" style="border-radius: 16px;">
-                <div class="d-flex align-items-center gap-4">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 80px; height: 80px; font-size: 2.2rem;">
-                        ${event.organizer.name.charAt(0)}
+            <div class="card-custom p-4 border border-1 border-neutral-100 shadow-sm bg-white w-100" style="border-radius: 16px;">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 64px; height: 64px; font-size: 1.5rem;" id="org-avatar"></div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-neutral-900 d-flex align-items-center gap-2">
+                                <span id="org-name"></span>
+                                <i data-lucide="badge-check" class="text-primary" width="18" height="18"></i>
+                            </h5>
+                            <div class="d-flex align-items-center text-neutral-500 small mt-1">
+                                <span class="d-flex align-items-center text-warning fw-semibold gap-1 me-3">
+                                    <i data-lucide="star" class="fill-warning" width="14" height="14"></i>
+                                    <span id="org-rating"></span>
+                                </span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i data-lucide="calendar-days" width="14" height="14"></i>
+                                    <span id="org-events-count"></span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <h4 class="fw-bold mb-0 text-neutral-900">${event.organizer.name}</h4>
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                                <i data-lucide="check-circle" width="12"></i> Verified
-                            </span>
-                        </div>
-                        <div class="d-flex align-items-center text-neutral-500 small mt-2">
-                            <span class="d-flex align-items-center text-warning fw-semibold bg-warning bg-opacity-10 px-2 py-1 rounded-pill me-3">
-                                <i data-lucide="star" class="fill-warning me-1" width="14"></i> ${event.organizer.rating} Rating
-                            </span>
-                            <span>10+ Past Events</span>
-                        </div>
+                        <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 d-inline-flex align-items-center justify-content-center gap-2 w-100" id="org-contact">
+                            <i data-lucide="mail" width="16" height="16"></i> Contact Organizer
+                        </a>
                     </div>
-                </div>
-                <div class="w-100" style="max-width: 220px;">
-                    <a href="mailto:${event.organizer.contactEmail}" class="btn btn-outline-primary rounded-pill w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                        <i data-lucide="mail" width="18"></i> Contact Organizer
-                    </a>
                 </div>
             </div>
         `;
+        organizerCard.querySelector('#org-avatar').textContent = event.organizer.name.charAt(0);
+        organizerCard.querySelector('#org-name').textContent = event.organizer.name;
+        organizerCard.querySelector('#org-rating').textContent = `${event.organizer.rating} Rating`;
+        organizerCard.querySelector('#org-events-count').textContent = '10+ Past Events'; // Placeholder, as actual count isn't in event object
+        organizerCard.querySelector('#org-contact').href = `mailto:${event.organizer.contactEmail}`;
+        if (window.initIcons) window.initIcons({ root: organizerCard });
     }
 
     // Populate Policies
@@ -188,7 +207,7 @@ export function populateSingleEvent(event) {
                     <i data-lucide="rotate-ccw" width="32" class="text-danger flex-shrink-0"></i>
                     <div>
                         <h5 class="fw-bold mb-2 text-neutral-900">Refund Policy</h5>
-                        <p class="text-neutral-500 small mb-0 lh-lg">${event.policies.refundPolicy}</p>
+                        <p class="text-neutral-500 small mb-0 lh-lg" id="policy-refund"></p>
                     </div>
                 </div>
             </div>
@@ -197,53 +216,64 @@ export function populateSingleEvent(event) {
                     <i data-lucide="file-check-2" width="32" class="text-success flex-shrink-0"></i>
                     <div>
                         <h5 class="fw-bold mb-2 text-neutral-900">Terms & Conditions</h5>
-                        <p class="text-neutral-500 small mb-0 lh-lg">${event.policies.termsAndConditions}</p>
+                        <p class="text-neutral-500 small mb-0 lh-lg" id="policy-terms"></p>
                     </div>
                 </div>
             </div>
         `;
+        policiesList.querySelector('#policy-refund').textContent = event.policies.refundPolicy;
+        policiesList.querySelector('#policy-terms').textContent = event.policies.termsAndConditions;
+        if (window.initIcons) window.initIcons({ root: policiesList });
     }
 
     // Populate Event Guide
     const guideList = document.getElementById('event-guide-list');
     if (guideList) {
-        const guideItems = [];
-
-        // 1. Duration
+        let durationHrs = 0;
         if (event.schedule && event.schedule.startDateTime && event.schedule.endDateTime) {
-            const durationMs = new Date(event.schedule.endDateTime) - new Date(event.schedule.startDateTime);
-            const durationHours = Math.round(durationMs / (1000 * 60 * 60));
-            if (durationHours > 0) {
-                guideItems.push({ icon: 'clock', title: 'Duration', value: `${durationHours} Hrs` });
-            }
+            durationHrs = Math.round((new Date(event.schedule.endDateTime) - new Date(event.schedule.startDateTime)) / (1000 * 60 * 60));
         }
+        const capacity = event.venue && event.venue.capacity ? event.venue.capacity : 0;
+        const categoryName = event.category ? event.category.name : 'General';
 
-        // 2. Capacity
-        if (event.venue && event.venue.capacity) {
-            guideItems.push({ icon: 'users', title: 'Capacity', value: `${event.venue.capacity} People` });
-        }
+        const guideItems = [
+            { icon: 'clock', title: 'Duration', text: `${durationHrs} Hours`, bg: 'primary' },
+            { icon: 'users', title: 'Capacity', text: `${capacity} People`, bg: 'success' },
+            { icon: 'tag', title: 'Category', text: categoryName, bg: 'warning' }
+        ];
 
-        // 3. Category
-        if (event.category) {
-            guideItems.push({ icon: event.category.icon || 'star', title: 'Category', value: event.category.name });
-        }
+        guideList.innerHTML = ''; // Clear existing content
+        guideItems.forEach(item => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            const card = document.createElement('div');
+            card.className = 'card-custom h-100 d-flex align-items-center gap-3 p-3 border-0 shadow-sm';
+            card.style.cssText = 'border-radius: 12px; background: white;';
 
-        guideList.innerHTML = guideItems.map(item => `
-            <div class="col-md-4">
-                <div class="card-custom h-100 d-flex align-items-center gap-3 p-3 border-0 shadow-sm" style="border-radius: 12px; background: white;">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
-                        <i data-lucide="${item.icon}" width="24"></i>
-                    </div>
-                    <div>
-                        <div class="caption text-neutral-400 small fw-medium mb-1">${item.title}</div>
-                        <div class="fw-bold text-neutral-900">${item.value}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+            const iconDiv = document.createElement('div');
+            iconDiv.className = `bg-${item.bg} bg-opacity-10 text-${item.bg} rounded-circle d-flex align-items-center justify-content-center flex-shrink-0`;
+            iconDiv.style.cssText = 'width: 48px; height: 48px;';
+            iconDiv.innerHTML = `<i data-lucide="${item.icon}" width="24"></i>`;
+            card.appendChild(iconDiv);
+
+            const textContentDiv = document.createElement('div');
+            const captionDiv = document.createElement('div');
+            captionDiv.className = 'caption text-neutral-400 small fw-medium mb-1';
+            captionDiv.textContent = item.title;
+            textContentDiv.appendChild(captionDiv);
+
+            const valueDiv = document.createElement('div');
+            valueDiv.className = 'fw-bold text-neutral-900';
+            valueDiv.textContent = item.text;
+            textContentDiv.appendChild(valueDiv);
+
+            card.appendChild(textContentDiv);
+            col.appendChild(card);
+            guideList.appendChild(col);
+        });
 
         if (window.lucide) {
-            lucide.createIcons({ root: guideList });
+            if (window.initIcons) window.initIcons({ root: guideList });
         }
     }
 
@@ -275,39 +305,7 @@ export function populateSingleEvent(event) {
             e.preventDefault();
             const userStr = localStorage.getItem('currentUser');
             if (!userStr) {
-                const modalEl = document.getElementById('loginRequiredModal');
-                if (modalEl) {
-                    const bsModal = new bootstrap.Modal(modalEl);
-                    bsModal.show();
-
-                    const loginForm = document.getElementById('modalLoginForm');
-                    if (loginForm) {
-                        loginForm.onsubmit = (subEvent) => {
-                            subEvent.preventDefault();
-                            subEvent.stopPropagation();
-                            loginForm.classList.add('was-validated');
-                            if (loginForm.checkValidity()) {
-                                const email = loginForm.querySelector('input[type="email"]').value;
-                                const pwd = loginForm.querySelector('input[type="password"]').value;
-                                const success = performLogin(email, pwd, false, (user) => {
-                                    // Custom redirect after success
-                                    window.location.href = `booking.html?id=${event.id}`;
-                                });
-
-                                if (success) {
-                                    const submitBtn = loginForm.querySelector('button[type="submit"]');
-                                    submitBtn.disabled = true;
-                                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
-                                } else {
-                                    loginForm.querySelector('input[type="password"]').value = '';
-                                    loginForm.classList.remove('was-validated');
-                                }
-                            }
-                        };
-                    }
-                } else {
-                    window.location.href = '../auth/login.html';
-                }
+                showEventLoginModal(event.id);
             } else {
                 window.location.href = `booking.html?id=${event.id}`;
             }
@@ -331,13 +329,20 @@ function setupPagination(events) {
         const end = start + itemsPerPage;
         const pageEvents = events.slice(start, end);
 
-        const eventsGrid = document.getElementById('events-grid');
-        if (eventsGrid) {
-            eventsGrid.innerHTML = pageEvents.map(e => createEventCard(e)).join('');
-            if (window.lucide) lucide.createIcons();
-        }
+        renderPaginatedEvents(pageEvents);
         renderControls(page);
     };
+
+    function renderPaginatedEvents(pageEvents) {
+        const eventsGrid = document.getElementById('events-grid');
+        if (eventsGrid) {
+            eventsGrid.innerHTML = '';
+            pageEvents.forEach(e => {
+                eventsGrid.appendChild(createEventCard(e));
+            });
+            if (window.initIcons) window.initIcons({ root: eventsGrid });
+        }
+    }
 
     const renderControls = (page) => {
         const totalPages = Math.ceil(events.length / itemsPerPage);
@@ -348,7 +353,7 @@ function setupPagination(events) {
         }
         html += `<button class="pagination-btn" data-page="${page + 1}" ${page === totalPages ? 'disabled' : ''}><i data-lucide="chevron-right" width="16" height="16"></i></button>`;
         paginationContainer.innerHTML = html;
-        if (window.lucide) lucide.createIcons();
+        if (window.initIcons) window.initIcons();
     };
 
     paginationContainer.addEventListener('click', (e) => {
@@ -490,4 +495,53 @@ function filterEvents(query) {
     }
 
     setupPagination(filtered);
+}
+
+function showEventLoginModal(eventId) {
+    let modalEl = document.getElementById('eventLoginModal');
+    if (!modalEl) {
+        modalEl = document.createElement('div');
+        modalEl.id = 'eventLoginModal';
+        modalEl.className = 'modal fade';
+        modalEl.tabIndex = -1;
+        modalEl.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-4 p-2">
+                    <div class="modal-header border-0 pb-0">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body pt-0 pb-4 px-4 text-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
+                            <i data-lucide="lock" width="32" height="32"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Login Required</h4>
+                        <p class="text-neutral-500 mb-4">Please login or enter your details to continue booking.</p>
+                        
+                        <div id="modal-login-form-container-events" class="text-start w-100"></div>
+                        <div class="text-center mt-3">
+                            <span class="text-neutral-400 small">New here? <a href="../auth/signup.html" onclick="sessionStorage.setItem('postLoginRedirect', window.location.href)" class="text-primary text-decoration-none fw-medium">Create an account</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalEl);
+        if (window.initIcons) window.initIcons();
+
+        import('../auth/auth.js').then(m => {
+            m.setupLoginForm('modal-login-form-container-events', true, {
+                action: (user) => {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    setTimeout(() => {
+                        const currentUrl = window.location.href;
+                        window.location.href = currentUrl;
+                    }, 2000); // Wait for the success modal animation
+                },
+                message: 'Redirecting you back...'
+            });
+        });
+    }
+
+    const bsModal = new window.bootstrap.Modal(modalEl);
+    bsModal.show();
 }

@@ -116,7 +116,6 @@
                     <a href="events.html" class="btn btn-text nav-link-btn text-neutral-900">Events</a>
                     <a href="../about/about.html" class="btn btn-text nav-link-btn text-neutral-900">About</a>
                     <a href="../about/contact.html" class="btn btn-text nav-link-btn text-neutral-900">Contact</a>
-
                 </div>
 
                 <div class="header-right">
@@ -462,7 +461,7 @@
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons();
+        if (window.initIcons) window.initIcons(); else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     </script>
     <script type="module" src="../../scripts/core/app.js"></script>
 </body>

@@ -112,8 +112,19 @@
       <div class="col-lg-5 d-none d-lg-block">
         <div class="rounded-4 overflow-hidden position-relative"
           style="position: sticky; top: 3rem; height: calc(100vh - 6rem);">
+          <!-- Overlay & Gradient -->
+          <div class="position-absolute inset-0 z-1"
+            style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.1) 100%); width: 100%; height: 100%;">
+          </div>
+
+          <!-- Brand Tagline -->
+          <div class="position-absolute bottom-0 start-0 p-5 z-2">
+            <h3 class="text-white fw-medium mb-0" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Discover events that
+              move you.</h3>
+          </div>
+
           <div id="organizerCarousel" class="carousel slide h-100" data-bs-ride="carousel">
-            <div class="carousel-indicators mb-4">
+            <div class="carousel-indicators mb-4 z-2">
               <button type="button" data-bs-target="#organizerCarousel" data-bs-slide-to="0" class="active"
                 aria-current="true" aria-label="Slide 1"></button>
               <button type="button" data-bs-target="#organizerCarousel" data-bs-slide-to="1"
@@ -135,12 +146,12 @@
                   alt="Organizer Visual 3">
               </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#organizerCarousel"
+            <button class="carousel-control-prev z-2" type="button" data-bs-target="#organizerCarousel"
               data-bs-slide="prev">
               <span class="carousel-control-prev-icon" aria-hidden="true"></span>
               <span class="visually-hidden">Previous</span>
             </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#organizerCarousel"
+            <button class="carousel-control-next z-2" type="button" data-bs-target="#organizerCarousel"
               data-bs-slide="next">
               <span class="carousel-control-next-icon" aria-hidden="true"></span>
               <span class="visually-hidden">Next</span>
@@ -150,12 +161,12 @@
       </div>
 
       <!-- Right Column: Form Panel -->
-      <div class="col-lg-7 d-flex flex-column justify-content-center">
+      <div class="col-12 col-lg-7 d-flex flex-column justify-content-center mx-auto">
         <div class="w-100 mx-auto" style="max-width: 600px;">
 
-          <!-- Brand Top Right -->
-          <div class="d-flex justify-content-end mb-4">
-            <a href="../../index.html" class="d-flex align-items-center gap-2 text-decoration-none">
+          <!-- Brand Placement -->
+          <div class="text-center mb-4">
+            <a href="../../index.html" class="d-inline-block text-decoration-none transition-scale">
               <img src="../../assets/logo.SVG" alt="SyncEvent" height="56">
             </a>
           </div>
@@ -208,42 +219,53 @@
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">First Name</label>
                     <input type="text" class="form-control" placeholder="John" required>
+                    <div class="invalid-feedback">First name is required.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Last Name</label>
                     <input type="text" class="form-control" placeholder="Doe" required>
+                    <div class="invalid-feedback">Last name is required.</div>
                   </div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Organization Name</label>
                     <input type="text" class="form-control" placeholder="Acme Events" required>
+                    <div class="invalid-feedback">Organization name is required.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Work Email</label>
                     <input type="email" class="form-control" placeholder="john@acme.com" required
                       pattern="[^@\s]+@[^@\s]+\.[^@\s]+">
+                    <div class="invalid-feedback">Please provide a valid email.</div>
                   </div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Password</label>
-                    <div class="input-group has-validation">
-                      <input type="password" class="form-control" placeholder="••••••••" required minlength="6">
+                    <div class="input-group has-validation mb-1">
+                      <input type="password" class="form-control" placeholder="••••••••" required minlength="6"
+                        pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{6,}"
+                        title="Must be at least 6 characters, contain 1 uppercase, 1 lowercase, 1 number, and 1 special character">
                       <span class="input-group-text bg-white border-start-0 text-neutral-400 toggle-password"
                         style="cursor: pointer">
                         <i data-lucide="eye-off"></i>
                       </span>
+                      <div class="invalid-feedback">Must have 1 uppercase, 1 lowercase, 1 number, 1 special char, & min
+                        6 chars.</div>
                     </div>
+                    <div class="form-text small text-neutral-500 mt-0" style="font-size: 0.75rem;">Requires 1 uppercase,
+                      1 lowercase, 1 number, 1 special character, min 6 length.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Confirm Password</label>
-                    <div class="input-group has-validation">
+                    <div class="input-group has-validation mb-1">
                       <input type="password" class="form-control" placeholder="••••••••" required minlength="6">
                       <span class="input-group-text bg-white border-start-0 text-neutral-400 toggle-password"
                         style="cursor: pointer">
                         <i data-lucide="eye-off"></i>
                       </span>
+                      <div class="invalid-feedback">Passwords must match.</div>
                     </div>
                   </div>
                 </div>
@@ -251,9 +273,11 @@
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="termsOrg" required>
                     <label class="form-check-label text-neutral-900" for="termsOrg">
-                      I agree to all the <a href="#" class="text-danger text-decoration-none fw-medium">Terms</a> and <a
-                        href="#" class="text-danger text-decoration-none fw-medium">Privacy Policies</a>
+                      I agree to all the <a href="#" class="text-decoration-none fw-medium"
+                        style="color: #0000FF;">Terms</a> and <a href="#" class="text-decoration-none fw-medium"
+                        style="color: #0000FF;">Privacy Policies</a>
                     </label>
+                    <div class="invalid-feedback">You must agree to the terms.</div>
                   </div>
                 </div>
                 <button type="button" class="btn btn-primary w-100 rounded-pill mb-4" id="orgBtnNext1">
@@ -277,6 +301,7 @@
                       <option>Non-Profit</option>
                       <option>Educational</option>
                     </select>
+                    <div class="invalid-feedback">Please select a type.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900">Industry</label>
@@ -286,36 +311,43 @@
                       <option>Entertainment</option>
                       <option>Education</option>
                     </select>
+                    <div class="invalid-feedback">Please select an industry.</div>
                   </div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Organization Size</label>
                     <select class="form-select bg-neutral-50 text-neutral-900" required>
-                      <option selected>1-10 Employees</option>
+                      <option value="" selected disabled>Select Size</option>
+                      <option>1-10 Employees</option>
                       <option>11-50 Employees</option>
                       <option>50+ Employees</option>
                     </select>
+                    <div class="invalid-feedback">Please select a size.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Website URL</label>
                     <input type="url" class="form-control bg-neutral-50" placeholder="https://" required>
+                    <div class="invalid-feedback">Valid URL required.</div>
                   </div>
                 </div>
                 <div class="row g-3 mb-3">
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">Country</label>
                     <input type="text" class="form-control bg-neutral-50" placeholder="India" required>
+                    <div class="invalid-feedback">Country is required.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label fw-medium text-neutral-900 small">City</label>
                     <input type="text" class="form-control bg-neutral-50" placeholder="Coimbatore" required>
+                    <div class="invalid-feedback">City is required.</div>
                   </div>
                 </div>
                 <div class="mb-4">
                   <label class="form-label fw-medium text-neutral-900 small">Organization Description</label>
                   <textarea class="form-control bg-neutral-50" rows="3" placeholder="Tell us about your organization..."
                     required></textarea>
+                  <div class="invalid-feedback">Description is required.</div>
                 </div>
                 <div class="d-flex gap-3">
                   <button type="button"
@@ -332,6 +364,7 @@
                   <div class="mb-3">
                     <label class="form-label fw-medium text-neutral-900 small">Official Phone Number</label>
                     <input type="tel" class="form-control bg-neutral-50" placeholder="+91 98765 43210" required>
+                    <div class="invalid-feedback">Valid phone number required.</div>
                   </div>
                   <div class="mb-3">
                     <label class="form-label fw-medium text-neutral-900 small">Business Registration Document</label>
@@ -342,6 +375,7 @@
                         <i data-lucide="upload-cloud" class="text-primary mb-2" width="24" height="24"></i>
                         <p class="small text-neutral-400 mb-0">Click or drag to upload</p>
                       </div>
+                      <div class="invalid-feedback">This document is required.</div>
                     </div>
                   </div>
                   <div class="mb-3">
@@ -353,6 +387,7 @@
                         <i data-lucide="file-text" class="text-primary mb-2" width="24" height="24"></i>
                         <p class="small text-neutral-400 mb-0">Click or drag to upload</p>
                       </div>
+                      <div class="invalid-feedback">Tax ID document is required.</div>
                     </div>
                   </div>
                 </div>
@@ -367,18 +402,21 @@
                         <i data-lucide="user-check" class="text-primary mb-2" width="24" height="24"></i>
                         <p class="small text-neutral-400 mb-0">Click or drag to upload</p>
                       </div>
+                      <div class="invalid-feedback">Government ID is required.</div>
                     </div>
                   </div>
                   <div class="mb-3">
                     <label class="form-label fw-medium text-neutral-900 small">LinkedIn Profile URL</label>
                     <input type="url" class="form-control bg-neutral-50" placeholder="https://linkedin.com/in/..."
                       required>
+                    <div class="invalid-feedback">Valid LinkedIn URL required.</div>
                   </div>
                   <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="confirmDetails" required>
                     <label class="form-check-label small text-neutral-500" for="confirmDetails">
                       I confirm all details provided are accurate
                     </label>
+                    <div class="invalid-feedback">You must confirm accuracy.</div>
                   </div>
                 </div>
                 <div class="d-flex gap-3">

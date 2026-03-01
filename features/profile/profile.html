@@ -592,6 +592,146 @@
         </div>
     </div>
 
+    <!-- Registration Details Modal -->
+    <div class="modal fade" id="registrationDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Header Component -->
+                <div class="modal-header border-0 bg-neutral-900 text-white p-4">
+                    <div>
+                        <span class="badge bg-white text-neutral-900 mb-2" id="reg-modal-status">CONFIRMED</span>
+                        <h4 class="modal-title fw-bold mb-1" id="reg-modal-event">Tech Conference 2025</h4>
+                        <p class="mb-0 text-neutral-300 small">Booking ID: <span id="reg-modal-id">#BK-123456</span></p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white align-self-start" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <!-- Body Information -->
+                <div class="modal-body p-4 bg-neutral-50">
+                    <div class="row g-4">
+                        <!-- Left Data -->
+                        <div class="col-md-7">
+                            <div class="bg-white p-4 rounded-4 shadow-sm h-100 border border-neutral-100">
+                                <h6 class="fw-bold mb-4">Event Details</h6>
+                                <div class="d-flex align-items-start gap-3 mb-3">
+                                    <div class="bg-primary text-white rounded p-2"><i data-lucide="calendar"
+                                            width="18"></i></div>
+                                    <div>
+                                        <div class="small text-neutral-400 fw-medium">Date & Time</div>
+                                        <div class="text-neutral-900 fw-medium" id="reg-modal-date">March 15, 2025 |
+                                            09:00 AM</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-start gap-3 mb-3">
+                                    <div class="bg-primary text-white rounded p-2"><i data-lucide="map-pin"
+                                            width="18"></i></div>
+                                    <div>
+                                        <div class="small text-neutral-400 fw-medium">Venue</div>
+                                        <div class="text-neutral-900 fw-medium" id="reg-modal-venue">Chennai Trade
+                                            Centre</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="bg-primary text-white rounded p-2"><i data-lucide="ticket"
+                                            width="18"></i></div>
+                                    <div>
+                                        <div class="small text-neutral-400 fw-medium">Ticket Type</div>
+                                        <div class="text-neutral-900 fw-medium" id="reg-modal-ticket-type">VIP Pass (2x)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Right Pass/QR -->
+                        <div class="col-md-5">
+                            <div
+                                class="bg-white p-4 rounded-4 shadow-sm h-100 border border-neutral-100 d-flex flex-column align-items-center justify-content-center text-center">
+                                <div class="mb-3 p-3 bg-white border border-neutral-200 rounded-3 d-inline-block">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=BK-123456"
+                                        alt="QR Code" class="img-fluid" id="reg-modal-qr">
+                                </div>
+                                <p class="small text-neutral-500 mb-0">Show this QR code at the entrance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Footer -->
+                <div class="modal-footer border-0 p-4 bg-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small text-neutral-500">Total Paid</div>
+                        <h5 class="fw-bold text-neutral-900 mb-0" id="reg-modal-amount">₹4,999</h5>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-dark rounded-pill"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary rounded-pill d-flex align-items-center gap-2"
+                            id="btn-download-ticket">
+                            <i data-lucide="download" width="18"></i> Download Ticket
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div class="modal fade" id="paymentDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-neutral-50 p-4 border-bottom border-neutral-200">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1">Payment Receipt</h5>
+                        <p class="mb-0 text-neutral-500 small">Transaction ID: <span
+                                id="pay-modal-id">#TXN-789012</span></p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 bg-white">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex bg-success-subtle text-success p-3 rounded-circle mb-3">
+                            <i data-lucide="check-circle" width="32"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1" id="pay-modal-amount">₹4,999</h3>
+                        <span class="badge bg-success bg-opacity-10 text-success fw-medium px-3 py-1"
+                            id="pay-modal-status">SUCCESSFUL</span>
+                    </div>
+
+                    <div class="bg-neutral-50 rounded-4 p-4 border border-neutral-100">
+                        <div class="d-flex justify-content-between mb-3 border-bottom border-neutral-200 pb-3">
+                            <span class="text-neutral-500">Date</span>
+                            <span class="fw-medium text-neutral-900" id="pay-modal-date">March 10, 2025</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 border-bottom border-neutral-200 pb-3">
+                            <span class="text-neutral-500">Event</span>
+                            <span class="fw-medium text-neutral-900 text-end" style="max-width: 200px;"
+                                id="pay-modal-event">Tech Conference 2025</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 border-bottom border-neutral-200 pb-3">
+                            <span class="text-neutral-500">Payment Method</span>
+                            <span class="fw-medium text-neutral-900 d-flex align-items-center gap-2">
+                                <i data-lucide="credit-card" width="16" class="text-neutral-400"></i>
+                                <span id="pay-modal-method">Card ending in 4242</span>
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-neutral-500">Booking ID</span>
+                            <span class="fw-medium text-neutral-900" id="pay-modal-booking">#BK-123456</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-white d-flex flex-column gap-2">
+                    <button type="button"
+                        class="btn btn-primary rounded-pill w-100 d-flex justify-content-center align-items-center gap-2"
+                        id="btn-download-invoice">
+                        <i data-lucide="file-text" width="18"></i> Download Invoice
+                    </button>
+                    <button type="button" class="btn btn-outline-dark rounded-pill w-100"
+                        data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script type="module" src="../../scripts/core/app.js"></script>

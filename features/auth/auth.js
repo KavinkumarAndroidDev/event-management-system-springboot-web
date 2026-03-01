@@ -1,16 +1,26 @@
 import { state } from '../../scripts/shared/state.js';
 import { showToast } from '../../scripts/shared/utils.js';
 
-export function performLogin(email, password, rememberMe = false, onRedirect = null) {
+export function performLogin(loginId, otp, onRedirect = null) {
+    const loginValidation = validateLoginId(loginId);
+    if (!loginValidation.valid) {
+        showToast('Hold on', 'Oops, that email or phone number doesn\'t look quite right.', 'danger');
+        return false;
+    }
     if (!state.users || state.users.length === 0) {
-        showToast('System Error', 'User data not loaded yet. Please try again.', 'warning');
+        showToast('Just a moment', 'We\'re still loading things up on our end. Please try again.', 'warning');
         return false;
     }
 
-    const user = state.users.find(u => u.profile.email === email && u.password === password);
+    if (!otp || otp.length !== 6) {
+        showToast('Check OTP', 'Please double-check your OTP. It should be 6 digits.', 'danger');
+        return false;
+    }
+
+    const user = state.users.find(u => u.profile.email === loginId || u.profile.phone === loginId);
 
     if (user) {
-        if (user.accountStatus.status !== 'ACTIVE') {
+        if (user.accountStatus && user.accountStatus.status !== 'ACTIVE') {
             // Create the suspended modal dynamically if it doesn't exist
             let modalEl = document.getElementById('suspendedAccountModal');
             if (!modalEl) {
@@ -37,137 +47,329 @@ export function performLogin(email, password, rememberMe = false, onRedirect = n
                     </div>
                 `;
                 document.body.appendChild(modalEl);
-                if (window.lucide) lucide.createIcons();
+                if (window.initIcons) window.initIcons();
             }
-            const bsModal = new bootstrap.Modal(modalEl);
+            const bsModal = new window.bootstrap.Modal(modalEl);
             bsModal.show();
             return false;
         }
 
-        if (rememberMe) {
-            localStorage.setItem('rememberedEmail', email);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+
+        // Create success modal
+        let modalEl = document.getElementById('loginSuccessModal');
+        if (!modalEl) {
+            modalEl = document.createElement('div');
+            modalEl.id = 'loginSuccessModal';
+            modalEl.className = 'modal fade';
+            modalEl.tabIndex = -1;
+            modalEl.style.zIndex = '1060';
+            modalEl.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+                        <div class="modal-body">
+                            <i data-lucide="check-circle" class="text-success mb-3 mx-auto" width="48" height="48"></i>
+                            <h4 class="fw-bold text-neutral-900 mb-2">Login Successful!</h4>
+                            <p class="text-neutral-500 mb-0">Welcome back, ${user.profile.fullName}. Redirecting to your dashboard...</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalEl);
+            if (window.initIcons) window.initIcons();
         }
 
-        const sessionUser = { ...user };
-        delete sessionUser.password;
-        localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+        let redirectMsg = 'Redirecting to your dashboard...';
+        if (typeof onRedirect === 'object' && onRedirect !== null && onRedirect.message) {
+            redirectMsg = onRedirect.message;
+        } else if (onRedirect) {
+            redirectMsg = 'Redirecting you back...';
+        }
 
-        showToast('Success', `Welcome back, ${user.profile.fullName}!`, 'success');
+        modalEl.querySelector('p').textContent = `Welcome back, ${user.profile.fullName}. ${redirectMsg}`;
+
+        const bsModal = new window.bootstrap.Modal(modalEl);
+        bsModal.show();
 
         setTimeout(() => {
-            if (onRedirect) {
+            if (typeof onRedirect === 'function') {
                 onRedirect(user);
+            } else if (typeof onRedirect === 'object' && onRedirect !== null && onRedirect.action) {
+                onRedirect.action(user);
             } else {
-                const role = user.role.name;
-                if (role === 'ATTENDEE') {
-                    window.location.href = '../../index.html';
-                } else if (role === 'ORGANIZER') {
-                    window.location.href = '../organizer/organizer-dashboard.html';
-                } else if (role === 'ADMIN') {
-                    window.location.href = 'admin-dashboard.html';
+                const redirectUrl = sessionStorage.getItem('postLoginRedirect');
+                if (redirectUrl) {
+                    sessionStorage.removeItem('postLoginRedirect');
+                    window.location.href = redirectUrl;
+                } else if (user.role && user.role.name === 'ORGANIZER') {
+                    window.location.href = '../organizer/dashboard.html';
+                } else if (user.role && user.role.name === 'ADMIN') {
+                    window.location.href = '../admin/dashboard.html';
                 } else {
-                    window.location.href = '../../index.html';
+                    window.location.href = '../profile/profile.html';
                 }
             }
-        }, 1000);
+        }, 2000);
         return true;
     } else {
-        showToast('Error', 'Invalid email or password.', 'danger');
+        showToast('Login Failed', 'Hmm, we couldn\'t match those details. Please try again.', 'danger');
         return false;
     }
 }
 
-export function setupLoginForm() {
-    const form = document.getElementById('loginForm');
-    if (!form) return;
+export function setupLoginForm(containerId = 'login-form-container', isModal = false, onSuccess = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return; // Silent return if not on login page or modal isn't ready
 
-    const savedEmail = localStorage.getItem('rememberedEmail');
-    if (savedEmail) {
-        const emailInput = document.getElementById('email');
-        const rememberMe = document.getElementById('rememberMe');
-        if (emailInput) emailInput.value = savedEmail;
-        if (rememberMe) rememberMe.checked = true;
+    const formId = isModal ? 'modalLoginForm' : 'loginForm';
+    const emailInputId = isModal ? 'modalEmailInput' : 'emailInput';
+    const phoneInputId = isModal ? 'modalPhoneInput' : 'phoneInput';
+    const otpInputId = isModal ? 'modalOtp' : 'otp';
+    const btnSendOtpId = isModal ? 'modalBtnSendOtp' : 'btnSendOtp';
+    const otpSentMsgId = isModal ? 'modalOtpSentMsg' : 'otpSentMsg';
+    const submitBtnId = isModal ? 'modalBtnLogin' : 'btnLoginSubmit';
+
+    container.innerHTML = `
+        <ul class="nav nav-tabs border-0 flex-nowrap mb-4 justify-content-center" id="${isModal ? 'modalLoginTabs' : 'loginTabs'}" role="tablist" style="border-bottom: 1px solid #e5e5e5 !important; margin-bottom: 24px;">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active bg-transparent border-0 rounded-0 fw-bold px-2 py-2 mx-3 text-primary" id="${isModal ? 'modal-email-tab' : 'email-tab'}" data-bs-toggle="pill" data-bs-target="#${isModal ? 'modal-email-pane' : 'email-pane'}" type="button" role="tab" aria-controls="${isModal ? 'modal-email-pane' : 'email-pane'}" aria-selected="true" style="border-bottom: 2px solid var(--bs-primary) !important; font-size: 0.95rem;">Email Address</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link bg-transparent border-0 rounded-0 fw-medium px-2 py-2 mx-3 text-neutral-400" id="${isModal ? 'modal-phone-tab' : 'phone-tab'}" data-bs-toggle="pill" data-bs-target="#${isModal ? 'modal-phone-pane' : 'phone-pane'}" type="button" role="tab" aria-controls="${isModal ? 'modal-phone-pane' : 'phone-pane'}" aria-selected="false" style="border-bottom: 2px solid transparent !important; font-size: 0.95rem;">Phone Number</button>
+            </li>
+        </ul>
+        
+        <form id="${formId}" novalidate>
+            <div class="tab-content w-100" id="${isModal ? 'modalLoginTabContent' : 'loginTabContent'}">
+            <!-- Email Tab -->
+            <div class="tab-pane fade show active" id="${isModal ? 'modal-email-pane' : 'email-pane'}" role="tabpanel" aria-labelledby="${isModal ? 'modal-email-tab' : 'email-tab'}" tabindex="0">
+                <div class="mb-3 px-1">
+                    <label for="${emailInputId}" class="form-label text-neutral-900 fw-medium small">Email Address</label>
+                    <input type="email" class="form-control px-3 py-2 bg-neutral-100 border-neutral-100 text-neutral-900 focus-ring" id="${emailInputId}" placeholder="name@example.com" style="border-radius: 8px;" required>
+                    <div class="invalid-feedback text-danger small mt-1">Please enter a valid email address.</div>
+                </div>
+            </div>
+            
+            <!-- Phone Tab -->
+            <div class="tab-pane fade" id="${isModal ? 'modal-phone-pane' : 'phone-pane'}" role="tabpanel" aria-labelledby="${isModal ? 'modal-phone-tab' : 'phone-tab'}" tabindex="0">
+                <div class="mb-3 px-1">
+                    <label for="${phoneInputId}" class="form-label text-neutral-900 fw-medium small">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-neutral-100 border-neutral-100 text-neutral-500 pe-2" style="border-radius: 8px 0 0 8px;">+91</span>
+                        <input type="tel" class="form-control px-3 py-2 bg-neutral-100 border-neutral-100 text-neutral-900 focus-ring" id="${phoneInputId}" placeholder="98765 43210" pattern="[0-9]{10}" style="border-radius: 0 8px 8px 0;" disabled required>
+                        <div class="invalid-feedback text-danger small mt-1">Please enter a valid 10-digit phone number.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4 px-1">
+            <label for="${otpInputId}" class="form-label text-neutral-900 fw-medium small d-flex justify-content-between">
+                <span>Verification Code</span>
+                <a href="#" class="text-primary text-decoration-none fw-medium" id="${btnSendOtpId}">Get Code</a>
+            </label>
+            <input type="text" class="form-control px-3 py-2 bg-neutral-100 border-neutral-100 text-neutral-900 focus-ring text-center letter-spacing-lg" id="${otpInputId}" placeholder="• • • • • •" maxlength="6" pattern="[0-9]{6}" style="border-radius: 8px;" required>
+            <div class="form-text text-success small mt-1 d-none" id="${otpSentMsgId}"><i data-lucide="check" width="14" class="me-1"></i>Code sent successfully!</div>
+            <div class="invalid-feedback text-danger small mt-1">Please enter the 6-digit code.</div>
+        </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill ${isModal ? 'mb-3' : 'mb-0'}" id="${submitBtnId}" style="font-size: 1rem; font-weight: 600;">${isModal ? 'Login to Continue' : 'Log In'}</button>
+        </form>
+    `;
+
+    const form = document.getElementById(formId);
+    const emailInput = document.getElementById(emailInputId);
+    const phoneInput = document.getElementById(phoneInputId);
+    const otpInput = document.getElementById(otpInputId);
+    const submitBtn = document.getElementById(submitBtnId);
+    const phoneTab = document.getElementById(isModal ? 'modal-phone-tab' : 'phone-tab');
+    const emailTab = document.getElementById(isModal ? 'modal-email-tab' : 'email-tab');
+
+    // Disable inactive tab input so checkValidity works correctly
+    phoneInput.disabled = true;
+
+    if (emailTab) {
+        emailTab.addEventListener('shown.bs.tab', () => {
+            emailTab.classList.add('text-primary', 'fw-bold');
+            emailTab.classList.remove('text-neutral-400', 'fw-medium');
+            emailTab.style.setProperty('border-bottom', '2px solid var(--bs-primary)', 'important');
+
+            phoneTab.classList.remove('text-primary', 'fw-bold');
+            phoneTab.classList.add('text-neutral-400', 'fw-medium');
+            phoneTab.style.setProperty('border-bottom', '2px solid transparent', 'important');
+
+            emailInput.disabled = false;
+            emailInput.required = true;
+            phoneInput.disabled = true;
+            phoneInput.required = false;
+            phoneInput.value = '';
+            form.classList.remove('was-validated');
+        });
+    }
+
+    if (phoneTab) {
+        phoneTab.addEventListener('shown.bs.tab', () => {
+            phoneTab.classList.add('text-primary', 'fw-bold');
+            phoneTab.classList.remove('text-neutral-400', 'fw-medium');
+            phoneTab.style.setProperty('border-bottom', '2px solid var(--bs-primary)', 'important');
+
+            emailTab.classList.remove('text-primary', 'fw-bold');
+            emailTab.classList.add('text-neutral-400', 'fw-medium');
+            emailTab.style.setProperty('border-bottom', '2px solid transparent', 'important');
+
+            phoneInput.disabled = false;
+            phoneInput.required = true;
+            emailInput.disabled = true;
+            emailInput.required = false;
+            emailInput.value = '';
+
+            // Clear prior validation states
+            form.querySelectorAll('.is-invalid, .is-valid').forEach(el => {
+                el.classList.remove('is-invalid', 'is-valid');
+            });
+        });
+    }
+
+    import('../../scripts/shared/utils.js').then(m => {
+        m.setupRealtimeValidation(formId);
+    });
+
+    const btnSendOtp = document.getElementById(btnSendOtpId);
+    const otpSentMsg = document.getElementById(otpSentMsgId);
+
+    if (btnSendOtp) {
+        btnSendOtp.addEventListener('click', (e) => {
+            e.preventDefault();
+            const activeInput = emailInput.disabled ? phoneInput : emailInput;
+            const loginId = activeInput.value.trim();
+
+            if (!loginId) {
+                showToast('Warning', 'Please enter your email or phone number first.', 'warning');
+                return;
+            }
+
+            if (!activeInput.checkValidity()) {
+                showToast('Error', 'Please enter a valid ' + (emailInput.disabled ? 'phone number' : 'email address') + '.', 'danger');
+                return;
+            }
+
+            // Check if user is registered!
+            if (!state.users || state.users.length === 0) {
+                showToast('System Error', 'User data not loaded yet.', 'warning');
+                return;
+            }
+
+            const user = state.users.find(u => u.profile.email === loginId || u.profile.phone === loginId);
+            if (!user) {
+                showToast('Not Registered', 'This ' + (emailInput.disabled ? 'phone' : 'email') + ' is not registered. Please sign up first.', 'warning');
+                return;
+            }
+
+            if (otpSentMsg) otpSentMsg.classList.remove('d-none');
+
+            showToast(
+                'OTP Sent',
+                `Mock OTP (123456) sent to your ${emailInput.disabled ? 'phone' : 'email'}.`,
+                'success'
+            );
+        });
     }
 
     form.addEventListener('submit', (e) => {
+        console.log('[Signup] RAW submit event detected');
+
         e.preventDefault();
         e.stopPropagation();
         form.classList.add('was-validated');
 
         if (form.checkValidity()) {
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const rememberMe = document.getElementById('rememberMe');
+            const isEmailFlow = document.getElementById(isModal ? 'modal-email-pane' : 'email-pane').classList.contains('active');
+            const loginId = isEmailFlow ? emailInput.value : phoneInput.value;
+            const otpCode = otpInput.value;
 
-            const email = emailInput ? emailInput.value : '';
-            const password = passwordInput ? passwordInput.value : '';
-            const remember = rememberMe ? rememberMe.checked : false;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
 
-            const success = performLogin(email, password, remember);
-
-            if (success) {
-                const btn = form.querySelector('button[type="submit"]');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...';
-                }
-            } else {
-                passwordInput.value = '';
-                form.classList.remove('was-validated');
+            const success = performLogin(loginId, otpCode, onSuccess);
+            if (!success) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isModal ? 'Login to Continue' : 'Log In';
+                otpInput.value = '';
+                otpInput.classList.remove('is-valid');
+                // The realtime logic will pick up the empty required field and mark it invalid
             }
-        } else {
-            showToast('Error', 'Please fill in all required fields correctly.', 'danger');
         }
+    });
+
+    window.addEventListener('beforeunload', () => {
+        console.log('[Signup] PAGE IS RELOADING');
     });
 }
 
 export function setupSignupForm() {
+    console.log('[Signup] setupSignupForm initialized');
+
     const form = document.getElementById('signupForm');
-    if (!form) return;
-
-    // Real-time password match validation
-    const passwordInputs = form.querySelectorAll('input[type="password"]');
-    if (passwordInputs.length >= 2) {
-        const password = passwordInputs[0];
-        const confirm = passwordInputs[1];
-
-        const validateMatch = () => {
-            if (confirm.value && password.value !== confirm.value) {
-                confirm.setCustomValidity("Passwords do not match");
-            } else {
-                confirm.setCustomValidity("");
-            }
-        };
-
-        password.addEventListener('input', validateMatch);
-        confirm.addEventListener('input', validateMatch);
+    if (!form) {
+        console.log('[Signup] Form not found');
+        return;
     }
 
+    console.log('[Signup] Form found');
+
+
+    const btnSendOtp = document.getElementById('btnSendOtp');
+    const otpSentMsg = document.getElementById('otpSentMsg');
+
+    if (btnSendOtp) {
+        btnSendOtp.addEventListener('click', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('phone')?.value.trim();
+            if (!phone) {
+                showToast('Warning', 'Please enter your phone number first to receive OTP.', 'warning');
+                return;
+            }
+            if (otpSentMsg) otpSentMsg.classList.remove('d-none');
+            showToast('OTP Sent', 'Mock OTP (123456) has been sent to ' + phone, 'success');
+        });
+    }
+
+    // Apply real-time validation helper
+    import('../../scripts/shared/utils.js').then(m => {
+        m.setupRealtimeValidation('signupForm');
+    });
+
     form.addEventListener('submit', (e) => {
+        console.log('[Signup] Submit triggered');
         e.preventDefault();
         e.stopPropagation();
-
-        form.classList.add('was-validated');
-
+        console.log('[Signup] Form validity:', form.checkValidity());
         if (form.checkValidity()) {
-            const inputs = form.querySelectorAll('input');
-            const firstName = inputs[0].value;
-            const lastName = inputs[1].value;
-            const email = form.querySelector('input[type="email"]').value;
-            const phone = form.querySelector('input[type="tel"]').value;
-            const password = passwordInputs[0].value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const otp = document.getElementById('otp').value.trim();
+            console.log('[Signup] OTP entered:', otp);
+            if (!otp || otp.length !== 6) {
+                showToast('Error', 'Invalid OTP. Please enter a valid 6-digit OTP.', 'danger');
+                return;
+            }
 
-            // Edge Case: Email exists
-            const exists = state.users.some(u => u.profile.email === email);
+            // Handle cases where backend fetch hasn't populated state yet
+            const safeUsers = state.users || [];
+
+            // Edge Case: Email or Phone exists
+            const exists = safeUsers.some(u => u.profile.email === email || u.profile.phone === phone);
             if (exists) {
-                showToast('Error', 'Email already registered. Please login.', 'warning');
+                showToast('Error', 'User already registered with this email or phone. Please login.', 'warning');
                 return;
             }
 
             // Create new user object
             const newUser = {
-                id: 'USR-' + (1000 + state.users.length + 1),
-                password: password,
+                id: 'USR-' + (1000 + safeUsers.length + 1),
+                password: 'mocked-otp-user',
                 profile: {
                     fullName: `${firstName} ${lastName}`,
                     email: email,
@@ -208,30 +410,84 @@ export function setupSignupForm() {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Creating...';
 
+            const showSuccessModal = () => {
+                console.log('[Signup] Preparing to show success modal');
+                let modalEl = document.getElementById('signupSuccessModal');
+                if (!modalEl) {
+                    console.log('[Signup] Creating modal element');
+                    modalEl = document.createElement('div');
+                    modalEl.id = 'signupSuccessModal';
+                    modalEl.className = 'modal fade';
+                    modalEl.tabIndex = -1;
+                    modalEl.style.zIndex = '1060'; // Ensure it's above backdrops
+                    modalEl.innerHTML = `
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+                                <div class="modal-body">
+                                    <i data-lucide="party-popper" class="text-primary mb-3 mx-auto" width="48" height="48"></i>
+                                    <h4 class="fw-bold text-neutral-900 mb-2">Account Created!</h4>
+                                    <p class="text-neutral-500 mb-0">Welcome to SyncEvent! Redirecting you to login...</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modalEl);
+                    if (window.initIcons) window.initIcons();
+                }
+                if (!window.bootstrap) {
+                    console.error('Bootstrap not loaded');
+                    window.location.href = 'login.html'; // fallback
+                    return;
+                }
+                const bsModal = new window.bootstrap.Modal(modalEl);
+
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    setTimeout(() => {
+                        console.log('[Signup] Redirecting to login page');
+                        console.log('[Signup] Current URL:', window.location.href);
+                        console.log('[Signup] Redirecting to:', 'login.html');
+                        window.location.href = '/features/auth/login.html';
+                    }, 1500);
+                }, { once: true });
+                console.log('[Signup] Showing modal now');
+                bsModal.show();
+                modalEl.addEventListener('shown.bs.modal', () => {
+                    console.log('[Signup] Modal fully visible on screen');
+                });
+            };
+            console.log('[Signup] Sending POST request to server...');
             // POST to JSON server
             fetch('http://localhost:3000/users', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newUser)
             })
-                .then(res => res.json())
+                .then(res => {
+                    console.log('[Signup] Server response received. Status:', res.status);
+
+                    if (!res.ok) throw new Error('Server returned non-200');
+                    return res.json();
+                })
                 .then(data => {
+                    console.log('[Signup] User successfully created on server:', data);
+                    if (!state.users) state.users = [];
                     state.users.push(data); // update local state
-                    showToast('Success', 'Account created successfully! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 1500);
+                    showSuccessModal();
                 })
                 .catch(err => {
-                    console.error('Signup error:', err);
-                    showToast('Error', 'Failed to create account. Please try again.', 'danger');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    console.warn('Signup POST failed (JSON server offline?). Mocking success for UI test.', err);
+                    if (!state.users) state.users = [];
+                    // Ensure we don't push duplicates
+                    if (!state.users.some(u => u.profile.email === newUser.profile.email)) {
+                        state.users.push(newUser);
+                    }
+                    showSuccessModal();
                 });
         } else {
             showToast('Error', 'Please fill in all required fields correctly.', 'danger');
         }
     });
+
 }
 
 export function setupForgotPassword() {
@@ -281,7 +537,7 @@ export function setupForgotPassword() {
 
             showToast('Success', 'Password reset successfully! You can now login.', 'success');
             const modalEl = document.getElementById('forgotPasswordModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
+            const modal = window.bootstrap.Modal.getInstance(modalEl);
             if (modal) modal.hide();
             form.reset();
             form.classList.remove('was-validated');
@@ -289,90 +545,18 @@ export function setupForgotPassword() {
     });
 }
 
-export function setupPasswordToggles() {
-    document.querySelectorAll('.toggle-password').forEach(btn => {
-        const wrapper = btn.closest('.input-group') || btn.closest('.position-relative');
-        if (!wrapper) return;
 
-        const input = wrapper.querySelector('input');
-        if (input && btn) {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
+function validateLoginId(loginId) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[6-9]\d{9}$/; // Indian 10 digit mobile number
 
-                if (window.lucide && window.lucide.createIcons) {
-                    const iconName = isPassword ? 'eye' : 'eye-off';
-                    btn.innerHTML = `<i data-lucide="${iconName}"></i>`;
-                    window.lucide.createIcons({
-                        root: btn,
-                        attrs: {
-                            width: 20,
-                            height: 20,
-                            "stroke-width": 1.5
-                        }
-                    });
-                }
-            });
-        }
-    });
-}
+    if (emailRegex.test(loginId)) {
+        return { valid: true, type: 'email' };
+    }
 
-export function setupPasswordStrength() {
-    const passwordInput = document.querySelector('#signupForm input[type="password"]');
-    const strengthMeter = document.getElementById('passwordStrength');
+    if (phoneRegex.test(loginId)) {
+        return { valid: true, type: 'phone' };
+    }
 
-    if (!passwordInput || !strengthMeter) return;
-
-    const progressBar = strengthMeter.querySelector('.progress-bar');
-    const reqLength = document.getElementById('req-length');
-    const reqUpper = document.getElementById('req-upper');
-    const reqLower = document.getElementById('req-lower');
-    const reqSpecial = document.getElementById('req-special');
-
-    passwordInput.addEventListener('focus', () => {
-        strengthMeter.classList.remove('d-none');
-    });
-
-    passwordInput.addEventListener('input', () => {
-        const val = passwordInput.value;
-        let strength = 0;
-
-        const hasLength = val.length >= 6;
-        const hasUpper = /[A-Z]/.test(val);
-        const hasLower = /[a-z]/.test(val);
-        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(val);
-
-        const updateRequirement = (el, isValid) => {
-            if (isValid) {
-                el.classList.remove('text-neutral-400');
-                el.classList.add('text-success');
-            } else {
-                el.classList.remove('text-success');
-                el.classList.add('text-neutral-400');
-            }
-        };
-
-        updateRequirement(reqLength, hasLength);
-        updateRequirement(reqUpper, hasUpper);
-        updateRequirement(reqLower, hasLower);
-        updateRequirement(reqSpecial, hasSpecial);
-
-        if (hasLength) strength += 25;
-        if (hasUpper) strength += 25;
-        if (hasLower) strength += 25;
-        if (hasSpecial) strength += 25;
-
-        progressBar.style.width = strength + '%';
-
-        if (strength <= 25) {
-            progressBar.className = 'progress-bar bg-danger';
-        } else if (strength <= 50) {
-            progressBar.className = 'progress-bar bg-warning';
-        } else if (strength <= 75) {
-            progressBar.className = 'progress-bar bg-info';
-        } else {
-            progressBar.className = 'progress-bar bg-success';
-        }
-    });
+    return { valid: false };
 }

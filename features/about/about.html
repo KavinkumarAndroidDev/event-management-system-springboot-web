@@ -448,7 +448,7 @@
 
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
-    lucide.createIcons();
+    if (window.initIcons) window.initIcons(); else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
   </script>
   <script type="module" src="../../scripts/core/app.js"></script>
 

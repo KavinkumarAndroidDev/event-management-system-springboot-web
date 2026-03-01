@@ -12758,26 +12758,6 @@ h4, .h4 {
   background: #ffffff;
 }
 
-.header-inner {
-  min-height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.header-left,
-.header-center,
-.header-right,
-.auth-state {
-  display: flex;
-  align-items: center;
-}
-
-.header-left {
-  gap: 0.5rem;
-}
-
 .brand {
   display: inline-flex;
   align-items: center;
@@ -12791,18 +12771,9 @@ h4, .h4 {
   height: auto;
 }
 
-.nav-links {
-  gap: 1rem;
-}
-
 .nav-link-btn {
   font-size: 0.95rem;
   font-weight: 500;
-}
-
-.header-right,
-.auth-state {
-  gap: 1rem;
 }
 
 .icon-circle {
@@ -12830,18 +12801,11 @@ h4, .h4 {
   font-weight: 500;
 }
 
-.welcome-text {
-  font-weight: 400;
-  color: #475569;
-}
-
-.site-header.search-variant {
-  margin-top: 1rem;
-}
-
-.site-header.search-variant .header-center {
-  flex: 1;
-  justify-content: center;
+/* Auth / Guest State Overrides */
+.auth-state {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .footer-main {
@@ -13033,10 +12997,6 @@ h4, .h4 {
 
 .bg-neutral-900 {
   background-color: #111827; /* or any dark color you prefer */
-}
-
-.toast-body {
-  color: #ffffff !important;
 }
 
 /*# sourceMappingURL=main.css.map */

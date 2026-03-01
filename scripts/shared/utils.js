@@ -27,12 +27,11 @@ export function showToast(title, message, type = 'primary') {
         </div>
     `;
 
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = html;
-    container.appendChild(wrapper.firstElementChild);
+    // Remove existing toast before showing new one to prevent stacking
+    container.innerHTML = html;
 
     const toastEl = document.getElementById(id);
-    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+    const toast = new window.bootstrap.Toast(toastEl, { delay: 3000 });
     toast.show();
 
     toastEl.addEventListener('hidden.bs.toast', () => {
@@ -87,10 +86,10 @@ export function injectSignOutModal() {
 export function initializeBootstrapComponents() {
     if (typeof bootstrap === 'undefined') return;
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    [...tooltipTriggerList].map(tooltipTriggerEl => new window.bootstrap.Tooltip(tooltipTriggerEl));
 
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-    [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    [...popoverTriggerList].map(popoverTriggerEl => new window.bootstrap.Popover(popoverTriggerEl));
 }
 
 export function setupGenericPagination({ items, containerId, paginationId, renderItem, itemsPerPage = 5, onRender }) {
@@ -120,8 +119,17 @@ export function setupGenericPagination({ items, containerId, paginationId, rende
 
         const listContainer = document.getElementById(containerId);
         if (listContainer) {
-            listContainer.innerHTML = pageItems.map(item => renderItem(item)).join('');
-            if (window.lucide) lucide.createIcons();
+            listContainer.innerHTML = ''; // safe clear
+            pageItems.forEach(item => {
+                const nodeOrString = renderItem(item);
+                if (typeof nodeOrString === 'string') {
+                    // Backwards compatibility for templates not yet refactored
+                    listContainer.insertAdjacentHTML('beforeend', nodeOrString);
+                } else if (nodeOrString instanceof Node) {
+                    listContainer.appendChild(nodeOrString);
+                }
+            });
+            if (window.initIcons) window.initIcons({ root: listContainer });
             if (onRender) onRender(pageItems);
         }
 
@@ -149,7 +157,7 @@ export function setupGenericPagination({ items, containerId, paginationId, rende
         html += `<button class="pagination-btn" data-page="${page + 1}" ${page === totalPages ? 'disabled' : ''}><i data-lucide="chevron-right" width="16" height="16"></i></button>`;
 
         paginationContainer.innerHTML = html;
-        if (window.lucide) lucide.createIcons();
+        if (window.initIcons) window.initIcons();
     };
 
     paginationContainer.addEventListener('click', (e) => {
@@ -165,4 +173,118 @@ export function setupGenericPagination({ items, containerId, paginationId, rende
     });
 
     renderPage(1);
+}
+
+export function setupRealtimeValidation(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    // Prevent default HTML5 bubbles
+    form.setAttribute('novalidate', '');
+
+    const inputs = form.querySelectorAll('input, select, textarea');
+
+    const updateValidationState = (input) => {
+        let feedbackEl = input.nextElementSibling;
+        if (!feedbackEl || !feedbackEl.classList.contains('invalid-feedback')) {
+            feedbackEl = input.parentNode.querySelector('.invalid-feedback');
+        }
+
+        // Handle deeply nested radio/check structures (like in terms agreements)
+        if (!feedbackEl && (input.type === 'checkbox' || input.type === 'radio')) {
+            const wrapper = input.closest('.form-check');
+            if (wrapper) feedbackEl = wrapper.querySelector('.invalid-feedback');
+        }
+
+        if (!feedbackEl) {
+            feedbackEl = document.createElement('div');
+            feedbackEl.className = 'invalid-feedback';
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                const wrapper = input.closest('.form-check');
+                if (wrapper) wrapper.appendChild(feedbackEl);
+                else input.parentNode.appendChild(feedbackEl);
+            } else {
+                input.parentNode.appendChild(feedbackEl);
+            }
+        }
+
+        if (!feedbackEl.hasAttribute('data-original-text')) {
+            feedbackEl.setAttribute('data-original-text', feedbackEl.textContent.trim());
+        }
+
+        if (!input.checkValidity()) {
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+
+            // Generate contextual error message
+            let errorMsg = feedbackEl.getAttribute('data-original-text') || 'Please provide a valid value.';
+
+            if (input.validity.valueMissing) {
+                errorMsg = feedbackEl.getAttribute('data-original-text') || 'This field is required.';
+            } else if (input.validity.typeMismatch) {
+                if (input.type === 'email') errorMsg = 'Please enter a valid email address.';
+                else if (input.type === 'url') errorMsg = 'Please enter a valid URL.';
+                else errorMsg = 'Invalid format.';
+            } else if (input.validity.patternMismatch) {
+                errorMsg = input.getAttribute('title') || 'Please match the format requested.';
+            } else if (input.validity.tooShort) {
+                errorMsg = `Minimum length is ${input.getAttribute('minlength')} characters.`;
+            } else if (input.validity.tooLong) {
+                errorMsg = `Maximum length is ${input.getAttribute('maxlength')} characters.`;
+            } else if (input.validity.rangeUnderflow) {
+                errorMsg = `Value must be greater than or equal to ${input.getAttribute('min')}.`;
+            } else if (input.validity.rangeOverflow) {
+                errorMsg = `Value must be less than or equal to ${input.getAttribute('max')}.`;
+            }
+
+            // Optional: fallback to browser's built-in message if we don't have a good default and original is empty
+            if (!errorMsg && input.validationMessage) {
+                errorMsg = input.validationMessage;
+            }
+
+            feedbackEl.textContent = errorMsg;
+        } else {
+            input.classList.remove('is-invalid');
+            if (input.type !== 'checkbox' && input.type !== 'radio') {
+                input.classList.add('is-valid');
+            }
+            feedbackEl.textContent = feedbackEl.getAttribute('data-original-text') || '';
+        }
+    };
+
+    inputs.forEach(input => {
+        const validateHandler = () => {
+            if (input.value.length > 0 || input.classList.contains('is-invalid') || input.type === 'checkbox' || input.type === 'radio') {
+                updateValidationState(input);
+            }
+        };
+        // Validate on typing
+        input.addEventListener('input', validateHandler);
+
+        // Validate on change (crucial for select, checkbox, radio)
+        input.addEventListener('change', validateHandler);
+
+        // Validate on leaving field
+        input.addEventListener('blur', () => {
+            updateValidationState(input);
+        });
+    });
+
+    // Handle form submit to validate all fields at once
+    form.addEventListener('submit', (e) => {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            inputs.forEach(input => {
+                updateValidationState(input);
+            });
+
+            // Focus first invalid input
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
+        }
+    });
 }

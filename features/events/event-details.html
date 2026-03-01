@@ -46,6 +46,11 @@
                 <div class="row g-4">
                     <!-- Left Column: Hero Image -->
                     <div class="col-lg-8">
+                        <a href="javascript:history.back()"
+                            class="btn btn-text text-neutral-500 hover-neutral-900 p-0 mb-4 d-inline-flex align-items-center gap-2"
+                            style="font-weight: 500;">
+                            <i data-lucide="arrow-left" width="16" height="16"></i> Back to events
+                        </a>
                         <div class="radius-lg shadow-card overflow-hidden">
                             <img src="../../assets/about_the_eif.jpg" id="event-hero-image" alt="Event Image"
                                 class="w-100 object-fit-cover" style="min-height: 400px; aspect-ratio: 16/9;">
@@ -290,20 +295,7 @@
                         <h4 class="fw-bold mb-3">Login Required</h4>
                         <p class="text-neutral-600 mb-4">Please log in or create an account to book tickets for this
                             event.</p>
-                        <form id="modalLoginForm" class="text-start mb-3" novalidate>
-                            <div class="mb-3">
-                                <label class="form-label small fw-medium">Email address</label>
-                                <input type="email" class="form-control" required placeholder="name@example.com">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-medium">Password</label>
-                                <input type="password" class="form-control" required placeholder="••••••••">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2">Log In</button>
-                        </form>
-                        <hr class="my-4">
-                        <p class="text-neutral-400 small mb-0">Don't have an account? <a href="../auth/signup.html"
-                                class="text-primary fw-medium text-decoration-none">Sign up</a></p>
+                        <!-- Hardcoded form removed, wait for auth.js to inject into modal-login-form-container-events -->
                     </div>
                 </div>
             </div>
@@ -401,7 +393,7 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons();
+        if (window.initIcons) window.initIcons(); else if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     </script>
     <script type="module" src="../../scripts/core/app.js"></script>
 </body>

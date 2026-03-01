@@ -30,53 +30,26 @@ export function initProfilePage() {
                     <h5 class="fw-bold text-neutral-900 mb-2">Login Required</h5>
                     <p class="text-neutral-400 mb-4 text-center">Log in to view your tickets, payments, and settings.</p>
 
-                    <form id="profileLoginForm-${s}" class="w-100" novalidate>
-                        <div class="mb-3 text-start">
-                            <label class="form-label fw-medium text-neutral-900 small">Email</label>
-                            <input type="email" class="form-control" name="email" placeholder="john@example.com" required>
-                        </div>
-                        <div class="mb-4 text-start">
-                            <label class="form-label fw-medium text-neutral-900 small">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="••••••••" required>
-                        </div>
-                        <div class="d-flex flex-column gap-3">
-                            <button type="submit" class="btn btn-primary rounded-pill w-100">Log in now</button>
-                            <a href="../auth/signup.html" class="btn btn-outline-dark rounded-pill w-100">Create an account</a>
-                        </div>
-                    </form>
+                    <div id="profile-login-form-container-${s}" class="w-100 mt-2"></div>
+                    <div class="text-center mt-3">
+                        <span class="text-neutral-400 small">New here? <a href="../auth/signup.html" class="text-primary text-decoration-none fw-medium">Create an account</a></span>
+                    </div>
                 </div>`;
 
                 setTimeout(() => {
-                    const inlineForm = document.getElementById(`profileLoginForm-${s}`);
-                    if (inlineForm) {
-                        inlineForm.onsubmit = async (subEvent) => {
-                            subEvent.preventDefault();
-                            inlineForm.classList.add('was-validated');
-                            if (inlineForm.checkValidity()) {
-                                const email = inlineForm.querySelector('input[type="email"]').value;
-                                const pwd = inlineForm.querySelector('input[type="password"]').value;
-
-                                const { performLogin } = await import('../auth/auth.js');
-                                const success = performLogin(email, pwd, false, () => {
-                                    window.location.reload();
-                                });
-
-                                if (success) {
-                                    const submitBtn = inlineForm.querySelector('button[type="submit"]');
-                                    submitBtn.disabled = true;
-                                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
-                                } else {
-                                    inlineForm.querySelector('input[type="password"]').value = '';
-                                    inlineForm.classList.remove('was-validated');
-                                }
-                            }
-                        };
-                    }
+                    import('../auth/auth.js').then(m => {
+                        m.setupLoginForm(`profile-login-form-container-${s}`, false, {
+                            action: () => {
+                                window.location.reload();
+                            },
+                            message: 'Redirecting you back...'
+                        });
+                    });
                 }, 0);
             }
         });
 
-        if (window.lucide) lucide.createIcons();
+        if (window.initIcons) window.initIcons();
         return; // Halt further profile initialization
     }
 
@@ -92,7 +65,12 @@ export function initProfilePage() {
     document.getElementById('profile-settings-email-display').textContent = user.profile.email;
 
     document.getElementById('profile-email').value = user.profile.email;
+    document.getElementById('profile-email').readOnly = true;
+    document.getElementById('profile-email').classList.add('bg-neutral-50', 'text-neutral-500');
+
     document.getElementById('profile-phone').value = user.profile.phone || '';
+    document.getElementById('profile-phone').readOnly = true;
+    document.getElementById('profile-phone').classList.add('bg-neutral-50', 'text-neutral-500');
     document.getElementById('profile-fullname').value = user.profile.fullName;
     document.getElementById('profile-dob').value = user.profile.dateOfBirth || '';
     if (user.profile.gender) document.getElementById('profile-gender').value = user.profile.gender;
@@ -176,7 +154,7 @@ export function initProfilePage() {
     if (profileLogoutBtn) {
         profileLogoutBtn.addEventListener('click', () => {
             const modalEl = document.getElementById('signOutModal');
-            if (modalEl) new bootstrap.Modal(modalEl).show();
+            if (modalEl) new window.bootstrap.Modal(modalEl).show();
         });
     }
 
@@ -217,7 +195,6 @@ export function initProfilePage() {
                                             <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
                                         </div>
                                     </div>
-                                    <a href="../events/event-details.html?id=${event.id}" class="btn btn-outline-primary btn-sm rounded-pill px-3">View</a>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-1 pt-2 border-top border-neutral-100">
                                     <div class="small text-neutral-600">${reg.quantity} Ticket${reg.quantity > 1 ? 's' : ''} • ${reg.ticketType}</div>
@@ -228,6 +205,17 @@ export function initProfilePage() {
                     </div>
                 `;
             }).join('');
+
+            // Wire up clicking the card to immediately launch the Registration Details Modal
+            upcomingData.forEach(({ reg }, index) => {
+                const card = container.children[index];
+                if (card) {
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', (e) => {
+                        openRegistrationModal(reg);
+                    });
+                }
+            });
         }
     }
 
@@ -258,6 +246,20 @@ export function initProfilePage() {
                     </div>
                 </div>`;
             }).join('');
+
+            // Wire up clicking the card to immediately launch the Payment Details Modal
+            recentPayments.forEach((pay, index) => {
+                const col = paymentsContainer.children[index];
+                if (col) {
+                    const card = col.querySelector('.card-custom');
+                    if (card) {
+                        card.style.cursor = 'pointer';
+                        card.addEventListener('click', () => {
+                            openPaymentModal(pay);
+                        });
+                    }
+                }
+            });
         }
     }
 
@@ -313,6 +315,9 @@ export function initProfilePage() {
 
         const changePasswordForm = document.getElementById('changePasswordForm');
         if (changePasswordForm) {
+            import('../../scripts/shared/utils.js').then(m => {
+                m.setupRealtimeValidation('changePasswordForm');
+            });
             changePasswordForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const form = e.target;
@@ -323,12 +328,11 @@ export function initProfilePage() {
                     form.reset();
                     showToast('Success', 'Password changed successfully.', 'success');
                 }
-                form.classList.add('was-validated');
             });
         }
     }
 
-    if (window.lucide) lucide.createIcons();
+    if (window.initIcons) window.initIcons();
 }
 
 // ─── Registrations ────────────────────────────────────────────────
@@ -343,7 +347,7 @@ function renderRegistrations() {
     const userId = user ? user.id : null;
 
     // Filter for active registrations (future events or not completed)
-    const registrations = state.registrations.filter(r => r.userId === userId && r.status !== 'COMPLETED' && r.status !== 'CANCELLED');
+    const registrations = state.registrations.filter(r => r.userId === userId && r.status !== 'COMPLETED');
 
     setupGenericPagination({
         items: registrations,
@@ -356,7 +360,7 @@ function renderRegistrations() {
                 date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             const isCancelled = reg.status === 'CANCELLED';
             return `
-            <div class="card-custom p-3 registration-card ${isCancelled ? 'cancelled' : ''}">
+            <div class="card-custom p-3 registration-card ${isCancelled ? 'cancelled' : ''}" data-id="${reg.id}" style="cursor: pointer;">
                 <div class="d-flex gap-3">
                     <img src="${reg.img}" class="rounded-3 object-fit-cover d-none d-sm-block" style="width: 120px; height: 90px;" alt="${reg.eventName}">
                     <div class="flex-grow-1">
@@ -366,10 +370,12 @@ function renderRegistrations() {
                                 <div class="small text-neutral-400 mb-1"><i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr}</div>
                                 <div class="small text-neutral-400"><i data-lucide="map-pin" width="14" class="me-1"></i> ${reg.location}</div>
                             </div>
-                            ${isCancelled
-                    ? `<span class="badge bg-danger-subtle text-danger rounded-pill px-3">Cancelled</span>`
+                            <div class="d-flex gap-2">
+                                ${isCancelled
+                    ? `<span class="badge bg-danger-subtle text-danger rounded-pill px-3 align-self-center">Cancelled</span>`
                     : `<button class="btn btn-outline-danger btn-sm rounded-pill px-3 btn-cancel-reg" data-id="${reg.id}">Cancel</button>`
                 }
+                            </div>
                         </div>
                         <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top border-neutral-100">
                             <div class="small text-neutral-600">${reg.quantity} x ${reg.ticketType}</div>
@@ -380,19 +386,71 @@ function renderRegistrations() {
             </div>`;
         },
         onRender: () => {
+            if (window.initIcons) window.initIcons();
             document.querySelectorAll('.btn-cancel-reg').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const reg = state.registrations.find(r => r.id === btn.dataset.id);
                     if (reg) openCancelModal(reg);
                 });
             });
+
+            // Make the entire card clickable to view the pass, unless they click a button
+            document.querySelectorAll('#registrations-list .registration-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('button')) return;
+                    const reg = state.registrations.find(r => r.id === card.dataset.id);
+                    if (reg) openRegistrationModal(reg);
+                });
+            });
         }
     });
 }
 
+function openRegistrationModal(reg) {
+    const modalEl = document.getElementById('registrationDetailsModal');
+    if (!modalEl) return;
+
+    document.getElementById('reg-modal-event').textContent = reg.eventName;
+    document.getElementById('reg-modal-id').textContent = `#${reg.id.substring(0, 8).toUpperCase()}`;
+
+    // date
+    const date = new Date(reg.date);
+    document.getElementById('reg-modal-date').textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+    document.getElementById('reg-modal-venue').textContent = reg.location;
+    document.getElementById('reg-modal-ticket-type').textContent = `${reg.ticketType} (${reg.quantity}x)`;
+    document.getElementById('reg-modal-amount').textContent = `₹${reg.price}`;
+
+    const statusBadge = document.getElementById('reg-modal-status');
+    if (reg.status === 'CANCELLED') {
+        statusBadge.className = 'badge bg-danger text-white mb-2';
+        statusBadge.textContent = 'CANCELLED';
+    } else {
+        statusBadge.className = 'badge bg-white text-neutral-900 mb-2';
+        statusBadge.textContent = 'CONFIRMED';
+    }
+
+    // update mock QR
+    const qrImg = document.getElementById('reg-modal-qr');
+    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${reg.id}`;
+
+    const downloadBtn = document.getElementById('btn-download-ticket');
+    if (downloadBtn) {
+        // clear old listeners by cloning
+        const newBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+        newBtn.addEventListener('click', () => {
+            showToast('Download Started', 'Your ticket is downloading...', 'info');
+        });
+    }
+
+    const bsModal = new window.bootstrap.Modal(modalEl);
+    bsModal.show();
+}
+
 function openCancelModal(reg) {
     const modalEl = document.getElementById('cancelBookingModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = new window.bootstrap.Modal(modalEl);
 
     document.getElementById('cancel-event-name').textContent = reg.eventName;
     document.getElementById('cancel-original-price').textContent = `₹${reg.price}`;
@@ -406,9 +464,29 @@ function openCancelModal(reg) {
     confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
     newBtn.addEventListener('click', () => {
         reg.status = 'CANCELLED';
+
+        // Update Backend for Registration
+        fetch(`http://localhost:3000/registrations/${reg.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'CANCELLED' })
+        }).catch(err => console.error("Error updating local db", err));
+
+        // Correlate and Process Refund on Payment
+        const payment = state.payments.find(p => p.userId === reg.userId && p.eventId === reg.eventId && p.status === 'Confirmed');
+        if (payment) {
+            payment.status = 'Refunded';
+            fetch(`http://localhost:3000/payments/${payment.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'Refunded' })
+            }).catch(err => console.error("Error updating local db", err));
+        }
+
         modal.hide();
-        showToast('Success', 'Booking cancelled successfully.', 'success');
+        showToast('Success', `Booking cancelled. A refund of ₹${refund} has been processed.`, 'success');
         renderRegistrations();
+        if (typeof renderPayments === 'function') renderPayments();
     });
     modal.show();
 }
@@ -468,7 +546,7 @@ function renderPastEvents() {
 
 function openFeedbackModal(evt) {
     const modalEl = document.getElementById('feedbackModal');
-    const modal = new bootstrap.Modal(modalEl);
+    const modal = new window.bootstrap.Modal(modalEl);
     document.getElementById('feedback-event-name').textContent = evt.eventName;
 
     const oldBtn = document.getElementById('submitFeedbackBtn');
@@ -533,6 +611,7 @@ function renderPayments() {
                         <div class="small text-neutral-600">${dateStr}</div>
                         <div class="small text-neutral-600">${pay.tickets}</div>
                         <div class="fw-medium text-neutral-900 mt-1">${pay.method}</div>
+                        <button class="btn btn-link text-primary p-0 text-start mt-2 btn-view-invoice fw-medium text-decoration-none" data-id="${pay.id}">View Invoice <i data-lucide="arrow-right" width="14" class="ms-1"></i></button>
                     </div>
                     <div class="text-end">
                         <div class="fs-5 fw-semibold text-neutral-900 mb-3">₹${pay.amount}</div>
@@ -542,6 +621,54 @@ function renderPayments() {
                     </div>
                 </div>
             </div>`;
+        },
+        onRender: () => {
+            if (window.initIcons) window.initIcons();
+            document.querySelectorAll('.btn-view-invoice').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pay = state.payments.find(p => p.id === btn.dataset.id);
+                    if (pay) openPaymentModal(pay);
+                });
+            });
         }
     });
+
+}
+
+function openPaymentModal(pay) {
+    const modalEl = document.getElementById('paymentDetailsModal');
+    if (!modalEl) return;
+
+    document.getElementById('pay-modal-id').textContent = `#${pay.id.substring(0, 8).toUpperCase()}`;
+    document.getElementById('pay-modal-amount').textContent = `₹${pay.amount}`;
+
+    const date = new Date(pay.date);
+    document.getElementById('pay-modal-date').textContent = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('pay-modal-event').textContent = pay.eventTitle;
+    document.getElementById('pay-modal-method').textContent = pay.method;
+    document.getElementById('pay-modal-booking').textContent = pay.bookingId ? `#${pay.bookingId.substring(0, 8).toUpperCase()}` : 'N/A';
+
+    const statusBadge = document.getElementById('pay-modal-status');
+    if (pay.status === 'Confirmed') {
+        statusBadge.className = 'badge bg-success bg-opacity-10 text-success fw-medium px-3 py-1';
+        statusBadge.textContent = 'SUCCESSFUL';
+    } else if (pay.status === 'Refunded') {
+        statusBadge.className = 'badge bg-warning bg-opacity-10 text-warning fw-medium px-3 py-1';
+        statusBadge.textContent = 'REFUNDED';
+    } else {
+        statusBadge.className = 'badge bg-danger bg-opacity-10 text-danger fw-medium px-3 py-1';
+        statusBadge.textContent = 'FAILED';
+    }
+
+    const downloadBtn = document.getElementById('btn-download-invoice');
+    if (downloadBtn) {
+        const newBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(newBtn, downloadBtn);
+        newBtn.addEventListener('click', () => {
+            showToast('Download Started', 'Your invoice is downloading...', 'info');
+        });
+    }
+
+    const bsModal = new window.bootstrap.Modal(modalEl);
+    bsModal.show();
 }
