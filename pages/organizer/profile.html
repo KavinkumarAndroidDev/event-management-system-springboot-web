@@ -1,158 +1,211 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Profile - SyncEvent Organizer</title>
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
-  
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile - SyncEvent Organizer</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        
+        
+    
+        /* Dashboard UI Refinements */
+        body.bg-neutral-50 {
+            background-color: #f8fafc !important;
+        }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        
+    
+        
+        
+            </style>
 </head>
-<body>
-<div class="organizer-layout">
-  <aside class="organizer-sidebar">
-    <div class="sidebar-brand"><img src="../../assets/logo.SVG" alt="SyncEvent"></div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="sidebar-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-      <a href="my-events.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i> My Events</a>
-      <a href="create-event.html" class="sidebar-nav-item"><i data-lucide="plus-circle"></i> Create Event</a>
-      <a href="ticket-management.html" class="sidebar-nav-item"><i data-lucide="ticket"></i> Ticket Management</a>
-      <a href="registrations.html" class="sidebar-nav-item"><i data-lucide="users"></i> Registrations</a>
-      <a href="reports.html" class="sidebar-nav-item"><i data-lucide="bar-chart-2"></i> Reports</a>
-      <a href="notifications.html" class="sidebar-nav-item"><i data-lucide="bell"></i> Notifications<span class="badge bg-danger ms-auto" style="font-size:0.65rem;padding:2px 6px;border-radius:10px;">3</span></a>
-      <a href="profile.html" class="sidebar-nav-item active"><i data-lucide="user-circle"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer"><a href="#" class="sidebar-nav-item text-danger"><i data-lucide="log-out"></i> Logout</a></div>
-  </aside>
-
-  <div class="organizer-main">
-    <div class="organizer-topbar">
-      <h5>Profile</h5>
-      <div class="topbar-user">
-        <div class="user-avatar">JD</div>
-        <div class="user-info">
-          <div class="name">John Doe</div>
-          <div class="role">Organizer</div>
-        </div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i><div style="font-size:0.75rem;color:#6c757d;line-height:1.2;">Organizer</div></div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i>
-      </div>
-    </div>
-
-    <div class="organizer-content">
-      <div class="mb-4">
-        <h4 class="fw-bold mb-1" style="font-size:1.1rem;">Profile Settings</h4>
-        <p class="text-neutral-400 mb-0" style="font-size:0.85rem;">Manage your organizer profile and account settings</p>
-      </div>
-
-      <!-- Static Info Section -->
-      <div class="org-card">
-        <div class="org-card-header">
-          <h6>Static Information</h6>
-          <small>Core account details</small>
-        </div>
-        <div class="org-card-body">
-          <div class="row g-3 align-items-start">
-            <div class="col-md-8">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">Full Name</label>
-                  <input type="text" class="form-control" value="John Doe">
+<body class="bg-neutral-50">
+    <!-- Organizer Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <!-- Left: Logo & Search -->
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                    <div class="position-relative d-none d-md-block" style="width: 300px;">
+                        <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="18"></i>
+                        <input type="text" class="form-control border-transparent ps-5" placeholder="Search events, orders...">
+                    </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input type="email" class="form-control" value="john@example.com">
+                
+                <!-- Right: Actions & Profile -->
+                <div class="d-flex align-items-center gap-3">
+                    <a href="create-event.html" class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
+                        <i data-lucide="plus" width="16"></i> Create Event
+                    </a>
+                    
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px; height:10px; margin-top:8px; margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">JD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size: 0.813rem; line-height: 1.2;">John Doe</div>
+                            <div class="text-neutral-400" style="font-size: 0.688rem; line-height: 1.1;">Organizer</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label">Organization Name 1</label>
-                  <input type="text" class="form-control" placeholder="Organization name">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Phone</label>
-                  <input type="tel" class="form-control" placeholder="+91 98765 43210">
-                </div>
-              </div>
             </div>
-            <div class="col-md-4 d-flex flex-column align-items-center gap-3">
-              <div class="profile-avatar-big">JD</div>
-              <div>
-                <label class="form-label mb-1" style="font-size:0.78rem;">Organization Logo</label>
-                <div class="d-flex align-items-center gap-2">
-                  <div style="width:40px;height:40px;border-radius:8px;background:#e9ecef;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#6c757d;">JO</div>
-                  <button class="btn btn-sm btn-outline-secondary"><i data-lucide="upload" style="width:12px;height:12px;"></i> Upload Logo</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mt-3">
-            <button class="btn btn-primary btn-sm d-flex align-items-center gap-2">
-              <i data-lucide="save" style="width:13px;height:13px;"></i> Save Changes
-            </button>
-          </div>
         </div>
-      </div>
+    </header>
 
-      <!-- Public Profile -->
-      <div class="org-card">
-        <div class="org-card-header"><h6>Public Profile</h6></div>
-        <div class="org-card-body">
-          <div class="row g-3">
-            <div class="col-12">
-              <label class="form-label">Bio / Description</label>
-              <textarea class="form-control" rows="3">We organize innovative tech conferences and networking events across the country.</textarea>
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="my-events.html" class="sidebar-item">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="create-event.html" class="sidebar-item">
+                                <i data-lucide="plus-circle" class="sidebar-icon"></i> Create Event
+                            </a>
+                            <a href="ticket-management.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Ticket Management
+                            </a>
+                            <a href="registrations.html" class="sidebar-item">
+                                <i data-lucide="users" class="sidebar-icon"></i> Registrations
+                            </a>
+                            <a href="reports.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
+                            </a>
+                            <a href="notifications.html" class="sidebar-item">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                            </a>
+                            <a href="profile.html" class="sidebar-item active">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="border-neutral-100 my-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Profile</h4>
+                    </div>
+                    <div class="mb-4 text-center">
+                    <div class="position-relative d-inline-block mb-3">
+                        <div class="avatar-circle" style="width: 100px; height: 100px; font-size: 32px;">JD</div>
+                        <button class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0 p-2 shadow" onclick="document.getElementById('avatarInput').click()">
+                            <i data-lucide="camera" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <input type="file" id="avatarInput" hidden="" accept="image/*">
+                    </div>
+                    <h2 class="h3 fw-bold text-neutral-900 mb-1">Profile Settings</h2>
+                    <p class="text-neutral-400 small mb-0">Manage your organizer profile and account settings</p>
+                </div>
+<div class="card-custom mb-4 p-4">
+                    <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">Basic Information</h3>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-neutral-900 small">Full Name</label>
+                            <input type="text" class="form-control" value="John Doe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-neutral-900 small">Email Address</label>
+                            <input type="email" class="form-control" value="john@doe.com" disabled="">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-neutral-900 small">Organization Name</label>
+                            <input type="text" class="form-control" value="Tech Events Global">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2">
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                    </div>
+                </div>
+<div class="card-custom mb-4 p-4">
+                    <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">Public Profile</h3>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-neutral-900 small">About Organizer</label>
+                            <textarea class="form-control" rows="4">We organize innovative tech conferences and networking events across the globe, connecting developers and industry leaders.</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-neutral-900 small d-block mb-3">Social Links</label>
+                            <div class="input-group mb-3 px-3 py-1 bg-light rounded-pill align-items-center">
+                                <span class="text-neutral-400 small fw-bold px-2 border-end" style="width: 100px;">Website</span>
+                                <input type="url" class="form-control" value="https://techevents.com">
+                            </div>
+                            <div class="input-group mb-3 px-3 py-1 bg-light rounded-pill align-items-center">
+                                <span class="text-neutral-400 small fw-bold px-2 border-end" style="width: 100px;">Twitter</span>
+                                <input type="url" class="form-control" value="https://twitter.com/techevents">
+                            </div>
+                            <div class="input-group px-3 py-1 bg-light rounded-pill align-items-center">
+                                <span class="text-neutral-400 small fw-bold px-2 border-end" style="width: 100px;">LinkedIn</span>
+                                <input type="url" class="form-control" value="https://linkedin.com/company/techevents">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2">
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold">Update Profile</button>
+                    </div>
+                </div>
+<div class="card-custom mb-4 p-4">
+                    <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">Security</h3>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-neutral-900 small">Current Password</label>
+                            <input type="password" class="form-control" placeholder="••••••••">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-neutral-900 small">New Password</label>
+                            <input type="password" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-neutral-900 small">Confirm New Password</label>
+                            <input type="password" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-2">
+                        <button class="btn btn-primary rounded-pill px-4 fw-bold">Change Password</button>
+                    </div>
+                </div>
+<div class="card-custom mb-5 p-4 border-0" style="background: rgba(239, 68, 68, 0.05);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="h6 fw-bold text-danger mb-1">Delete Account</h3>
+                            <p class="text-neutral-600 small mb-0">Once you delete your account, there is no going back.
+                            </p>
+                        </div>
+                        <button class="btn btn-danger rounded-pill px-4 fw-bold">Delete Forever</button>
+                    </div>
+                </div>
+                </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Organization Links</label>
-              <input type="url" class="form-control mb-2" placeholder="https://yourwebsite.com" value="https://techevents.com">
-              <input type="url" class="form-control mb-2" placeholder="Facebook URL" value="https://facebook.com/techevents">
-              <input type="url" class="form-control mb-2" placeholder="Twitter URL" value="https://twitter.com/techevents">
-              <input type="url" class="form-control" placeholder="LinkedIn URL" value="https://linkedin.com/company/techevents">
-            </div>
-          </div>
-          <div class="mt-3">
-            <button class="btn btn-primary btn-sm d-flex align-items-center gap-2">
-              <i data-lucide="save" style="width:13px;height:13px;"></i> Save Changes
-            </button>
-          </div>
         </div>
-      </div>
+    </main>
 
-      <!-- Security -->
-      <div class="org-card">
-        <div class="org-card-header"><h6>Security</h6></div>
-        <div class="org-card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Current Password</label>
-              <input type="password" class="form-control" placeholder="••••••••">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">New Password</label>
-              <input type="password" class="form-control" placeholder="••••••••">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Confirm New Password</label>
-              <input type="password" class="form-control" placeholder="••••••••">
-            </div>
-          </div>
-          <div class="mt-3">
-            <button class="btn btn-primary btn-sm">Change Password</button>
-          </div>
-        </div>
-      </div>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-      <!-- Danger Zone -->
-      <div class="danger-zone">
-        <h6 class="fw-bold" style="color:#dc2626;font-size:0.9rem;">Danger Zone</h6>
-        <p class="text-muted mb-3" style="font-size:0.82rem;">Once you delete your account, there is no going back. Please be certain.</p>
-        <button class="btn btn-danger btn-sm">Delete Account</button>
-      </div>
+    <script>
+        lucide.createIcons();
+        function togglePw(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    </script>
 
-    </div>
-  </div>
-</div>
-<script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+</body></html>

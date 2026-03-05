@@ -1,147 +1,218 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Notifications - SyncEvent Organizer</title>
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
-  
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notifications - SyncEvent Organizer</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        
+        
+    
+        /* Dashboard UI Refinements */
+        body.bg-neutral-50 {
+            background-color: #f8fafc !important;
+        }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        
+    
+        
+        
+            </style>
 </head>
-<body>
-<div class="organizer-layout">
-  <aside class="organizer-sidebar">
-    <div class="sidebar-brand"><img src="../../assets/logo.SVG" alt="SyncEvent"></div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="sidebar-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-      <a href="my-events.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i> My Events</a>
-      <a href="create-event.html" class="sidebar-nav-item"><i data-lucide="plus-circle"></i> Create Event</a>
-      <a href="ticket-management.html" class="sidebar-nav-item"><i data-lucide="ticket"></i> Ticket Management</a>
-      <a href="registrations.html" class="sidebar-nav-item"><i data-lucide="users"></i> Registrations</a>
-      <a href="reports.html" class="sidebar-nav-item"><i data-lucide="bar-chart-2"></i> Reports</a>
-      <a href="notifications.html" class="sidebar-nav-item active"><i data-lucide="bell"></i> Notifications<span class="badge bg-danger ms-auto" style="font-size:0.65rem;padding:2px 6px;border-radius:10px;">3</span></a>
-      <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user-circle"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer"><a href="#" class="sidebar-nav-item text-danger"><i data-lucide="log-out"></i> Logout</a></div>
-  </aside>
-
-  <div class="organizer-main">
-    <div class="organizer-topbar">
-      <h5>Notifications</h5>
-      <div class="topbar-user">
-        <div class="user-avatar">JD</div>
-        <div class="user-info">
-          <div class="name">John Doe</div>
-          <div class="role">Organizer</div>
+<body class="bg-neutral-50">
+    <!-- Organizer Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <!-- Left: Logo & Search -->
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                    <div class="position-relative d-none d-md-block" style="width: 300px;">
+                        <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="18"></i>
+                        <input type="text" class="form-control border-transparent ps-5" placeholder="Search events, orders...">
+                    </div>
+                </div>
+                
+                <!-- Right: Actions & Profile -->
+                <div class="d-flex align-items-center gap-3">
+                    <a href="create-event.html" class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
+                        <i data-lucide="plus" width="16"></i> Create Event
+                    </a>
+                    
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px; height:10px; margin-top:8px; margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">JD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size: 0.813rem; line-height: 1.2;">John Doe</div>
+                            <div class="text-neutral-400" style="font-size: 0.688rem; line-height: 1.1;">Organizer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i><div style="font-size:0.75rem;color:#6c757d;line-height:1.2;">Organizer</div></div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i>
-      </div>
-    </div>
+    </header>
 
-    <div class="organizer-content">
-      <div class="d-flex align-items-start justify-content-between mb-4">
-        <div>
-          <h4 class="fw-bold mb-1" style="font-size:1.1rem;">Notifications</h4>
-          <p class="text-neutral-400 mb-0" style="font-size:0.85rem;">Stay updated on your event activities</p>
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="my-events.html" class="sidebar-item">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="create-event.html" class="sidebar-item">
+                                <i data-lucide="plus-circle" class="sidebar-icon"></i> Create Event
+                            </a>
+                            <a href="ticket-management.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Ticket Management
+                            </a>
+                            <a href="registrations.html" class="sidebar-item">
+                                <i data-lucide="users" class="sidebar-icon"></i> Registrations
+                            </a>
+                            <a href="reports.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
+                            </a>
+                            <a href="notifications.html" class="sidebar-item active">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                            </a>
+                            <a href="profile.html" class="sidebar-item">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="border-neutral-100 my-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Notifications</h4>
+                    </div>
+                    <div class="mb-4">
+                    <h2 class="h3 fw-bold text-neutral-900 mb-1">Stay Updated</h2>
+                    <p class="text-neutral-400 small mb-0">Stay updated with your event activities</p>
+                </div>
+<div class="card-custom p-0 overflow-hidden">
+                    <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-10">
+                        <div class="btn-group p-1 bg-light rounded-pill" role="group">
+                            <button type="button" class="btn btn-sm rounded-pill px-3 active fw-bold border-0" style="font-size: 12px;">All (8)</button>
+                            <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold border-0" style="font-size: 12px;">Unread (3)</button>
+                        </div>
+                        <button class="btn btn-link link-primary p-0 small fw-bold text-decoration-none">Mark all as
+                            read</button>
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        <!-- Unread notification -->
+                        <div class="list-group-item px-4 py-3 bg-light bg-opacity-10 d-flex align-items-start gap-3">
+                            <div class="icon-circle bg-primary bg-opacity-10 text-primary flex-shrink-0">
+                                <i data-lucide="dollar-sign" style="width:18px; height:18px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold text-neutral-900 mb-1" style="font-size: 14px;">New Payment
+                                        Received</h6>
+                                    <span class="text-neutral-400" style="font-size: 11px;">2m ago</span>
+                                </div>
+                                <p class="text-neutral-600 small mb-0">Payment of <strong class="text-neutral-900">$150</strong> received for Tech Conference 2026</p>
+                            </div>
+                            <div class="d-flex flex-column gap-2 align-items-end">
+                                <div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>
+                                <button class="btn btn-link text-neutral-400 p-0" title="Mark as read"><i data-lucide="check" style="width:16px;height:16px;"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Unread registration -->
+                        <div class="list-group-item px-4 py-3 bg-light bg-opacity-10 d-flex align-items-start gap-3">
+                            <div class="icon-circle bg-primary bg-opacity-10 text-primary flex-shrink-0">
+                                <i data-lucide="user-plus" style="width:18px; height:18px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold text-neutral-900 mb-1" style="font-size: 14px;">New Registration
+                                    </h6>
+                                    <span class="text-neutral-400" style="font-size: 11px;">15m ago</span>
+                                </div>
+                                <p class="text-neutral-600 small mb-0"><strong class="text-neutral-900">John
+                                        Smith</strong> registered for Music Festival Summer</p>
+                            </div>
+                            <div class="d-flex flex-column gap-2 align-items-end">
+                                <div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>
+                                <button class="btn btn-link text-neutral-400 p-0" title="Mark as read"><i data-lucide="check" style="width:16px;height:16px;"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Warning notification -->
+                        <div class="list-group-item px-4 py-3 bg-light bg-opacity-10 d-flex align-items-start gap-3">
+                            <div class="icon-circle bg-warning bg-opacity-10 text-warning flex-shrink-0">
+                                <i data-lucide="alert-triangle" style="width:18px; height:18px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold text-neutral-900 mb-1" style="font-size: 14px;">Low Ticket
+                                        Inventory</h6>
+                                    <span class="text-neutral-400" style="font-size: 11px;">1h ago</span>
+                                </div>
+                                <p class="text-neutral-600 small mb-0">Only <strong class="text-neutral-900">20 VIP
+                                        tickets</strong> remaining for Tech Conference</p>
+                            </div>
+                            <div class="d-flex flex-column gap-2 align-items-end">
+                                <div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>
+                                <button class="btn btn-link text-neutral-400 p-0" title="Mark as read"><i data-lucide="check" style="width:16px;height:16px;"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Read Success -->
+                        <div class="list-group-item px-4 py-3 d-flex align-items-start gap-3 opacity-75">
+                            <div class="icon-circle bg-success bg-opacity-10 text-success flex-shrink-0">
+                                <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold text-neutral-900 mb-1" style="font-size: 14px;">Event Published
+                                    </h6>
+                                    <span class="text-neutral-400" style="font-size: 11px;">2h ago</span>
+                                </div>
+                                <p class="text-neutral-600 small mb-0">Your event <strong class="text-neutral-900">'Art
+                                        Exhibition Opening'</strong> is now live</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
         </div>
-        <a href="#" style="font-size:0.82rem;color:#1a7341;text-decoration:none;font-weight:500;">Mark all as read</a>
-      </div>
+    </main>
 
-      <!-- Filter tabs -->
-      <div class="d-flex gap-2 mb-4">
-        <button class="btn btn-sm btn-primary rounded-pill px-3">All Notifications</button>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Cancel All</button>
-      </div>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-      <div class="org-card">
-        <!-- Unread -->
-        <div class="notif-item unread">
-          <div class="notif-icon" style="background:#dbeafe;"><i data-lucide="indian-rupee" style="width:16px;height:16px;color:#1e40af;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">New Payment Received</div>
-            <div class="notif-desc">₹1,500 payment received for Tech Conference 2026</div>
-            <div class="notif-time">1 hour ago</div>
-          </div>
-          <div class="notif-check"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-        </div>
+    <script>
+        lucide.createIcons();
 
-        <div class="notif-item unread">
-          <div class="notif-icon" style="background:#d1fae5;"><i data-lucide="user-plus" style="width:16px;height:16px;color:#065f46;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">New Registration</div>
-            <div class="notif-desc">John Doe registered for Music Festival Summer</div>
-            <div class="notif-time">3 hours ago</div>
-          </div>
-          <div class="notif-check"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-        </div>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
 
-        <div class="notif-item unread">
-          <div class="notif-icon" style="background:#fee2e2;"><i data-lucide="alert-triangle" style="width:16px;height:16px;color:#991b1b;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Low Ticket Inventory</div>
-            <div class="notif-desc">Only 20 tickets remaining for The Conference</div>
-            <div class="notif-time">5 hours ago</div>
-          </div>
-          <div class="notif-check"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
-        </div>
-
-        <!-- Read -->
-        <div class="notif-item">
-          <div class="notif-icon" style="background:#e8f5e9;"><i data-lucide="check-circle-2" style="width:16px;height:16px;color:#1a7341;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Event Published Successfully</div>
-            <div class="notif-desc">Your event Art Exhibition Opening is now live</div>
-            <div class="notif-time">Yesterday</div>
-          </div>
-          <div class="notif-check" style="color:#1a7341;"><i data-lucide="check-check" style="width:14px;height:14px;"></i></div>
-        </div>
-
-        <div class="notif-item">
-          <div class="notif-icon" style="background:#fef9c3;"><i data-lucide="clock" style="width:16px;height:16px;color:#a16207;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Event Approval Pending</div>
-            <div class="notif-desc">Business Networking Event is awaiting admin approval</div>
-            <div class="notif-time">Yesterday</div>
-          </div>
-          <div class="notif-check" style="color:#1a7341;"><i data-lucide="check-check" style="width:14px;height:14px;"></i></div>
-        </div>
-
-        <div class="notif-item">
-          <div class="notif-icon" style="background:#d1fae5;"><i data-lucide="credit-card" style="width:16px;height:16px;color:#065f46;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Payment Confirmed</div>
-            <div class="notif-desc">Full payment of ₹5,000 has been processed</div>
-            <div class="notif-time">2 days ago</div>
-          </div>
-          <div class="notif-check" style="color:#1a7341;"><i data-lucide="check-check" style="width:14px;height:14px;"></i></div>
-        </div>
-
-        <div class="notif-item">
-          <div class="notif-icon" style="background:#f3f4f6;"><i data-lucide="star" style="width:16px;height:16px;color:#6b7280;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Event Overview</div>
-            <div class="notif-desc">Tech Conference 2026 attendees in today</div>
-            <div class="notif-time">2 days ago</div>
-          </div>
-          <div class="notif-check" style="color:#1a7341;"><i data-lucide="check-check" style="width:14px;height:14px;"></i></div>
-        </div>
-
-        <div class="notif-item">
-          <div class="notif-icon" style="background:#e8f5e9;"><i data-lucide="trophy" style="width:16px;height:16px;color:#1a7341;"></i></div>
-          <div class="notif-content">
-            <div class="notif-title">Milestone Achieved</div>
-            <div class="notif-desc">You've reached 1,000 total ticket bookings!</div>
-            <div class="notif-time">3 days ago</div>
-          </div>
-          <div class="notif-check" style="color:#1a7341;"><i data-lucide="check-check" style="width:14px;height:14px;"></i></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+</body></html>

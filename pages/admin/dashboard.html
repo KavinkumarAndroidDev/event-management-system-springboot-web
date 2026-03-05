@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - SyncEvent Admin</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        body.bg-neutral-50 { background-color: #f8fafc !important; }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+    </style>
+</head>
+<body class="bg-neutral-50">
+
+    <!-- Admin Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px;height:10px;margin-top:8px;margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">AD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size:0.813rem;line-height:1.2;">Admin User</div>
+                            <div class="text-neutral-400" style="font-size:0.688rem;line-height:1.1;">admin@example.com</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item active">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="user-management.html" class="sidebar-item">
+                                <i data-lucide="users" class="sidebar-icon"></i> User Management
+                            </a>
+                            <a href="event-approvals.html" class="sidebar-item">
+                                <i data-lucide="check-circle" class="sidebar-icon"></i> Event Approvals
+                                <span class="badge rounded-pill ms-auto" style="background:#ef4444;color:#fff;font-size:10px;">8</span>
+                            </a>
+                            <a href="events.html" class="sidebar-item">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> Events
+                            </a>
+                            <a href="categories.html" class="sidebar-item">
+                                <i data-lucide="tag" class="sidebar-icon"></i> Categories
+                            </a>
+                            <a href="venues.html" class="sidebar-item">
+                                <i data-lucide="map-pin" class="sidebar-icon"></i> Venues
+                            </a>
+                            <a href="tickets-registrations.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Tickets &amp; Registrations
+                            </a>
+                            <a href="payments-revenue.html" class="sidebar-item">
+                                <i data-lucide="dollar-sign" class="sidebar-icon"></i> Payments &amp; Revenue
+                            </a>
+                            <a href="reports-analytics.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports &amp; Analytics
+                            </a>
+                            <a href="feedback-moderation.html" class="sidebar-item">
+                                <i data-lucide="message-square" class="sidebar-icon"></i> Feedback Moderation
+                            </a>
+                            <a href="notifications.html" class="sidebar-item">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                                <span class="badge rounded-pill ms-auto" style="background:#ef4444;color:#fff;font-size:10px;">5</span>
+                            </a>
+                            <a href="profile.html" class="sidebar-item">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="my-3" style="border-color:rgba(0,0,0,0.06);">
+                        <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill">
+                            <i data-lucide="log-out" width="18" class="me-2"></i> Logout
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Dashboard</h4>
+                    </div>
+
+                    <!-- Stat Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container">
+                                        <i data-lucide="users" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-neutral-900 mb-1">12,543</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Total Users</div>
+                                <div class="text-success small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i> ↑ 12% from last month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container" style="background:rgba(0,184,217,0.12);color:#00b8d9;">
+                                        <i data-lucide="user-check" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-neutral-900 mb-1">245</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Total Organizers</div>
+                                <div class="text-success small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i> ↑ 8% from last month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+                                        <i data-lucide="calendar" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-neutral-900 mb-1">1,234</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Total Events</div>
+                                <div class="text-success small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i> ↑ 15% from last month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container" style="background:rgba(34,197,94,0.12);color:#22c55e;">
+                                        <i data-lucide="activity" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-neutral-900 mb-1">89</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Active Events</div>
+                                <div class="text-success small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i> ↑ 5% from last month
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+                                        <i data-lucide="clock" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-neutral-900 mb-1">8</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Pending Approvals</div>
+                                <div class="text-danger small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-down" style="width:12px;height:12px;"></i> ↓ 2 from yesterday
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-4">
+                            <div class="card-custom h-100 p-4">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="icon-container">
+                                        <i data-lucide="dollar-sign" style="width:24px;height:24px;"></i>
+                                    </div>
+                                </div>
+                                <div class="h2 fw-bold text-primary mb-1">$124,543</div>
+                                <div class="text-neutral-400 small fw-medium mb-1">Total Revenue</div>
+                                <div class="text-success small d-flex align-items-center gap-1">
+                                    <i data-lucide="trending-up" style="width:12px;height:12px;"></i> ↑ 23% from last month
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Approvals Table -->
+                    <div class="card-custom p-0 mb-4 overflow-hidden">
+                        <div class="px-4 py-3 border-bottom d-flex align-items-center justify-content-between bg-light">
+                            <h2 class="h6 mb-0 fw-bold">Pending Approvals</h2>
+                            <a href="event-approvals.html" class="btn btn-text text-primary small p-0 fw-bold">View All <i data-lucide="arrow-right" style="width:14px;height:14px;margin-left:4px;"></i></a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Event Name</th>
+                                        <th class="py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Organizer</th>
+                                        <th class="py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Submitted Date</th>
+                                        <th class="py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Event Date</th>
+                                        <th class="py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Status</th>
+                                        <th class="pe-4 py-3 text-uppercase small fw-bold text-neutral-400" style="font-size:11px;letter-spacing:0.05em;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-neutral-900">Tech Conference 2026</td>
+                                        <td class="text-neutral-400 small">John Doe</td>
+                                        <td class="text-neutral-400 small">2026-02-10</td>
+                                        <td class="text-neutral-400 small">2026-03-15</td>
+                                        <td><span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Pending</span></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="event-approvals.html" class="btn btn-sm text-primary p-0 fw-bold" style="font-size:12px;">View</a>
+                                                <button class="btn btn-sm btn-dark rounded-pill px-3" style="font-size:12px;" onclick="showApproveModal('Tech Conference 2026')">Approve</button>
+                                                <button class="btn btn-sm btn-danger rounded-pill px-3" style="font-size:12px;" onclick="showRejectModal('Tech Conference 2026')">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-neutral-900">Music Festival Summer</td>
+                                        <td class="text-neutral-400 small">Jane Smith</td>
+                                        <td class="text-neutral-400 small">2026-02-12</td>
+                                        <td class="text-neutral-400 small">2026-07-20</td>
+                                        <td><span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Pending</span></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="event-approvals.html" class="btn btn-sm text-primary p-0 fw-bold" style="font-size:12px;">View</a>
+                                                <button class="btn btn-sm btn-dark rounded-pill px-3" style="font-size:12px;" onclick="showApproveModal('Music Festival Summer')">Approve</button>
+                                                <button class="btn btn-sm btn-danger rounded-pill px-3" style="font-size:12px;" onclick="showRejectModal('Music Festival Summer')">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-neutral-900">Food &amp; Wine Expo</td>
+                                        <td class="text-neutral-400 small">Mike Johnson</td>
+                                        <td class="text-neutral-400 small">2026-02-13</td>
+                                        <td class="text-neutral-400 small">2026-04-10</td>
+                                        <td><span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Pending</span></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="event-approvals.html" class="btn btn-sm text-primary p-0 fw-bold" style="font-size:12px;">View</a>
+                                                <button class="btn btn-sm btn-dark rounded-pill px-3" style="font-size:12px;" onclick="showApproveModal('Food &amp; Wine Expo')">Approve</button>
+                                                <button class="btn btn-sm btn-danger rounded-pill px-3" style="font-size:12px;" onclick="showRejectModal('Food &amp; Wine Expo')">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-neutral-900">Startup Pitch Night</td>
+                                        <td class="text-neutral-400 small">Sarah Williams</td>
+                                        <td class="text-neutral-400 small">2026-02-14</td>
+                                        <td class="text-neutral-400 small">2026-03-25</td>
+                                        <td><span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Pending</span></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="event-approvals.html" class="btn btn-sm text-primary p-0 fw-bold" style="font-size:12px;">View</a>
+                                                <button class="btn btn-sm btn-dark rounded-pill px-3" style="font-size:12px;" onclick="showApproveModal('Startup Pitch Night')">Approve</button>
+                                                <button class="btn btn-sm btn-danger rounded-pill px-3" style="font-size:12px;" onclick="showRejectModal('Startup Pitch Night')">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-4 fw-bold text-neutral-900">Art Gallery Opening</td>
+                                        <td class="text-neutral-400 small">David Brown</td>
+                                        <td class="text-neutral-400 small">2026-02-14</td>
+                                        <td class="text-neutral-400 small">2026-03-05</td>
+                                        <td><span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Pending</span></td>
+                                        <td class="pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <a href="event-approvals.html" class="btn btn-sm text-primary p-0 fw-bold" style="font-size:12px;">View</a>
+                                                <button class="btn btn-sm btn-dark rounded-pill px-3" style="font-size:12px;" onclick="showApproveModal('Art Gallery Opening')">Approve</button>
+                                                <button class="btn btn-sm btn-danger rounded-pill px-3" style="font-size:12px;" onclick="showRejectModal('Art Gallery Opening')">Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Snapshot + Trend -->
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="card-custom p-4 h-100">
+                                <h2 class="h6 fw-bold mb-4">Revenue Snapshot</h2>
+                                <div class="mb-3 d-flex justify-content-between align-items-center border-bottom pb-3">
+                                    <div class="text-neutral-400 small">This Month Revenue</div>
+                                    <div class="fw-bold text-neutral-900">$45,230</div>
+                                </div>
+                                <div class="mb-3 d-flex justify-content-between align-items-center border-bottom pb-3">
+                                    <div class="text-neutral-400 small">Platform Earnings</div>
+                                    <div class="fw-bold text-neutral-900">$4,523</div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-neutral-400 small">Refunds</div>
+                                    <div class="fw-bold text-danger">$1,250</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="card-custom p-4 h-100">
+                                <h2 class="h6 fw-bold mb-4">Revenue Trend (Last 30 Days)</h2>
+                                <div style="height: 180px;">
+                                    <canvas id="revenueTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="card-custom p-0 mt-4 overflow-hidden">
+                        <div class="px-4 py-3 border-bottom bg-light">
+                            <h2 class="h6 mb-0 fw-bold">Recent Activity</h2>
+                        </div>
+                        <div class="p-4">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <span class="rounded-circle flex-shrink-0" style="width:10px;height:10px;background:#17b978;margin-top:5px;"></span>
+                                <div>
+                                    <div class="small fw-bold text-neutral-900">New organizer registered: Emily Carter</div>
+                                    <div class="text-neutral-400" style="font-size:11px;">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <span class="rounded-circle flex-shrink-0" style="width:10px;height:10px;background:#22c55e;margin-top:5px;"></span>
+                                <div>
+                                    <div class="small fw-bold text-neutral-900">Event approved: Tech Conference 2026</div>
+                                    <div class="text-neutral-400" style="font-size:11px;">4 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <span class="rounded-circle flex-shrink-0" style="width:10px;height:10px;background:#ef4444;margin-top:5px;"></span>
+                                <div>
+                                    <div class="small fw-bold text-neutral-900">Event cancelled: Holiday Party 2026</div>
+                                    <div class="text-neutral-400" style="font-size:11px;">6 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <span class="rounded-circle flex-shrink-0" style="width:10px;height:10px;background:#f59e0b;margin-top:5px;"></span>
+                                <div>
+                                    <div class="small fw-bold text-neutral-900">Refund processed: $250 for ticket #1234</div>
+                                    <div class="text-neutral-400" style="font-size:11px;">8 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-start gap-3">
+                                <span class="rounded-circle flex-shrink-0" style="width:10px;height:10px;background:#17b978;margin-top:5px;"></span>
+                                <div>
+                                    <div class="small fw-bold text-neutral-900">New organizer registered: Robert Kim</div>
+                                    <div class="text-neutral-400" style="font-size:11px;">10 hours ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Approve Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-modal" style="border-radius:1rem;">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-2">Approve Event</h5>
+                    <p class="text-neutral-400 small" id="approveModalText">Are you sure you want to approve this event?</p>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Confirm Approval</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-modal" style="border-radius:1rem;">
+                <div class="modal-body p-4">
+                    <h5 class="fw-bold mb-2">Reject Event</h5>
+                    <p class="text-neutral-400 small mb-3" id="rejectModalText">Please provide a reason for rejecting this event:</p>
+                    <textarea class="form-control" rows="3" placeholder="Enter rejection reason..."></textarea>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Confirm Rejection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        lucide.createIcons();
+
+        function showApproveModal(name) {
+            document.getElementById('approveModalText').textContent = `Are you sure you want to approve "${name}"? This event will be published and visible to all users.`;
+            new bootstrap.Modal(document.getElementById('approveModal')).show();
+        }
+        function showRejectModal(name) {
+            document.getElementById('rejectModalText').textContent = `Please provide a reason for rejecting "${name}":`;
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+
+        const ctx = document.getElementById('revenueTrendChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan 15','Jan 18','Jan 21','Jan 24','Jan 27','Jan 30','Feb 2','Feb 5','Feb 8','Feb 11'],
+                datasets: [{
+                    data: [8000,15000,14000,16000,15500,17000,19000,22000,25000,30000],
+                    borderColor: '#17B978',
+                    backgroundColor: 'rgba(23,185,120,0.08)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#17B978',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9CA3AF' } },
+                    y: { grid: { color: '#F5F5F5' }, ticks: { font: { size: 10 }, color: '#9CA3AF' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

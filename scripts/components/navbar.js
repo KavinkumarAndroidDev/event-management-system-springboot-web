@@ -65,7 +65,7 @@ function injectHeader(rootPath, user) {
         
         <!-- Logo -->
         <a class="navbar-brand py-0 m-0" href="${rootPath}index.html">
-          <img src="${rootPath}assets/logo.SVG" alt="SyncEvent" height="32">
+          <img src="${rootPath}assets/logo.SVG" alt="SyncEvent" height="40">
         </a>
         
         <!-- Hamburger Toggle -->

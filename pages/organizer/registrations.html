@@ -1,185 +1,220 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registrations - SyncEvent Organizer</title>
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
-  
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrations - SyncEvent Organizer</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        
+        
+    
+        /* Dashboard UI Refinements */
+        body.bg-neutral-50 {
+            background-color: #f8fafc !important;
+        }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        
+    
+        
+        
+            </style>
 </head>
-<body>
-<div class="organizer-layout">
-  <aside class="organizer-sidebar">
-    <div class="sidebar-brand"><img src="../../assets/logo.SVG" alt="SyncEvent"></div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="sidebar-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-      <a href="my-events.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i> My Events</a>
-      <a href="create-event.html" class="sidebar-nav-item"><i data-lucide="plus-circle"></i> Create Event</a>
-      <a href="ticket-management.html" class="sidebar-nav-item"><i data-lucide="ticket"></i> Ticket Management</a>
-      <a href="registrations.html" class="sidebar-nav-item active"><i data-lucide="users"></i> Registrations</a>
-      <a href="reports.html" class="sidebar-nav-item"><i data-lucide="bar-chart-2"></i> Reports</a>
-      <a href="notifications.html" class="sidebar-nav-item"><i data-lucide="bell"></i> Notifications<span class="badge bg-danger ms-auto" style="font-size:0.65rem;padding:2px 6px;border-radius:10px;">3</span></a>
-      <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user-circle"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer"><a href="#" class="sidebar-nav-item text-danger"><i data-lucide="log-out"></i> Logout</a></div>
-  </aside>
-
-  <div class="organizer-main">
-    <div class="organizer-topbar">
-      <h5>Registrations</h5>
-      <div class="topbar-user">
-        <div class="user-avatar">JD</div>
-        <div class="user-info">
-          <div class="name">John Doe</div>
-          <div class="role">Organizer</div>
-        </div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i><div style="font-size:0.75rem;color:#6c757d;line-height:1.2;">Organizer</div></div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i>
-      </div>
-    </div>
-
-    <div class="organizer-content">
-      <div class="d-flex align-items-start justify-content-between mb-4">
-        <div>
-          <h4 class="fw-bold mb-1" style="font-size:1.1rem;">All Registrations</h4>
-          <p class="text-neutral-400 mb-0" style="font-size:0.85rem;">View and manage registrations across all events</p>
-        </div>
-        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2">
-          <i data-lucide="download" style="width:14px;height:14px;"></i> Export
-        </button>
-      </div>
-
-      <!-- Stats row -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-          <div class="reg-stat"><div class="num">8</div><div class="lbl">Total Registrations</div></div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="reg-stat"><div class="num">6</div><div class="lbl">Confirmed</div></div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="reg-stat"><div class="num">1</div><div class="lbl">Pending</div></div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="reg-stat"><div class="num" style="color:#1a7341;">₹850</div><div class="lbl">Total Revenue</div></div>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="org-card">
-        <div class="p-3">
-          <div class="row g-2 align-items-end">
-            <div class="col-md-3">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;">Event</label>
-              <select class="form-select form-select-sm">
-                <option>All Events</option>
-                <option>Tech Conference 2026</option>
-                <option>Music Festival Summer</option>
-              </select>
+<body class="bg-neutral-50">
+    <!-- Organizer Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <!-- Left: Logo & Search -->
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                    <div class="position-relative d-none d-md-block" style="width: 300px;">
+                        <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="18"></i>
+                        <input type="text" class="form-control border-transparent ps-5" placeholder="Search events, orders...">
+                    </div>
+                </div>
+                
+                <!-- Right: Actions & Profile -->
+                <div class="d-flex align-items-center gap-3">
+                    <a href="create-event.html" class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
+                        <i data-lucide="plus" width="16"></i> Create Event
+                    </a>
+                    
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px; height:10px; margin-top:8px; margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">JD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size: 0.813rem; line-height: 1.2;">John Doe</div>
+                            <div class="text-neutral-400" style="font-size: 0.688rem; line-height: 1.1;">Organizer</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-3">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;">Search or email</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-white border-end-0"><i data-lucide="search" style="width:13px;height:13px;color:#9ca3af;"></i></span>
-                <input type="text" class="form-control border-start-0" placeholder="Search...">
-              </div>
-            </div>
-            <div class="col-md-2">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;">Start Date</label>
-              <input type="date" class="form-control form-control-sm">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;">End Date</label>
-              <input type="date" class="form-control form-control-sm">
-            </div>
-          </div>
         </div>
-      </div>
+    </header>
 
-      <!-- Registrations Table -->
-      <div class="org-card">
-        <div class="org-card-header">
-          <h6>Registrations</h6>
-          <span style="font-size:0.78rem;color:#6c757d;">8 total</span>
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="my-events.html" class="sidebar-item">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="create-event.html" class="sidebar-item">
+                                <i data-lucide="plus-circle" class="sidebar-icon"></i> Create Event
+                            </a>
+                            <a href="ticket-management.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Ticket Management
+                            </a>
+                            <a href="registrations.html" class="sidebar-item active">
+                                <i data-lucide="users" class="sidebar-icon"></i> Registrations
+                            </a>
+                            <a href="reports.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
+                            </a>
+                            <a href="notifications.html" class="sidebar-item">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                            </a>
+                            <a href="profile.html" class="sidebar-item">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="border-neutral-100 my-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Registrations</h4>
+                    </div>
+                    <div class="mb-4">
+                    <h2 class="h3 fw-bold text-neutral-900 mb-1">Registrations</h2>
+                    <p class="text-neutral-400 small mb-0">View and manage registrations across all events</p>
+                </div>
+<div class="card-custom mb-4 py-3 px-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="text-neutral-400 small fw-bold text-uppercase ls-1 mb-2" style="font-size: 11px;">Event Filter</label>
+                            <select class="form-select px-3 fw-medium">
+                                <option>All Events</option>
+                                <option>Tech Conference 2026</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-neutral-400 small fw-bold text-uppercase ls-1 mb-2" style="font-size: 11px;">Search</label>
+                            <div class="position-relative">
+                                <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" style="width:16px; height:16px;"></i>
+                                <input type="text" class="form-control ps-5 fw-medium" placeholder="Name or email">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-neutral-400 small fw-bold text-uppercase ls-1 mb-2" style="font-size: 11px;">Date Filter</label>
+                            <input type="date" class="form-control px-3 fw-medium">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary rounded-pill w-100 fw-bold">
+                                <i data-lucide="download" style="width:18px;height:18px;"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+<div class="row g-4 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-neutral-900 mb-1">1,240</div>
+                            <div class="text-neutral-400 small fw-medium">Total Registrations</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-primary mb-1">1,120</div>
+                            <div class="text-neutral-400 small fw-medium">Attendance Rate</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-success mb-1">980</div>
+                            <div class="text-neutral-400 small fw-medium">Confirmed Paid</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-success mb-1">$45,200</div>
+                            <div class="text-neutral-400 small fw-medium">Net Revenue</div>
+                        </div>
+                    </div>
+                </div>
+<div class="card-custom p-0 overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light bg-opacity-25">
+                                <tr>
+                                    <th class="ps-4 text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Event Name</th>
+                                    <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">
+                                        Attendee</th>
+                                    <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">
+                                        Email</th>
+                                    <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">
+                                        Ticket Type</th>
+                                    <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">
+                                        Payment</th>
+                                    <th class="pe-4 text-neutral-400 small fw-bold text-uppercase text-end" style="font-size: 11px;">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-neutral-900">Tech Conference 2026</td>
+                                    <td class="fw-medium">John Smith</td>
+                                    <td class="text-neutral-400 small">john@example.com</td>
+                                    <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-bold" style="font-size: 10px;">VIP PASS</span></td>
+                                    <td><span class="text-success fw-bold small">Paid</span></td>
+                                    <td class="pe-4 text-end text-neutral-400 small">Feb 10, 2026</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-neutral-900">Tech Conference 2026</td>
+                                    <td class="fw-medium">Sarah Johnson</td>
+                                    <td class="text-neutral-400 small">sarah@example.com</td>
+                                    <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-bold" style="font-size: 10px;">GENERAL</span></td>
+                                    <td><span class="text-success fw-bold small">Paid</span></td>
+                                    <td class="pe-4 text-end text-neutral-400 small">Feb 12, 2026</td>
+                                </tr>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-neutral-900">Music Festival Summer</td>
+                                    <td class="fw-medium">Mike Brown</td>
+                                    <td class="text-neutral-400 small">mike@example.com</td>
+                                    <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-bold" style="font-size: 10px;">EARLY BIRD</span></td>
+                                    <td><span class="text-warning fw-bold small">Paid</span></td>
+                                    <td class="pe-4 text-end text-neutral-400 small">Feb 14, 2026</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
         </div>
-        <div style="overflow-x:auto;">
-          <table class="organizer-table">
-            <thead>
-              <tr>
-                <th>Attendee</th>
-                <th>Event</th>
-                <th>Ticket</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Total Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <div class="fw-medium">John Smith</div>
-                  <div style="font-size:0.75rem;color:#6c757d;">john@example.com</div>
-                </td>
-                <td>Tech Conference 2026</td>
-                <td>General Admission</td>
-                <td><span class="badge-status badge-free">Free</span></td>
-                <td>Mar 12, 2026</td>
-                <td class="fw-semibold text-success">₹0</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="fw-medium">Sarah Johnson</div>
-                  <div style="font-size:0.75rem;color:#6c757d;">sarah@example.com</div>
-                </td>
-                <td>Tech Conference 2026</td>
-                <td>VIP Pass</td>
-                <td><span class="badge-status badge-paid">Paid</span></td>
-                <td>Mar 10, 2026</td>
-                <td class="fw-semibold text-success">₹1,500</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="fw-medium">Mike Brown</div>
-                  <div style="font-size:0.75rem;color:#6c757d;">mike@example.com</div>
-                </td>
-                <td>Music Festival Summer</td>
-                <td>Off Pass</td>
-                <td><span class="badge-status badge-free">Free</span></td>
-                <td>Mar 9, 2026</td>
-                <td class="fw-semibold text-success">₹0</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="fw-medium">Emily Davis</div>
-                  <div style="font-size:0.75rem;color:#6c757d;">emily@example.com</div>
-                </td>
-                <td>Tech Conference 2026</td>
-                <td>Student Ticket</td>
-                <td><span class="badge-status badge-paid">Paid</span></td>
-                <td>Mar 8, 2026</td>
-                <td class="fw-semibold text-success">₹250</td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="fw-medium">Music Festival Summer</div>
-                  <div style="font-size:0.75rem;color:#6c757d;">david@example.com</div>
-                </td>
-                <td>Music Festival Summer</td>
-                <td>General Admission</td>
-                <td><span class="badge-status badge-pending">Pending</span></td>
-                <td>Mar 7, 2026</td>
-                <td class="fw-semibold" style="color:#a16207;">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+    </main>
+
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>lucide.createIcons();</script>
+
+</body></html>

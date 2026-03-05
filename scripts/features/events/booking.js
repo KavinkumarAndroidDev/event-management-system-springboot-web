@@ -405,9 +405,9 @@ export function initBookingPage() {
                 "key": "rzp_test_SL5XMJTbrtdBjR",
                 "amount": Math.round(totalAmount * 100), // in paise
                 "currency": "INR",
-                "name": "EMS Booking",
+                "name": "SyncEvent",
                 "description": `Ticket Booking for ${event.title}`,
-                "image": "https://ui-avatars.com/api/?name=EMS&background=17B978&color=fff",
+                "image": "https://ui-avatars.com/api/?name=S&background=17B978&color=fff",
                 "handler": function (response) {
                     processSuccessfulBooking(response.razorpay_payment_id, totalAmount);
                 },
@@ -476,6 +476,7 @@ export function initBookingPage() {
             const paymentData = {
                 id: payId,
                 userId: user.id,
+                eventId: event.id,
                 eventTitle: event.title,
                 date: new Date().toISOString(),
                 tickets: `${firstTicketName} x ${totalTickets}`,

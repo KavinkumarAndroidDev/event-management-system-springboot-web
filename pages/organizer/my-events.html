@@ -1,208 +1,256 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>My Events - SyncEvent Organizer</title>
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
-  
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Events - SyncEvent Organizer</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        
+        
+    
+        /* Dashboard UI Refinements */
+        body.bg-neutral-50 {
+            background-color: #f8fafc !important;
+        }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        
+    
+        
+        
+            </style>
 </head>
-<body>
-<div class="organizer-layout">
-  <aside class="organizer-sidebar">
-    <div class="sidebar-brand"><img src="../../assets/logo.SVG" alt="SyncEvent"></div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="sidebar-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-      <a href="my-events.html" class="sidebar-nav-item active"><i data-lucide="calendar-days"></i> My Events</a>
-      <a href="create-event.html" class="sidebar-nav-item"><i data-lucide="plus-circle"></i> Create Event</a>
-      <a href="ticket-management.html" class="sidebar-nav-item"><i data-lucide="ticket"></i> Ticket Management</a>
-      <a href="registrations.html" class="sidebar-nav-item"><i data-lucide="users"></i> Registrations</a>
-      <a href="reports.html" class="sidebar-nav-item"><i data-lucide="bar-chart-2"></i> Reports</a>
-      <a href="notifications.html" class="sidebar-nav-item"><i data-lucide="bell"></i> Notifications <span class="badge bg-danger ms-auto" style="font-size:0.65rem;padding:2px 6px;border-radius:10px;">3</span></a>
-      <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user-circle"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer"><a href="#" class="sidebar-nav-item text-danger"><i data-lucide="log-out"></i> Logout</a></div>
-  </aside>
-
-  <div class="organizer-main">
-    <div class="organizer-topbar">
-      <h5>My Events</h5>
-      <div class="topbar-user">
-        <div class="user-avatar">JD</div>
-        <div>
-          <div style="font-size:0.85rem;font-weight:600;line-height:1.2;">John Doe</div>
-          <div style="font-size:0.75rem;color:#6c757d;line-height:1.2;">Organizer</div>
-        </div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i>
-      </div>
-    </div>
-
-    <div class="organizer-content">
-      <!-- Page header -->
-      <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-          <h4 class="fw-bold mb-1" style="font-size:1.1rem;">My Events</h4>
-          <p class="text-neutral-400 mb-0" style="font-size:0.85rem;">Manage all your created events</p>
-        </div>
-        <a href="create-event.html" class="btn btn-primary d-flex align-items-center gap-2">
-          <i data-lucide="plus" style="width:16px;height:16px;"></i> Create Event
-        </a>
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-          <div class="stat-pill">
-            <span class="val">4</span>
-            <span class="lbl">Total</span>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-pill">
-            <span class="val">2</span>
-            <span class="lbl">Upcoming</span>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-pill">
-            <span class="val">1</span>
-            <span class="lbl">Live</span>
-          </div>
-        </div>
-        <div class="col-6 col-md-3">
-          <div class="stat-pill" style="color:#dc2626;">
-            <span class="val" style="color:#dc2626;">₹18,076</span>
-            <span class="lbl" style="color:#6c757d;">Revenue</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filter Bar -->
-      <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
-        <button class="btn btn-sm btn-primary rounded-pill px-3">All</button>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Upcoming</button>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Active</button>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Ended</button>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill px-3">Cancelled</button>
-        <div class="ms-auto">
-          <div class="input-group input-group-sm" style="width:200px;">
-            <span class="input-group-text bg-white border-end-0"><i data-lucide="search" style="width:14px;height:14px;color:#9ca3af;"></i></span>
-            <input type="text" class="form-control border-start-0" placeholder="Search events...">
-          </div>
-        </div>
-      </div>
-
-      <!-- Event Cards Grid -->
-      <div class="row g-3">
-        <!-- Card 1 -->
-        <div class="col-md-6 col-xl-4">
-          <div class="event-card-org">
-            <div class="event-img-placeholder" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);">
-              🎤
-            </div>
-            <div class="event-card-body">
-              <div class="event-name">Tech Conference 2026</div>
-              <div class="event-meta d-flex flex-column gap-1 mt-2">
-                <div><i data-lucide="calendar" style="width:12px;height:12px;"></i> Apr 10, 2026 — Aug 26, 2026</div>
-                <div><i data-lucide="map-pin" style="width:12px;height:12px;"></i> Coimbatore, TN</div>
-                <div><i data-lucide="ticket" style="width:12px;height:12px;"></i> 450 · 350 tickets sold</div>
-              </div>
-              <div class="mt-2" style="font-size:0.85rem;font-weight:700;color:#1a7341;">₹48,515</div>
-            </div>
-            <div class="event-footer">
-              <span class="badge-status badge-upcoming">Upcoming</span>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-secondary px-2 py-1"><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
-                <button class="btn btn-sm btn-outline-danger px-2 py-1"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 2 -->
-        <div class="col-md-6 col-xl-4">
-          <div class="event-card-org">
-            <div class="event-img-placeholder" style="background:linear-gradient(135deg,#7c2d12,#f97316);">
-              🎵
-            </div>
-            <div class="event-card-body">
-              <div class="event-name">Music Festival Summer</div>
-              <div class="event-meta d-flex flex-column gap-1 mt-2">
-                <div><i data-lucide="calendar" style="width:12px;height:12px;"></i> Apr 10, 2026 — Aug 26, 2026</div>
-                <div><i data-lucide="map-pin" style="width:12px;height:12px;"></i> Chennai, TN</div>
-                <div><i data-lucide="ticket" style="width:12px;height:12px;"></i> 800 · 650 tickets sold</div>
-              </div>
-              <div class="mt-2" style="font-size:0.85rem;font-weight:700;color:#1a7341;">₹68,700</div>
-            </div>
-            <div class="event-footer">
-              <span class="badge-status badge-upcoming">Upcoming</span>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-secondary px-2 py-1"><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
-                <button class="btn btn-sm btn-outline-danger px-2 py-1"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="col-md-6 col-xl-4">
-          <div class="event-card-org">
-            <div class="event-img-placeholder" style="background:linear-gradient(135deg,#166534,#22c55e);">
-              🎨
-            </div>
-            <div class="event-card-body">
-              <div class="event-name">Art Exhibition Opening</div>
-              <div class="event-meta d-flex flex-column gap-1 mt-2">
-                <div><i data-lucide="calendar" style="width:12px;height:12px;"></i> Apr 10, 2026 — Aug 26, 2026</div>
-                <div><i data-lucide="map-pin" style="width:12px;height:12px;"></i> Madurai, TN</div>
-                <div><i data-lucide="ticket" style="width:12px;height:12px;"></i> 200 · 80 tickets sold</div>
-              </div>
-              <div class="mt-2" style="font-size:0.85rem;font-weight:700;color:#1a7341;">₹3,750</div>
-            </div>
-            <div class="event-footer">
-              <span class="badge-status badge-active">Active</span>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-secondary px-2 py-1"><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
-                <button class="btn btn-sm btn-outline-danger px-2 py-1"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 4 Full width featured -->
-        <div class="col-12">
-          <div class="event-card-org" style="display:flex;flex-direction:row;align-items:stretch;">
-            <div class="event-img-placeholder" style="background:linear-gradient(135deg,#312e81,#7c3aed);width:200px;flex-shrink:0;border-radius:0;">
-              💼
-            </div>
-            <div style="flex:1;padding:16px 20px;">
-              <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
-                <div>
-                  <div class="event-name" style="font-size:1rem;">Business Networking Event</div>
-                  <div class="event-meta d-flex flex-wrap gap-3 mt-2">
-                    <span><i data-lucide="calendar" style="width:12px;height:12px;"></i> May 3, 2026</span>
-                    <span><i data-lucide="map-pin" style="width:12px;height:12px;"></i> RSPuram, Coimbatore</span>
-                    <span><i data-lucide="users" style="width:12px;height:12px;"></i> 150 capacity</span>
-                    <span><i data-lucide="ticket" style="width:12px;height:12px;"></i> 45 tickets sold</span>
-                  </div>
+<body class="bg-neutral-50">
+    <!-- Organizer Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <!-- Left: Logo & Search -->
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                    <div class="position-relative d-none d-md-block" style="width: 300px;">
+                        <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="18"></i>
+                        <input type="text" class="form-control border-transparent ps-5" placeholder="Search events, orders...">
+                    </div>
                 </div>
-                <span class="badge-status badge-upcoming">Upcoming</span>
-              </div>
-              <div class="d-flex align-items-center justify-content-between mt-3">
-                <div style="font-size:1.1rem;font-weight:700;color:#1a7341;">₹1,250</div>
-                <div class="d-flex gap-2">
-                  <button class="btn btn-sm btn-outline-secondary px-2 py-1"><i data-lucide="pencil" style="width:12px;height:12px;"></i></button>
-                  <button class="btn btn-sm btn-outline-danger px-2 py-1"><i data-lucide="trash-2" style="width:12px;height:12px;"></i></button>
+                
+                <!-- Right: Actions & Profile -->
+                <div class="d-flex align-items-center gap-3">
+                    <a href="create-event.html" class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
+                        <i data-lucide="plus" width="16"></i> Create Event
+                    </a>
+                    
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px; height:10px; margin-top:8px; margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">JD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size: 0.813rem; line-height: 1.2;">John Doe</div>
+                            <div class="text-neutral-400" style="font-size: 0.688rem; line-height: 1.1;">Organizer</div>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
+    </header>
 
-    </div>
-  </div>
-</div>
-<script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="my-events.html" class="sidebar-item active">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="create-event.html" class="sidebar-item">
+                                <i data-lucide="plus-circle" class="sidebar-icon"></i> Create Event
+                            </a>
+                            <a href="ticket-management.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Ticket Management
+                            </a>
+                            <a href="registrations.html" class="sidebar-item">
+                                <i data-lucide="users" class="sidebar-icon"></i> Registrations
+                            </a>
+                            <a href="reports.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
+                            </a>
+                            <a href="notifications.html" class="sidebar-item">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                            </a>
+                            <a href="profile.html" class="sidebar-item">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="border-neutral-100 my-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">My Events</h4>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="h3 fw-bold text-neutral-900 mb-1">My Events</h2>
+                        <p class="text-neutral-400 small mb-0">Manage and track all your events</p>
+                    </div>
+                    <a href="create-event.html" class="btn btn-primary rounded-pill">
+                        <i data-lucide="plus" style="width:18px;height:18px;"></i> Create Event
+                    </a>
+                </div>
+<div class="row g-4 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-neutral-900 mb-1">4</div>
+                            <div class="text-neutral-400 small fw-medium">Total Events</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-success mb-1">2</div>
+                            <div class="text-neutral-400 small fw-medium">Published</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-neutral-900 mb-1">1</div>
+                            <div class="text-neutral-400 small fw-medium">Drafts</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="card-custom py-3 px-4 h-100">
+                            <div class="h3 fw-bold text-primary mb-1">$118,070</div>
+                            <div class="text-neutral-400 small fw-medium">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+<div class="row g-4">
+                    <!-- Event 1 -->
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card-custom p-0 overflow-hidden h-100">
+                            <div class="position-relative">
+                                <img src="../../assets/about_the_eif.jpg" class="w-100" style="height: 180px; object-fit: cover;" alt="Tech Conference 2026">
+                                <span class="badge rounded-pill bg-success px-3 py-2 fw-bold position-absolute" style="top:12px; right:12px; font-size: 11px;">Published</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="h6 fw-bold text-neutral-900 mb-3">Tech Conference 2026</h3>
+                                <div class="d-flex flex-column gap-2 mb-4">
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="calendar" style="width:14px; height:14px;"></i> Mar 15–17, 2026
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="map-pin" style="width:14px; height:14px;"></i> Convention Center
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="users" style="width:14px; height:14px;"></i> 150 / 200 sold
+                                    </div>
+                                </div>
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" style="width: 75%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="text-neutral-400 small">Revenue</span>
+                                    <span class="fw-bold text-neutral-900">$48,320</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="Edit"><i data-lucide="pencil" style="width:16px;height:16px;"></i></button>
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="View"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card-custom p-0 overflow-hidden h-100">
+                            <div class="position-relative">
+                                <img src="../../assets/about_the_eif.jpg" class="w-100" style="height: 180px; object-fit: cover;" alt="Music Festival Summer">
+                                <span class="badge rounded-pill bg-success px-3 py-2 fw-bold position-absolute" style="top:12px; right:12px; font-size: 11px;">Published</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="h6 fw-bold text-neutral-900 mb-3">Music Festival Summer</h3>
+                                <div class="d-flex flex-column gap-2 mb-4">
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="calendar" style="width:14px; height:14px;"></i> Apr 22, 2026
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="map-pin" style="width:14px; height:14px;"></i> Outdoor Park
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="users" style="width:14px; height:14px;"></i> 450 / 500 sold
+                                    </div>
+                                </div>
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" style="width: 90%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="text-neutral-400 small">Revenue</span>
+                                    <span class="fw-bold text-neutral-900">$67,500</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="Edit"><i data-lucide="pencil" style="width:16px;height:16px;"></i></button>
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="View"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-xl-4">
+                        <div class="card-custom p-0 overflow-hidden h-100">
+                            <div class="position-relative">
+                                <img src="../../assets/about_the_eif.jpg" class="w-100" style="height: 180px; object-fit: cover;" alt="Art Exhibition Opening">
+                                <span class="badge rounded-pill px-3 py-2 fw-bold position-absolute" style="font-size: 11px; background-color: #F1F5F9; color: #475569;">Draft</span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="h6 fw-bold text-neutral-900 mb-3">Art Exhibition Opening</h3>
+                                <div class="d-flex flex-column gap-2 mb-4">
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="calendar" style="width:14px; height:14px;"></i> Feb 28, 2026
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="map-pin" style="width:14px; height:14px;"></i> Art Gallery
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 text-neutral-400 small">
+                                        <i data-lucide="users" style="width:14px; height:14px;"></i> 0 / 100 sold
+                                    </div>
+                                </div>
+                                <div class="progress mb-3" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" style="width: 0%"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <span class="text-neutral-400 small">Revenue</span>
+                                    <span class="fw-bold text-neutral-900">$0</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="Edit"><i data-lucide="pencil" style="width:16px;height:16px;"></i></button>
+                                    <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900" title="View"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>lucide.createIcons();</script>
+
+</body></html>

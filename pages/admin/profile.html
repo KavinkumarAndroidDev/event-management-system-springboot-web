@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile - SyncEvent Admin</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        body.bg-neutral-50 { background-color: #f8fafc !important; }
+        .card-custom { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 2px 4px -1px rgba(0,0,0,0.02) !important; border-color: rgba(0,0,0,0.06) !important; }
+    </style>
+</head>
+<body class="bg-neutral-50">
+    <header class="bg-white border-bottom sticky-top" style="height:64px;z-index:1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <a class="brand" href="../../index.html" style="width:140px;"><img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid"></a>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white"><i data-lucide="bell" style="width:20px;height:20px;"></i><span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px;height:10px;margin-top:8px;margin-left:-8px;"></span></a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">AD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size:0.813rem;">Admin User</div>
+                            <div class="text-neutral-400" style="font-size:0.688rem;">admin@example.com</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top:88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item"><i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard</a>
+                            <a href="user-management.html" class="sidebar-item"><i data-lucide="users" class="sidebar-icon"></i> User Management</a>
+                            <a href="event-approvals.html" class="sidebar-item"><i data-lucide="check-circle" class="sidebar-icon"></i> Event Approvals <span class="badge rounded-pill ms-auto" style="background:#ef4444;color:#fff;font-size:10px;">8</span></a>
+                            <a href="events.html" class="sidebar-item"><i data-lucide="calendar" class="sidebar-icon"></i> Events</a>
+                            <a href="categories.html" class="sidebar-item"><i data-lucide="tag" class="sidebar-icon"></i> Categories</a>
+                            <a href="venues.html" class="sidebar-item"><i data-lucide="map-pin" class="sidebar-icon"></i> Venues</a>
+                            <a href="tickets-registrations.html" class="sidebar-item"><i data-lucide="ticket" class="sidebar-icon"></i> Tickets &amp; Registrations</a>
+                            <a href="payments-revenue.html" class="sidebar-item"><i data-lucide="dollar-sign" class="sidebar-icon"></i> Payments &amp; Revenue</a>
+                            <a href="reports-analytics.html" class="sidebar-item"><i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports &amp; Analytics</a>
+                            <a href="feedback-moderation.html" class="sidebar-item"><i data-lucide="message-square" class="sidebar-icon"></i> Feedback Moderation</a>
+                            <a href="notifications.html" class="sidebar-item"><i data-lucide="bell" class="sidebar-icon"></i> Notifications <span class="badge rounded-pill ms-auto" style="background:#ef4444;color:#fff;font-size:10px;">5</span></a>
+                            <a href="profile.html" class="sidebar-item active"><i data-lucide="user" class="sidebar-icon"></i> Profile</a>
+                        </nav>
+                        <hr class="my-3" style="border-color:rgba(0,0,0,0.06);">
+                        <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Profile</h4>
+                    </div>
+
+                    <!-- Admin Information -->
+                    <div class="card-custom mb-4 p-4">
+                        <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">
+                            <i data-lucide="user" style="width:16px;height:16px;" class="me-2"></i> Admin Information
+                        </h3>
+                        <div class="d-flex align-items-center gap-4 mb-4">
+                            <div class="avatar-circle flex-shrink-0" style="width:80px;height:80px;font-size:24px;">AD</div>
+                            <div>
+                                <div class="fw-bold text-neutral-900 mb-1">Admin User</div>
+                                <div class="text-neutral-400 small">Super Admin · admin@example.com</div>
+                            </div>
+                        </div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">Full Name</label>
+                                <input type="text" class="form-control" value="Admin User">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">Email Address</label>
+                                <input type="email" class="form-control" value="admin@example.com" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">Phone Number</label>
+                                <input type="text" class="form-control" value="+1 (555) 123-4567">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">Role</label>
+                                <input type="text" class="form-control" value="Super Admin" disabled>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-2 d-flex gap-2">
+                            <button class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                            <button class="btn btn-outline-secondary rounded-pill px-4">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="card-custom mb-4 p-4">
+                        <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">
+                            <i data-lucide="lock" style="width:16px;height:16px;" class="me-2"></i> Change Password
+                        </h3>
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-neutral-900 small">Current Password</label>
+                                <input type="password" class="form-control" placeholder="••••••••">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">New Password</label>
+                                <input type="password" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-neutral-900 small">Confirm New Password</label>
+                                <input type="password" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-2">
+                            <button class="btn btn-primary rounded-pill px-4 fw-bold">Update Password</button>
+                        </div>
+                    </div>
+
+                    <!-- System Settings -->
+                    <div class="card-custom mb-4 p-4">
+                        <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">
+                            <i data-lucide="settings" style="width:16px;height:16px;" class="me-2"></i> System Settings
+                        </h3>
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Email Notifications</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Receive email notifications for important system events</div>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Two-Factor Authentication</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Add an extra layer of security to your account</div>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" style="width:2.5rem;height:1.25rem;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Auto-Approve Events</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Automatically approve events from verified organizers</div>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" style="width:2.5rem;height:1.25rem;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Daily Reports</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Receive daily summary reports via email</div>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" checked style="width:2.5rem;height:1.25rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Activity -->
+                    <div class="card-custom mb-4 p-4">
+                        <h3 class="h6 fw-bold text-neutral-900 mb-4 border-bottom pb-3">Account Activity</h3>
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                <div class="small text-neutral-400">Last Login</div>
+                                <div class="fw-bold text-neutral-900 small">February 15, 2026 at 9:30 AM</div>
+                            </div>
+                            <div class="text-neutral-400 small">IP: 192.168.1.1</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                <div class="small text-neutral-400">Previous Login</div>
+                                <div class="fw-bold text-neutral-900 small">February 14, 2026 at 2:15 PM</div>
+                            </div>
+                            <div class="text-neutral-400 small">IP: 192.168.1.1</div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <div class="small text-neutral-400">Account Created</div>
+                                <div class="fw-bold text-neutral-900 small">January 1, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="card-custom mb-4 p-4 border-0" style="background:rgba(239,68,68,0.05);">
+                        <h3 class="h6 fw-bold text-danger mb-3">Danger Zone</h3>
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Export All Data</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Download a complete copy of all platform data</div>
+                            </div>
+                            <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" style="font-size:12px;">Export Data</button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold text-neutral-900 small">Clear System Cache</div>
+                                <div class="text-neutral-400" style="font-size:12px;">Clear all cached data to improve performance</div>
+                            </div>
+                            <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" style="font-size:12px;">Clear Cache</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

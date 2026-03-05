@@ -1,155 +1,223 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Create Event - SyncEvent Organizer</title>
-  <link rel="stylesheet" href="../../css/main.css">
-  <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
-  
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create Event - SyncEvent Organizer</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
+    <style>
+        
+        
+    
+        /* Dashboard UI Refinements */
+        body.bg-neutral-50 {
+            background-color: #f8fafc !important;
+        }
+        .card-custom {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02) !important;
+            border-color: rgba(0,0,0,0.06) !important;
+        }
+        
+    
+        
+        
+            </style>
 </head>
-<body>
-<div class="organizer-layout">
-  <aside class="organizer-sidebar">
-    <div class="sidebar-brand"><img src="../../assets/logo.SVG" alt="SyncEvent"></div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html" class="sidebar-nav-item"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-      <a href="my-events.html" class="sidebar-nav-item"><i data-lucide="calendar-days"></i> My Events</a>
-      <a href="create-event.html" class="sidebar-nav-item active"><i data-lucide="plus-circle"></i> Create Event</a>
-      <a href="ticket-management.html" class="sidebar-nav-item"><i data-lucide="ticket"></i> Ticket Management</a>
-      <a href="registrations.html" class="sidebar-nav-item"><i data-lucide="users"></i> Registrations</a>
-      <a href="reports.html" class="sidebar-nav-item"><i data-lucide="bar-chart-2"></i> Reports</a>
-      <a href="notifications.html" class="sidebar-nav-item"><i data-lucide="bell"></i> Notifications <span class="badge bg-danger ms-auto" style="font-size:0.65rem;padding:2px 6px;border-radius:10px;">3</span></a>
-      <a href="profile.html" class="sidebar-nav-item"><i data-lucide="user-circle"></i> Profile</a>
-    </nav>
-    <div class="sidebar-footer"><a href="#" class="sidebar-nav-item text-danger"><i data-lucide="log-out"></i> Logout</a></div>
-  </aside>
+<body class="bg-neutral-50">
+    <!-- Organizer Navbar -->
+    <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
+        <div class="container-fluid px-4 h-100">
+            <div class="d-flex align-items-center justify-content-between h-100">
+                <!-- Left: Logo & Search -->
+                <div class="d-flex align-items-center gap-4">
+                    <a class="brand" href="../../index.html" style="width: 140px;">
+                        <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
+                    </a>
+                    <div class="position-relative d-none d-md-block" style="width: 300px;">
+                        <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" width="18"></i>
+                        <input type="text" class="form-control border-transparent ps-5" placeholder="Search events, orders...">
+                    </div>
+                </div>
+                
+                <!-- Right: Actions & Profile -->
+                <div class="d-flex align-items-center gap-3">
+                    <a href="create-event.html" class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
+                        <i data-lucide="plus" width="16"></i> Create Event
+                    </a>
+                    
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                        <i data-lucide="bell" style="width:20px;height:20px;"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width:10px; height:10px; margin-top:8px; margin-left:-8px;"></span>
+                    </a>
+                    <div class="d-flex align-items-center gap-2 ps-3 border-start ms-1">
+                        <div class="avatar-circle">JD</div>
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-neutral-900" style="font-size: 0.813rem; line-height: 1.2;">John Doe</div>
+                            <div class="text-neutral-400" style="font-size: 0.688rem; line-height: 1.1;">Organizer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <div class="organizer-main">
-    <div class="organizer-topbar">
-      <h5>Create Event</h5>
-      <div class="topbar-user">
-        <div class="user-avatar">JD</div>
-        <div>
-          <div style="font-size:0.85rem;font-weight:600;line-height:1.2;">John Doe</div>
-          <div style="font-size:0.75rem;color:#6c757d;line-height:1.2;">Organizer</div>
-        </div>
-        <i data-lucide="chevron-down" style="width:14px;height:14px;color:#6c757d;"></i>
-      </div>
-    </div>
+    <main class="section-sm">
+        <div class="container-fluid px-4">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-2">
+                    <div class="card-custom p-3 position-sticky" style="top: 88px;">
+                        <nav class="nav flex-column gap-1">
+                            <a href="dashboard.html" class="sidebar-item">
+                                <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
+                            </a>
+                            <a href="my-events.html" class="sidebar-item">
+                                <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="create-event.html" class="sidebar-item active">
+                                <i data-lucide="plus-circle" class="sidebar-icon"></i> Create
+                    Event
+                            </a>
+                            <a href="ticket-management.html" class="sidebar-item">
+                                <i data-lucide="ticket" class="sidebar-icon"></i> Ticket Management
+                            </a>
+                            <a href="registrations.html" class="sidebar-item">
+                                <i data-lucide="users" class="sidebar-icon"></i> Registrations
+                            </a>
+                            <a href="reports.html" class="sidebar-item">
+                                <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
+                            </a>
+                            <a href="notifications.html" class="sidebar-item">
+                                <i data-lucide="bell" class="sidebar-icon"></i> Notifications
+                            </a>
+                            <a href="profile.html" class="sidebar-item">
+                                <i data-lucide="user" class="sidebar-icon"></i> Profile
+                            </a>
+                        </nav>
+                        <hr class="border-neutral-100 my-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a href="../../index.html" class="btn btn-outline-danger w-100 rounded-pill"><i data-lucide="log-out" width="18" class="me-2"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
 
-    <div class="organizer-content">
-      <!-- Stepper -->
-      <div class="stepper">
-        <div class="step active">
-          <div class="step-circle">1</div>
-          <span class="step-label">Basic Events</span>
+                <!-- Main Content -->
+                <div class="col-lg-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0">Create Event</h4>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-center gap-4 mb-5 mx-auto" style="max-width: 800px;">
+                    <div class="d-flex flex-column align-items-center gap-2">
+                        <div class="avatar-circle" id="sc1" style="width: 36px; height: 36px;">1</div>
+                        <span class="small fw-bold text-neutral-900" id="sl1">Basic Details</span>
+                    </div>
+                    <div class="flex-grow-1 border-top border-2 mb-4" style="border-style: dashed !important; border-color: #E5E7EB !important;"></div>
+                    <div class="d-flex flex-column align-items-center gap-2">
+                        <div class="avatar-circle bg-light text-neutral-400" id="sc2" style="width: 36px; height: 36px;">2</div>
+                        <span class="small text-neutral-400" id="sl2">Venue</span>
+                    </div>
+                    <div class="flex-grow-1 border-top border-2 mb-4" style="border-style: dashed !important; border-color: #E5E7EB !important;"></div>
+                    <div class="d-flex flex-column align-items-center gap-2">
+                        <div class="avatar-circle bg-light text-neutral-400" id="sc3" style="width: 36px; height: 36px;">3</div>
+                        <span class="small text-neutral-400" id="sl3">Tickets</span>
+                    </div>
+                </div>
+<div class="card-custom mx-auto" style="max-width: 720px;" id="step1">
+                    <h2 class="h5 fw-bold text-neutral-900 mb-4">Event Information</h2>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-medium small">Event Title *</label>
+                            <input type="text" class="form-control" placeholder="Enter event name">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-medium small">Category *</label>
+                            <select class="form-select">
+                                <option>Conference</option>
+                                <option>Workshop</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-medium small">Banner Image *</label>
+                            <div class="border-2 border-dashed rounded-3 p-5 text-center bg-light" style="border-style: dashed !important; border-color: #E5E7EB !important; cursor: pointer;">
+                                <i data-lucide="upload" class="text-neutral-400 mb-2"></i>
+                                <div class="small fw-bold text-neutral-900">Click to upload banner</div>
+                                <div class="small text-neutral-400">PNG, JPG up to 5MB</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-medium small">Description *</label>
+                            <textarea class="form-control h-auto" rows="5" placeholder="Tell us about the event"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-3 mt-5">
+                        <button class="btn btn-primary rounded-pill px-4">Save &amp; Continue <i data-lucide="arrow-right" class="btn-icon text-neutral-900"></i></button>
+                    </div>
+                </div>
+                </div>
+            </div>
         </div>
-        <div class="step-line"></div>
-        <div class="step pending">
-          <div class="step-circle">2</div>
-          <span class="step-label">Schedule & Venue</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step pending">
-          <div class="step-circle">3</div>
-          <span class="step-label">Tickets</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step pending">
-          <div class="step-circle">4</div>
-          <span class="step-label">Review & Submit</span>
-        </div>
-      </div>
+    </main>
 
-      <!-- Form Card -->
-      <div class="org-card">
-        <div class="org-card-header">
-          <h6>Create New Event</h6>
-        </div>
-        <div class="org-card-body">
-          <div class="row g-3">
-            <!-- Event Title -->
-            <div class="col-12">
-              <label class="form-label">Event Title <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" placeholder="Enter event title">
-            </div>
-            <!-- Description -->
-            <div class="col-12">
-              <label class="form-label">Description</label>
-              <textarea class="form-control" rows="4" placeholder="Write a brief description about your event..."></textarea>
-              <div class="form-text">A clear description helps attendees understand your event. Max 500 characters.</div>
-            </div>
-            <!-- Category -->
-            <div class="col-md-6">
-              <label class="form-label">Category <span class="text-danger">*</span></label>
-              <select class="form-select">
-                <option value="">Select Category</option>
-                <option>Technology</option>
-                <option>Music</option>
-                <option>Business</option>
-                <option>Art & Culture</option>
-                <option>Sports</option>
-                <option>Food & Drinks</option>
-                <option>Education</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <!-- Event Type -->
-            <div class="col-md-6">
-              <label class="form-label">Event Type <span class="text-danger">*</span></label>
-              <select class="form-select">
-                <option value="">Select Type</option>
-                <option>In-Person</option>
-                <option>Online</option>
-                <option>Hybrid</option>
-              </select>
-            </div>
-            <!-- Capacity -->
-            <div class="col-md-6">
-              <label class="form-label">Total Capacity</label>
-              <input type="number" class="form-control" placeholder="e.g. 500">
-            </div>
-            <!-- Venue Name -->
-            <div class="col-md-6">
-              <label class="form-label">Venue Name</label>
-              <input type="text" class="form-control" placeholder="Venue name">
-            </div>
-            <!-- Tags -->
-            <div class="col-12">
-              <label class="form-label">Tags</label>
-              <input type="text" class="form-control" placeholder="e.g. tech, startups, networking (comma-separated)">
-              <div class="form-text">Add relevant keywords to improve discoverability.</div>
-            </div>
-            <!-- Venue / Notes -->
-            <div class="col-12">
-              <label class="form-label">Event Notes <span class="text-muted">(Optional)</span></label>
-              <textarea class="form-control" rows="2" placeholder="Any additional notes..."></textarea>
-            </div>
-            <!-- Banner Upload -->
-            <div class="col-12">
-              <label class="form-label">Event Banner</label>
-              <div class="upload-zone">
-                <i data-lucide="image" style="width:32px;height:32px;margin-bottom:8px;"></i>
-                <div style="font-size:0.85rem;">Drag &amp; drop your banner here, or <span style="color:#1a7341;font-weight:600;">browse files</span></div>
-                <div style="font-size:0.75rem;color:#d1d5db;margin-top:4px;">Supports JPG, PNG up to 5MB. Recommended: 1920×600px</div>
-              </div>
-            </div>
-          </div>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-          <!-- Footer Buttons -->
-          <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <button class="btn btn-outline-secondary">Cancel</button>
-            <a href="create-event-step2.html" class="btn btn-primary">Next <i data-lucide="arrow-right" class="btn-icon" style="width:14px;height:14px;"></i></a>
-          </div>
-        </div>
-      </div>
+    <script>
+        lucide.createIcons();
 
-    </div>
-  </div>
-</div>
-<script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+        let currentStep = 1;
+
+        function goStep(n) {
+            // Hide all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('step' + i).classList.add('d-none');
+            }
+            // Show target
+            document.getElementById('step' + n).classList.remove('d-none');
+            currentStep = n;
+            updateStepper();
+            lucide.createIcons();
+        }
+
+        function updateStepper() {
+            for (let i = 1; i <= 4; i++) {
+                const circle = document.getElementById('sc' + i);
+                const icon = document.getElementById('si' + i);
+                const label = document.getElementById('sl' + i);
+                if (i < currentStep) {
+                    circle.className = 'step-circle done';
+                    icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                    label.className = 'step-label';
+                } else if (i === currentStep) {
+                    circle.className = 'step-circle active';
+                    icon.textContent = i;
+                    label.className = 'step-label';
+                } else {
+                    circle.className = 'step-circle pending';
+                    icon.textContent = i;
+                    label.className = 'step-label pending';
+                }
+            }
+        }
+
+        let ticketCount = 1;
+        function addTicket() {
+            ticketCount++;
+            const row = document.createElement('div');
+            row.className = 'ticket-row';
+            row.dataset.ticket = ticketCount;
+            row.innerHTML = `
+                <input type="text" class="form-control" placeholder="e.g. VIP Pass">
+                <input type="number" class="form-control" placeholder="0">
+                <input type="number" class="form-control" placeholder="0">
+                <button class="ticket-del-btn" onclick="removeTicket(this)" title="Remove">
+                    <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
+                </button>`;
+            document.getElementById('ticketRows').appendChild(row);
+            lucide.createIcons();
+        }
+
+        function removeTicket(btn) {
+            btn.closest('.ticket-row').remove();
+        }
+    </script>
+
+</body></html>
