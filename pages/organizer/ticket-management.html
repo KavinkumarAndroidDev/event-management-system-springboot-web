@@ -239,15 +239,11 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
+    <script src="../../scripts/app.js" type="module"></script>
+    <script>
         function addTicketRow() {
             const tbody = document.getElementById('ticketList');
+            if (!tbody) return;
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td class="ps-4">
@@ -267,7 +263,7 @@
                     </button>
                 </td>`;
             tbody.appendChild(row);
-            lucide.createIcons();
+            if (window.initIcons) window.initIcons();
         }
     </script>
 

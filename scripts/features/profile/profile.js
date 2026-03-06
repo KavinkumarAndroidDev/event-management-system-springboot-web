@@ -13,7 +13,7 @@ export function initProfilePage() {
     const user = userStr ? JSON.parse(userStr) : null;
 
     if (user && user.role && user.role.name !== 'ATTENDEE') {
-        window.location.href = '../../index.html';
+        // Safe return, app.js now filters this correctly
         return;
     }
 
@@ -194,13 +194,7 @@ export function initProfilePage() {
         });
     }
 
-    const confirmSignOutBtn = document.getElementById('confirmSignOutBtn');
-    if (confirmSignOutBtn) {
-        confirmSignOutBtn.addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            window.location.href = '../../index.html';
-        });
-    }
+    // Simplified: injectSignOutModal handles the confirm button
 
     // Populate Upcoming Events
     const container = document.getElementById('profile-upcoming-events');

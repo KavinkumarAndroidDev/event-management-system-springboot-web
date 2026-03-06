@@ -270,13 +270,7 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
-    </script>
+    <script src="../../scripts/app.js" type="module"></script>
 
     <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;position:fixed;bottom:2rem;right:2rem;z-index:9999;

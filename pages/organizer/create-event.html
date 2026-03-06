@@ -191,13 +191,11 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../scripts/app.js" type="module"></script>
 
     <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
+        import { setupFileUploads } from '../../scripts/features/organizer/organizer.js';
+        setupFileUploads();
 
         let currentStep = 1;
 

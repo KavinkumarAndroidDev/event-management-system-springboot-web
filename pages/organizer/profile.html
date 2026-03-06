@@ -231,16 +231,11 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
+    <script src="../../scripts/app.js" type="module"></script>
+    <script>
         function togglePw(id) {
             const input = document.getElementById(id);
-            input.type = input.type === 'password' ? 'text' : 'password';
+            if (input) input.type = input.type === 'password' ? 'text' : 'password';
         }
     </script>
 

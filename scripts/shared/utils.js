@@ -126,14 +126,15 @@ export function injectSignOutModal() {
     if (confirmBtn) {
         confirmBtn.addEventListener('click', () => {
             localStorage.removeItem('currentUser');
-            let path = window.location.pathname;
-            if (path.includes('/features/events/')) {
-                window.location.href = '../../index.html';
-            } else if (path.includes('/features/')) {
-                window.location.href = '../../index.html';
-            } else {
-                window.location.href = 'index.html';
+            const path = window.location.pathname;
+            const isNestedPage = path.includes('/pages/');
+
+            // Always redirect to the root index.html
+            let rootRedirect = 'index.html';
+            if (isNestedPage) {
+                rootRedirect = '../../index.html';
             }
+            window.location.href = rootRedirect;
         });
     }
 }
@@ -419,4 +420,37 @@ export function showRestrictedAccessModal(redirectUrl = '../../index.html') {
             window.location.href = redirectUrl;
         }
     }, 1000);
+}
+
+/**
+ * Robust helper to check if current user has access to current page
+ */
+export function checkPageAccess() {
+    const path = window.location.pathname;
+    const userStr = localStorage.getItem('currentUser');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const role = user?.role?.name;
+
+    // Admin Pages
+    if (path.includes('/pages/admin/')) {
+        if (role !== 'ADMIN') {
+            return { hasAccess: false, redirect: '../../index.html' };
+        }
+    }
+
+    // Organizer Pages (excluding signup.html)
+    if (path.includes('/pages/organizer/') && !path.includes('signup.html')) {
+        if (role !== 'ORGANIZER') {
+            return { hasAccess: false, redirect: '../../index.html' };
+        }
+    }
+
+    // Booking Page 
+    if (path.includes('/events/booking')) {
+        if (role !== 'ATTENDEE') {
+            return { hasAccess: false, redirect: '../../pages/events/index.html' };
+        }
+    }
+
+    return { hasAccess: true };
 }

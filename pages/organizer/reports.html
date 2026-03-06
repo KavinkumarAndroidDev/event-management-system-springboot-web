@@ -296,61 +296,61 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../scripts/app.js" type="module"></script>
     <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
-
         // Revenue line chart
-        new Chart(document.getElementById('revenueChart'), {
-            type: 'line',
-            data: {
-                labels: ['Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026'],
-                datasets: [{
-                    label: 'Revenue ($)',
-                    data: [12000, 18000, 22000, 28000, 26000, 36000],
-                    borderColor: '#17B978',
-                    backgroundColor: 'rgba(23,185,120,0.08)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#17B978',
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9CA3AF' } },
-                    y: { grid: { color: '#F5F5F5' }, ticks: { font: { size: 11 }, color: '#9CA3AF' } }
+        const revCtx = document.getElementById('revenueChart');
+        if (revCtx) {
+            new Chart(revCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [12000, 18000, 22000, 28000, 26000, 36000],
+                        borderColor: '#17B978',
+                        backgroundColor: 'rgba(23,185,120,0.08)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#17B978',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9CA3AF' } },
+                        y: { grid: { color: '#F5F5F5' }, ticks: { font: { size: 11 }, color: '#9CA3AF' } }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // Pie chart
-        new Chart(document.getElementById('pieChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['General Admission', 'VIP Pass', 'Student Ticket', 'Early Bird'],
-                datasets: [{
-                    data: [450, 180, 220, 150],
-                    backgroundColor: ['#17B978', '#9333EA', '#22C55E', '#F59E0B'],
-                    borderWidth: 0,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                cutout: '60%',
-            }
-        });
+        const pieCtx = document.getElementById('pieChart');
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['General Admission', 'VIP Pass', 'Student Ticket', 'Early Bird'],
+                    datasets: [{
+                        data: [450, 180, 220, 150],
+                        backgroundColor: ['#17B978', '#9333EA', '#22C55E', '#F59E0B'],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    cutout: '60%',
+                }
+            });
+        }
     </script>
 
 

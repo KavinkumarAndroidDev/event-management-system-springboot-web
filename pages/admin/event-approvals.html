@@ -311,20 +311,11 @@
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../scripts/app.js" type="module"></script>
     <script type="module">
-        import { injectSignOutModal, populateSidebarUserInfo } from '../../scripts/shared/utils.js';
-
-        lucide.createIcons();
-        injectSignOutModal();
-        populateSidebarUserInfo();
-        function showApproveModal(name) {
-            document.getElementById('approveModalText').textContent = `Are you sure you want to approve "${name}"? This event will be published and visible to all users.`;
-            new bootstrap.Modal(document.getElementById('approveModal')).show();
-        }
-        function showRejectModal(name) {
-            document.getElementById('rejectModalText').textContent = `Please provide a reason for rejecting "${name}":`;
-            new bootstrap.Modal(document.getElementById('rejectModal')).show();
-        }
+        import { showApproveModal, showRejectModal } from '../../scripts/features/admin/admin.js';
+        window.showApproveModal = showApproveModal;
+        window.showRejectModal = showRejectModal;
     </script>
 
     <!-- Scroll to Top Button -->

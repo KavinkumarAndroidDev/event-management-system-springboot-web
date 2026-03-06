@@ -34,6 +34,13 @@ function injectHeader(rootPath, user, currentPath) {
     const initials = user.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     const firstName = user.profile.fullName.split(' ')[0];
 
+    let profileUrl = `${rootPath}pages/profile/index.html`;
+    if (user.role && user.role.name === 'ADMIN') {
+      profileUrl = `${rootPath}pages/admin/profile.html`;
+    } else if (user.role && user.role.name === 'ORGANIZER') {
+      profileUrl = `${rootPath}pages/organizer/profile.html`;
+    }
+
     rightContent = `
             <a href="${rootPath}pages/notifications/index.html" class="icon-circle btn p-0 me-2 text-decoration-none d-inline-flex align-items-center justify-content-center">
                 <i data-lucide="bell" width="20" height="20"></i>
@@ -44,7 +51,7 @@ function injectHeader(rootPath, user, currentPath) {
                     <span class="welcome-text d-none d-sm-inline-block">Welcome, ${firstName}</span>
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="${rootPath}pages/profile/index.html">My Profile</a></li>
+                    <li><a class="dropdown-item" href="${profileUrl}">My Profile</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><button class="dropdown-item text-danger" id="logoutBtn">Logout</button></li>
                 </ul>
