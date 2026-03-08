@@ -63,6 +63,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (path.includes('/pages/organizer/') && !path.includes('signup.html')) {
         const { initAdminPage } = await import('./features/admin/admin.js');
         initAdminPage();
+
+        const {
+            initOrganizerDashboard,
+            initMyEvents,
+            initRegistrations,
+            initTicketManagement,
+            initReports,
+            initOrganizerProfile,
+            initOrganizerNotifications
+        } = await import('./features/organizer/organizer.js');
+
+        if (path.includes('dashboard.html')) {
+            whenDataReady(() => initOrganizerDashboard());
+        } else if (path.includes('my-events.html')) {
+            whenDataReady(() => initMyEvents());
+        } else if (path.includes('registrations.html')) {
+            whenDataReady(() => initRegistrations());
+        } else if (path.includes('ticket-management.html')) {
+            whenDataReady(() => initTicketManagement());
+        } else if (path.includes('reports.html')) {
+            whenDataReady(() => initReports());
+        } else if (path.includes('profile.html')) {
+            whenDataReady(() => initOrganizerProfile());
+        } else if (path.includes('notifications.html')) {
+            whenDataReady(() => initOrganizerNotifications());
+        }
     }
 
     // Guest/Common logic for Organizer Signup

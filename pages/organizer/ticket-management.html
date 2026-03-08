@@ -130,7 +130,6 @@
                         </div>
                     </div>
                     <div class="mb-4">
-                        <h2 class="h3 fw-bold text-neutral-900 mb-1">Ticket Management</h2>
                         <p class="text-neutral-400 small mb-0">Manage ticket types and pricing for your events</p>
                     </div>
                     <div class="card-custom mb-4 py-3 px-4">
@@ -139,19 +138,17 @@
                                 <label class="fw-bold text-neutral-900 small">Select Event:</label>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select fw-medium px-3">
-                                    <option selected="">Tech Conference 2026</option>
-                                    <option>Music Festival Summer</option>
-                                    <option>Business Networking Event</option>
+                                <select class="form-select fw-medium px-3" id="event-selector">
+                                    <!-- Populated by JS -->
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <div class="card-custom p-0 overflow-hidden mb-4">
+                    <div class="card-custom p-0 mb-4">
                         <div
                             class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center bg-light bg-opacity-10">
                             <h3 class="h6 fw-bold text-neutral-900 mb-0">Ticket Types</h3>
-                            <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="addTicketRow()">
+                            <button class="btn btn-primary btn-sm rounded-pill px-3" id="addTicketBtn">
                                 <i data-lucide="plus" style="width:16px;height:16px;"></i> Add Type
                             </button>
                         </div>
@@ -194,14 +191,26 @@
                                         <td class="text-neutral-900 fw-medium">25</td>
                                         <td class="pe-4 text-end">
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <button
+                                                    class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
+                                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i data-lucide="more-vertical" width="18"></i>
                                                 </button>
-                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
-                                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="eye" width="14"></i> View Details</a></li>
-                                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="copy" width="14"></i> Duplicate</a></li>
-                                                    <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" onclick="this.closest('tr').remove()"><i data-lucide="trash-2" width="14"></i> Delete Type</a></li>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
+                                                    style="font-size: 13px; min-width: 140px;">
+                                                    <li><a class="dropdown-item d-flex align-items-center gap-2"
+                                                            href="#"><i data-lucide="eye" width="14"></i> View
+                                                            Details</a></li>
+                                                    <li><a class="dropdown-item d-flex align-items-center gap-2"
+                                                            href="#"><i data-lucide="copy" width="14"></i> Duplicate</a>
+                                                    </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger"
+                                                            href="#" onclick="this.closest('tr').remove()"><i
+                                                                data-lucide="trash-2" width="14"></i> Delete Type</a>
+                                                    </li>
                                                 </ul>
                                             </div>
                                         </td>

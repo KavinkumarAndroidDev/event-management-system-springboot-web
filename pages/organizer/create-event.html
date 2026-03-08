@@ -132,56 +132,150 @@
                     <div class="d-flex align-items-center justify-content-center gap-4 mb-5 mx-auto"
                         style="max-width: 800px;">
                         <div class="d-flex flex-column align-items-center gap-2">
-                            <div class="avatar-circle" id="sc1" style="width: 36px; height: 36px;">1</div>
-                            <span class="small fw-bold text-neutral-900" id="sl1">Basic Details</span>
+                            <div class="step-circle active" id="sc1">1</div>
+                            <span class="small fw-bold text-neutral-900" id="sl1">Basic Info</span>
                         </div>
                         <div class="flex-grow-1 border-top border-2 mb-4"
                             style="border-style: dashed !important; border-color: #E5E7EB !important;"></div>
                         <div class="d-flex flex-column align-items-center gap-2">
-                            <div class="avatar-circle bg-light text-neutral-400" id="sc2"
-                                style="width: 36px; height: 36px;">2</div>
+                            <div class="step-circle pending" id="sc2">2</div>
                             <span class="small text-neutral-400" id="sl2">Venue</span>
                         </div>
                         <div class="flex-grow-1 border-top border-2 mb-4"
                             style="border-style: dashed !important; border-color: #E5E7EB !important;"></div>
                         <div class="d-flex flex-column align-items-center gap-2">
-                            <div class="avatar-circle bg-light text-neutral-400" id="sc3"
-                                style="width: 36px; height: 36px;">3</div>
+                            <div class="step-circle pending" id="sc3">3</div>
                             <span class="small text-neutral-400" id="sl3">Tickets</span>
                         </div>
+                        <div class="flex-grow-1 border-top border-2 mb-4"
+                            style="border-style: dashed !important; border-color: #E5E7EB !important;"></div>
+                        <div class="d-flex flex-column align-items-center gap-2">
+                            <div class="step-circle pending" id="sc4">4</div>
+                            <span class="small text-neutral-400" id="sl4">Review</span>
+                        </div>
                     </div>
+
+                    <!-- Step 1: Basic Details -->
                     <div class="card-custom mx-auto" style="max-width: 720px;" id="step1">
                         <h2 class="h5 fw-bold text-neutral-900 mb-4">Event Information</h2>
                         <div class="row g-4">
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Event Title *</label>
-                                <input type="text" class="form-control" placeholder="Enter event name">
+                                <input type="text" class="form-control" id="eventTitle" placeholder="Enter event name">
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Category *</label>
-                                <select class="form-select">
-                                    <option>Conference</option>
-                                    <option>Workshop</option>
+                                <select class="form-select" id="eventCategory">
+                                    <option value="Conference">Conference</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Music">Music</option>
+                                    <option value="Art">Art</option>
+                                    <option value="Business">Business</option>
                                 </select>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Banner Image *</label>
-                                <div class="border-2 border-dashed rounded-3 p-5 text-center bg-light"
+                                <div class="border-2 border-dashed rounded-3 p-5 text-center bg-light" id="bannerUpload"
                                     style="border-style: dashed !important; border-color: #E5E7EB !important; cursor: pointer;">
                                     <i data-lucide="upload" class="text-neutral-400 mb-2"></i>
                                     <div class="small fw-bold text-neutral-900">Click to upload banner</div>
                                     <div class="small text-neutral-400">PNG, JPG up to 5MB</div>
+                                    <img id="bannerPrev" class="img-fluid mt-3 d-none rounded-2" style="max-height: 200px;">
                                 </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Description *</label>
-                                <textarea class="form-control h-auto" rows="5"
+                                <textarea class="form-control h-auto" rows="5" id="eventDesc"
                                     placeholder="Tell us about the event"></textarea>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end gap-3 mt-5">
-                            <button class="btn btn-primary rounded-pill px-4">Save &amp; Continue <i
-                                    data-lucide="arrow-right" class="btn-icon text-neutral-900"></i></button>
+                            <button class="btn btn-primary rounded-pill px-4" onclick="nextStep(2)">Save &amp; Continue <i
+                                    data-lucide="arrow-right" class="ms-2" width="16"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Venue & Schedule -->
+                    <div class="card-custom mx-auto d-none" style="max-width: 720px;" id="step2">
+                        <h2 class="h5 fw-bold text-neutral-900 mb-4">Venue & Schedule</h2>
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Venue Type</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="venueType" id="vt-physical" value="PHYSICAL" checked>
+                                        <label class="form-check-label" for="vt-physical">Physical Venue</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="venueType" id="vt-virtual" value="VIRTUAL">
+                                        <label class="form-check-label" for="vt-virtual">Virtual Event</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12" id="physical-details">
+                                <label class="form-label fw-medium small">Venue Name / Location *</label>
+                                <input type="text" class="form-control" id="venueName" placeholder="e.g. Grand Ballroom, Hotel Plaza">
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium small">City</label>
+                                        <input type="text" class="form-control" id="venueCity" placeholder="City">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium small">Total Capacity</label>
+                                        <input type="number" class="form-control" id="venueCapacity" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 d-none" id="virtual-details">
+                                <label class="form-label fw-medium small">Event URL *</label>
+                                <input type="url" class="form-control" id="eventUrl" placeholder="https://zoom.us/j/...">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">Start Date & Time *</label>
+                                <input type="datetime-local" class="form-control" id="startDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium small">End Date & Time *</label>
+                                <input type="datetime-local" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 mt-5">
+                            <button class="btn btn-outline-neutral-400 rounded-pill px-4" onclick="nextStep(1)">Back</button>
+                            <button class="btn btn-primary rounded-pill px-4" onclick="nextStep(3)">Save &amp; Continue <i
+                                    data-lucide="arrow-right" class="ms-2" width="16"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Tickets -->
+                    <div class="card-custom mx-auto d-none" style="max-width: 720px;" id="step3">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h5 fw-bold text-neutral-900 mb-0">Ticket Information</h2>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="window.addTicketRow()">
+                                <i data-lucide="plus" width="14"></i> Add Type
+                            </button>
+                        </div>
+                        <div id="ticketRows" class="d-flex flex-column gap-3">
+                            <!-- Ticket rows added here -->
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 mt-5">
+                            <button class="btn btn-outline-neutral-400 rounded-pill px-4" onclick="nextStep(2)">Back</button>
+                            <button class="btn btn-primary rounded-pill px-4" onclick="nextStep(4)">Save &amp; Continue <i
+                                    data-lucide="arrow-right" class="ms-2" width="16"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review -->
+                    <div class="card-custom mx-auto d-none" style="max-width: 720px;" id="step4">
+                        <h2 class="h5 fw-bold text-neutral-900 mb-4">Review & Submit</h2>
+                        <div class="p-4 bg-light rounded-3 mb-4" id="reviewContent">
+                            <!-- Review content populated by JS -->
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 mt-5">
+                            <button class="btn btn-outline-neutral-400 rounded-pill px-4" onclick="nextStep(3)">Back</button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary rounded-pill px-4" id="saveDraftBtn">Save as Draft</button>
+                                <button class="btn btn-primary rounded-pill px-4" id="submitEventBtn">Publish Event</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,64 +288,8 @@
     <script src="../../scripts/app.js" type="module"></script>
 
     <script type="module">
-        import { setupFileUploads } from '../../scripts/features/organizer/organizer.js';
-        setupFileUploads();
-
-        let currentStep = 1;
-
-        function goStep(n) {
-            // Hide all steps
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById('step' + i).classList.add('d-none');
-            }
-            // Show target
-            document.getElementById('step' + n).classList.remove('d-none');
-            currentStep = n;
-            updateStepper();
-            lucide.createIcons();
-        }
-
-        function updateStepper() {
-            for (let i = 1; i <= 4; i++) {
-                const circle = document.getElementById('sc' + i);
-                const icon = document.getElementById('si' + i);
-                const label = document.getElementById('sl' + i);
-                if (i < currentStep) {
-                    circle.className = 'step-circle done';
-                    icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                    label.className = 'step-label';
-                } else if (i === currentStep) {
-                    circle.className = 'step-circle active';
-                    icon.textContent = i;
-                    label.className = 'step-label';
-                } else {
-                    circle.className = 'step-circle pending';
-                    icon.textContent = i;
-                    label.className = 'step-label pending';
-                }
-            }
-        }
-
-        let ticketCount = 1;
-        function addTicket() {
-            ticketCount++;
-            const row = document.createElement('div');
-            row.className = 'ticket-row';
-            row.dataset.ticket = ticketCount;
-            row.innerHTML = `
-                <input type="text" class="form-control" placeholder="e.g. VIP Pass">
-                <input type="number" class="form-control" placeholder="0">
-                <input type="number" class="form-control" placeholder="0">
-                <button class="ticket-del-btn" onclick="removeTicket(this)" title="Remove">
-                    <i data-lucide="trash-2" style="width:18px;height:18px;"></i>
-                </button>`;
-            document.getElementById('ticketRows').appendChild(row);
-            lucide.createIcons();
-        }
-
-        function removeTicket(btn) {
-            btn.closest('.ticket-row').remove();
-        }
+        import { initCreateEventWizard } from '../../scripts/features/organizer/organizer.js';
+        initCreateEventWizard();
     </script>
 
 
