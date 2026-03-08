@@ -1,4 +1,4 @@
-import { state } from '../../shared/state.js';
+import { state, getCategory, getVenue, getUser } from '../../shared/state.js';
 import { showLoading, showToast } from '../../shared/utils.js';
 
 export function initializeDetails() {
@@ -25,13 +25,14 @@ export function populateSingleEvent(event) {
     };
 
     setText('event-title', event.title);
-    if (event.category) {
-        setText('event-category', event.category.name);
+    const category = getCategory(event.categoryId);
+    if (category) {
+        setText('event-category', category.name);
         const iconEl = document.getElementById('event-category-icon');
         if (iconEl) {
             const newIcon = document.createElement('i');
             newIcon.id = 'event-category-icon';
-            newIcon.setAttribute('data-lucide', event.category.icon);
+            newIcon.setAttribute('data-lucide', category.icon);
             newIcon.className = iconEl.getAttribute('class') || '';
             iconEl.replaceWith(newIcon);
             if (window.initIcons) window.initIcons({ root: newIcon.parentElement });
@@ -42,7 +43,11 @@ export function populateSingleEvent(event) {
     const endDate = new Date(event.schedule.endDateTime);
     const dateStr = `${startDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}, ${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} – ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
     setText('event-date', dateStr);
-    setText('event-location', `${event.venue.name}, ${event.venue.address.city}`);
+
+    const venue = getVenue(event.venueId) || { name: 'Unknown Venue', address: { city: 'Various' } };
+    const locName = venue.name || 'Unknown Venue';
+    const locCity = (venue.address && venue.address.city) || venue.city || 'Various';
+    setText('event-location', `${locName}, ${locCity}`);
 
     const minPrice = Math.min(...event.tickets.map(t => t.price));
     setText('event-price', minPrice === 0 ? 'Free' : `₹${minPrice}`);
@@ -50,15 +55,24 @@ export function populateSingleEvent(event) {
     setText('event-description', event.fullDescription);
     setupShowMore('event-description', 300); // 300 chars limit
 
-    setText('venue-name', event.venue.name);
-    setText('venue-address', `${event.venue.address.street}, ${event.venue.address.city}, ${event.venue.address.pincode}`);
+    const detailVenue = getVenue(event.venueId) || { name: 'Unknown Venue', address: { street: 'Unknown Street', city: 'Various', pincode: 'N/A' } };
+    const vName = detailVenue.name || 'Unknown Venue';
+    const vStreet = (detailVenue.address && detailVenue.address.street) || 'Unknown Street';
+    const vCity = (detailVenue.address && detailVenue.address.city) || detailVenue.city || 'Various';
+    const vPincode = (detailVenue.address && detailVenue.address.pincode) || 'N/A';
+
+    setText('venue-name', vName);
+    setText('venue-address', `${vStreet}, ${vCity}, ${vPincode}`);
 
     const heroImg = document.getElementById('event-hero-image');
     if (heroImg) heroImg.src = event.media.thumbnail;
 
     // Populate Organizer
     const organizerCard = document.getElementById('event-organizer-card');
-    if (organizerCard && event.organizer) {
+    const organizer = getUser(event.organizerId);
+
+    if (organizerCard && organizer) {
+        const orgProfile = organizer.profile;
         organizerCard.innerHTML = `
             <div class="card-custom p-4 border border-1 border-neutral-100 shadow-sm bg-white w-100" style="border-radius: 16px;">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4">
@@ -89,11 +103,11 @@ export function populateSingleEvent(event) {
                 </div>
             </div>
         `;
-        organizerCard.querySelector('#org-avatar').textContent = event.organizer.name.charAt(0);
-        organizerCard.querySelector('#org-name').textContent = event.organizer.name;
-        organizerCard.querySelector('#org-rating').textContent = `${event.organizer.rating} Rating`;
+        organizerCard.querySelector('#org-avatar').textContent = orgProfile.fullName.charAt(0);
+        organizerCard.querySelector('#org-name').textContent = orgProfile.fullName;
+        organizerCard.querySelector('#org-rating').textContent = `4.8 Rating`; // Fallback rating
         organizerCard.querySelector('#org-events-count').textContent = '10+ Past Events';
-        organizerCard.querySelector('#org-contact').href = `mailto:${event.organizer.contactEmail}`;
+        organizerCard.querySelector('#org-contact').href = `mailto:${orgProfile.email}`;
         if (window.initIcons) window.initIcons({ root: organizerCard });
     }
 
@@ -132,8 +146,17 @@ export function populateSingleEvent(event) {
         if (event.schedule && event.schedule.startDateTime && event.schedule.endDateTime) {
             durationHrs = Math.round((new Date(event.schedule.endDateTime) - new Date(event.schedule.startDateTime)) / (1000 * 60 * 60));
         }
-        const capacity = event.venue && event.venue.capacity ? event.venue.capacity : 0;
-        const categoryName = event.category ? event.category.name : 'General';
+        const eventVenue = getVenue(event.venueId);
+        let totalCapacity = 0;
+        if (event.tickets && Array.isArray(event.tickets)) {
+            event.tickets.forEach(t => {
+                totalCapacity += parseInt(t.totalQuantity || t.quantity || 0);
+            });
+        }
+        // Fallback to venue capacity if no tickets defined yet
+        const capacity = totalCapacity > 0 ? totalCapacity : (eventVenue?.capacity || 0);
+        const eventCategory = getCategory(event.categoryId);
+        const categoryName = eventCategory?.name || 'General';
 
         const guideItems = [
             { icon: 'clock', title: 'Duration', text: `${durationHrs} Hours`, bg: 'primary' },

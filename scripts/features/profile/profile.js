@@ -1,11 +1,39 @@
-import { state } from '../../shared/state.js';
-import { showToast, setupGenericPagination } from '../../shared/utils.js';
+import { state, getCategory, getVenue, getEvent, getUser } from '../../shared/state.js';
+import { showToast, setupGenericPagination, showLoading, hideLoading } from '../../shared/utils.js';
 
 function getPaymentActivityDate(payment) {
     // Use refund timestamp as latest activity for refunded transactions.
-    const sourceDate = payment.status === 'Refunded' ? (payment.refundDate || payment.date) : payment.date;
+    const sourceDate = (payment.status === 'Refunded' || payment.status === 'REFUNDED') ? (payment.refundDate || payment.date) : payment.date;
     const parsed = new Date(sourceDate);
     return Number.isNaN(parsed.getTime()) ? new Date(0) : parsed;
+}
+
+function setupAvatarUpload() {
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarImg = document.getElementById('profile-settings-avatar');
+    const changeBtn = document.getElementById('change-avatar-btn');
+
+    if (!avatarInput || !avatarImg) return;
+
+    if (changeBtn) {
+        changeBtn.onclick = () => avatarInput.click();
+    }
+
+    avatarInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                showToast('Error', 'Image size must be less than 2MB.', 'danger');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                avatarImg.src = e.target.result;
+                showToast('Success', 'Avatar updated locally. Save changes to persist.', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 }
 
 export function initProfilePage() {
@@ -13,7 +41,7 @@ export function initProfilePage() {
     const user = userStr ? JSON.parse(userStr) : null;
 
     if (user && user.role && user.role.name !== 'ATTENDEE') {
-        // Safe return, app.js now filters this correctly
+        hideProfileLoader();
         return;
     }
 
@@ -72,17 +100,21 @@ export function initProfilePage() {
     }
 
     // Populate Sidebar
-    const initials = user.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    const fullName = (user.profile && user.profile.fullName) || user.name || 'User';
+    const email = (user.profile && user.profile.email) || user.email || '—';
+    const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
     document.getElementById('sidebar-avatar').textContent = initials;
-    document.getElementById('sidebar-name').textContent = user.profile.fullName;
-    document.getElementById('sidebar-email').textContent = user.profile.email;
+    document.getElementById('sidebar-name').textContent = fullName;
+    document.getElementById('sidebar-email').textContent = email;
 
     // Populate Profile Settings View
-    document.getElementById('profile-settings-avatar').src = user.profile.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.profile.fullName)}&background=17B978&color=fff`;
-    document.getElementById('profile-settings-name').textContent = user.profile.fullName;
-    document.getElementById('profile-settings-email-display').textContent = user.profile.email;
+    const profileImg = (user.profile && user.profile.profileImage) || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=17B978&color=fff`;
+    document.getElementById('profile-settings-avatar').src = profileImg;
+    document.getElementById('profile-settings-name').textContent = fullName;
+    document.getElementById('profile-settings-email-display').textContent = email;
 
-    document.getElementById('profile-email').value = user.profile.email;
+    document.getElementById('profile-email').value = email;
     document.getElementById('profile-email').readOnly = true;
     document.getElementById('profile-email').classList.add('form-control-readonly');
     document.getElementById('profile-email').style.backgroundColor = '#F3F4F6';
@@ -90,15 +122,15 @@ export function initProfilePage() {
     document.getElementById('profile-email').style.cursor = 'not-allowed';
     document.getElementById('profile-email').style.borderStyle = 'dashed';
 
-    document.getElementById('profile-phone').value = user.profile.phone || '';
+    document.getElementById('profile-phone').value = (user.profile && user.profile.phone) || '';
     document.getElementById('profile-phone').readOnly = false;
     document.getElementById('profile-phone').disabled = false;
     document.getElementById('profile-phone').classList.remove('form-control-readonly');
-    document.getElementById('profile-fullname').value = user.profile.fullName;
-    document.getElementById('profile-dob').value = user.profile.dateOfBirth || '';
+    document.getElementById('profile-fullname').value = fullName;
+    document.getElementById('profile-dob').value = (user.profile && user.profile.dateOfBirth) || '';
 
     // Initialize Gender Radios
-    if (user.profile.gender) {
+    if (user.profile && user.profile.gender) {
         const genderRadio = document.querySelector(`input[name="profile-gender"][value="${user.profile.gender}"]`);
         if (genderRadio) genderRadio.checked = true;
     }
@@ -122,7 +154,7 @@ export function initProfilePage() {
     // Profile Completion Calculation
     const fieldsToTrack = ['fullName', 'email', 'phone', 'dateOfBirth', 'gender', 'profileImage'];
     const completedFields = fieldsToTrack.filter(field => {
-        const val = user.profile[field];
+        const val = user.profile ? user.profile[field] : null;
         return val && String(val).trim() !== '' && val !== 'null' && val !== 'undefined';
     });
     const completionPercentage = Math.round((completedFields.length / fieldsToTrack.length) * 100);
@@ -241,7 +273,7 @@ export function initProfilePage() {
         const userRegistrations = state.registrations.filter(r => r.userId === user.id);
         const now = new Date();
         const upcomingData = userRegistrations
-            .map(reg => ({ reg, event: state.events.find(e => e.id === reg.eventId) }))
+            .map(reg => ({ reg, event: getEvent(reg.eventId) }))
             .filter(item => item.event && item.reg.status !== 'CANCELLED' && new Date(item.event.schedule.startDateTime) > now)
             .sort((a, b) => new Date(a.event.schedule.startDateTime) - new Date(b.event.schedule.startDateTime))
             .slice(0, 3);
@@ -252,6 +284,8 @@ export function initProfilePage() {
             container.innerHTML = upcomingData.map(({ reg, event }) => {
                 const date = new Date(event.schedule.startDateTime);
                 const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const venue = getVenue(event.venueId) || { address: { city: 'Various' } };
+                const locCity = venue.address?.city || venue.city || 'Various';
                 return `
                     <div class="card-custom p-3">
                         <div class="d-flex gap-3">
@@ -261,7 +295,7 @@ export function initProfilePage() {
                                     <div>
                                         <h6 class="fw-bold mb-1">${event.title}</h6>
                                         <div class="small text-neutral-400 mb-0">
-                                            <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${event.venue.address.city}
+                                            <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${locCity}
                                         </div>
                                     </div>
                                     <button class="btn btn-outline-primary btn-sm rounded-pill btn-view-ticket" data-reg-id="${reg.id}">
@@ -300,9 +334,14 @@ export function initProfilePage() {
             paymentsContainer.innerHTML = '<div class="text-neutral-400 py-3">No recent payments.</div>';
         } else {
             paymentsContainer.innerHTML = recentPayments.map(pay => {
+                const event = getEvent(pay.eventId);
+                const eventTitle = event ? event.title : (pay.eventTitle || pay.eventName || 'Event Payment');
+                const orderId = pay.orderId || pay.id || 'N/A';
+                const displayId = String(orderId).includes('-') ? orderId.split('-')[1] : String(orderId).substring(0, 8);
+
                 let badgeClass = '';
-                if (pay.status === 'Confirmed') badgeClass = 'border-success text-success';
-                else if (pay.status === 'Refunded') badgeClass = 'border-danger text-danger';
+                if (pay.status === 'Confirmed' || pay.status === 'PAID') badgeClass = 'border-success text-success';
+                else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') badgeClass = 'border-info text-info';
                 else if (pay.status === 'Failed') badgeClass = 'border-danger text-danger';
 
                 return `
@@ -310,8 +349,8 @@ export function initProfilePage() {
                     <div class="card-custom p-3">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                                <div class="fw-bold text-truncate" style="max-width: 150px;">${pay.eventTitle}</div>
-                                <div class="small text-neutral-400">Order #${pay.id.split('-')[1]}</div>
+                                <div class="fw-bold text-truncate" style="max-width: 150px;">${eventTitle}</div>
+                                <div class="small text-neutral-400">Order #${displayId}</div>
                             </div>
                             <span class="badge bg-transparent border ${badgeClass} rounded-pill px-3">${pay.status}</span>
                         </div>
@@ -319,152 +358,155 @@ export function initProfilePage() {
                     </div>
                 </div>`;
             }).join('');
-
-            // Wire up clicking the card to immediately launch the Payment Details Modal
-            recentPayments.forEach((pay, index) => {
-                const col = paymentsContainer.children[index];
-                if (col) {
-                    const card = col.querySelector('.card-custom');
-                    if (card) {
-                        card.style.cursor = 'pointer';
-                        card.addEventListener('click', () => {
-                            openPaymentModal(pay);
-                        });
-                    }
-                }
-            });
         }
-    }
 
-    // Profile Update Handler
-    const profileForm = document.getElementById('profile-form');
-    if (profileForm) {
-        profileForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            // Get current values
-            const fullName = document.getElementById('profile-fullname').value;
-            const phone = document.getElementById('profile-phone').value;
-            const dob = document.getElementById('profile-dob').value;
-            const gender = document.querySelector('input[name="profile-gender"]:checked')?.value;
-
-            // Update user object
-            user.profile.fullName = fullName;
-            user.profile.phone = phone;
-            user.profile.dateOfBirth = dob;
-            user.profile.gender = gender;
-
-            // Get Preferences
-            const language = document.getElementById('pref-language').value;
-            const notifyEmail = document.getElementById('notify-email').checked;
-            const notifySms = document.getElementById('notify-sms').checked;
-            const notifyPush = document.getElementById('notify-push').checked;
-            const interestedCategories = Array.from(document.querySelectorAll('#pref-categories input:checked')).map(cb => cb.value);
-
-            user.preferences = {
-                language,
-                notifications: {
-                    email: notifyEmail,
-                    sms: notifySms,
-                    push: notifyPush
-                },
-                interestedCategories
-            };
-
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(user));
-
-            // Update UI elements immediately
-            document.getElementById('sidebar-name').textContent = fullName;
-            document.getElementById('profile-settings-name').textContent = fullName;
-
-            // Update initials
-            const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-            document.getElementById('sidebar-avatar').textContent = initials;
-
-            // Patch DB
-            fetch(`http://localhost:3000/users/${user.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    profile: user.profile,
-                    preferences: user.preferences
-                })
-            }).then(res => {
-                if (res.ok) {
-                    showToast('Success', 'Profile and preferences updated successfully!', 'success');
-                } else {
-                    showToast('Error', 'Failed to save changes to server.', 'danger');
+        // Wire up clicking the card to immediately launch the Payment Details Modal
+        recentPayments.forEach((pay, index) => {
+            const col = paymentsContainer.children[index];
+            if (col) {
+                const card = col.querySelector('.card-custom');
+                if (card) {
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', () => {
+                        openPaymentModal(pay);
+                    });
                 }
-            }).catch(err => {
-                console.error("Error updating profile", err);
-                showToast('Success', 'Profile saved locally.', 'success');
-            });
-        });
-    }
-
-    // Change Password Logic
-    const cpNewPass = document.getElementById('cpNewPassword');
-    const cpConfirmPass = document.getElementById('cpConfirmPassword');
-
-    if (cpNewPass && cpConfirmPass) {
-        cpNewPass.addEventListener('input', () => {
-            const val = cpNewPass.value;
-            const hasLength = val.length >= 8;
-            const hasUpper = /[A-Z]/.test(val);
-            const hasNumber = /[0-9]/.test(val);
-
-            const updateReq = (id, valid) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                if (valid) { el.classList.remove('text-neutral-400'); el.classList.add('text-success'); }
-                else { el.classList.remove('text-success'); el.classList.add('text-neutral-400'); }
-            };
-            updateReq('cp-req-length', hasLength);
-            updateReq('cp-req-upper', hasUpper);
-            updateReq('cp-req-number', hasNumber);
-
-            let strength = 0;
-            if (hasLength) strength += 33;
-            if (hasUpper) strength += 33;
-            if (hasNumber) strength += 34;
-
-            const bar = document.querySelector('#cpPasswordStrength .progress-bar');
-            if (bar) {
-                bar.style.width = strength + '%';
-                if (strength < 50) bar.className = 'progress-bar bg-danger';
-                else if (strength < 100) bar.className = 'progress-bar bg-warning';
-                else bar.className = 'progress-bar bg-success';
             }
         });
+    }
+}
 
-        cpConfirmPass.addEventListener('input', () => {
-            cpConfirmPass.setCustomValidity(
-                cpConfirmPass.value && cpNewPass.value !== cpConfirmPass.value ? "Passwords do not match" : ""
-            );
+// Profile Update Handler
+const profileForm = document.getElementById('profile-form');
+if (profileForm) {
+    profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Get current values
+        const fullName = document.getElementById('profile-fullname').value;
+        const phone = document.getElementById('profile-phone').value;
+        const dob = document.getElementById('profile-dob').value;
+        const gender = document.querySelector('input[name="profile-gender"]:checked')?.value;
+
+        // Update user object
+        user.profile.fullName = fullName;
+        user.profile.phone = phone;
+        user.profile.dateOfBirth = dob;
+        user.profile.gender = gender;
+
+        // Get Preferences
+        const language = document.getElementById('pref-language').value;
+        const notifyEmail = document.getElementById('notify-email').checked;
+        const notifySms = document.getElementById('notify-sms').checked;
+        const notifyPush = document.getElementById('notify-push').checked;
+        const interestedCategories = Array.from(document.querySelectorAll('#pref-categories input:checked')).map(cb => cb.value);
+
+        user.preferences = {
+            language,
+            notifications: {
+                email: notifyEmail,
+                sms: notifySms,
+                push: notifyPush
+            },
+            interestedCategories
+        };
+
+        // Save to localStorage
+        localStorage.setItem('currentUser', JSON.stringify(user));
+
+        // Update UI elements immediately
+        document.getElementById('sidebar-name').textContent = fullName;
+        document.getElementById('profile-settings-name').textContent = fullName;
+
+        // Update initials
+        const initials = fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        document.getElementById('sidebar-avatar').textContent = initials;
+
+        // Patch DB
+        fetch(`http://localhost:3000/users/${user.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profile: user.profile,
+                preferences: user.preferences
+            })
+        }).then(res => {
+            if (res.ok) {
+                showToast('Success', 'Profile and preferences updated successfully!', 'success');
+            } else {
+                showToast('Error', 'Failed to save changes to server.', 'danger');
+            }
+        }).catch(err => {
+            console.error("Error updating profile", err);
+            showToast('Success', 'Profile saved locally.', 'success');
         });
+    });
+}
 
-        const changePasswordForm = document.getElementById('changePasswordForm');
-        if (changePasswordForm) {
-            import('../../shared/utils.js').then(m => {
-                m.setupRealtimeValidation('changePasswordForm');
-            });
-            changePasswordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const form = e.target;
-                if (form.checkValidity()) {
-                    const modalEl = document.getElementById('changePasswordModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    if (modal) modal.hide();
-                    form.reset();
-                    showToast('Success', 'Password changed successfully.', 'success');
-                }
-            });
+// Change Password Logic
+const cpNewPass = document.getElementById('cpNewPassword');
+const cpConfirmPass = document.getElementById('cpConfirmPassword');
+
+if (cpNewPass && cpConfirmPass) {
+    cpNewPass.addEventListener('input', () => {
+        const val = cpNewPass.value;
+        const hasLength = val.length >= 8;
+        const hasUpper = /[A-Z]/.test(val);
+        const hasNumber = /[0-9]/.test(val);
+
+        const updateReq = (id, valid) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (valid) { el.classList.remove('text-neutral-400'); el.classList.add('text-success'); }
+            else { el.classList.remove('text-success'); el.classList.add('text-neutral-400'); }
+        };
+        updateReq('cp-req-length', hasLength);
+        updateReq('cp-req-upper', hasUpper);
+        updateReq('cp-req-number', hasNumber);
+
+        let strength = 0;
+        if (hasLength) strength += 33;
+        if (hasUpper) strength += 33;
+        if (hasNumber) strength += 34;
+
+        const bar = document.querySelector('#cpPasswordStrength .progress-bar');
+        if (bar) {
+            bar.style.width = strength + '%';
+            if (strength < 50) bar.className = 'progress-bar bg-danger';
+            else if (strength < 100) bar.className = 'progress-bar bg-warning';
+            else bar.className = 'progress-bar bg-success';
         }
+    });
+
+    cpConfirmPass.addEventListener('input', () => {
+        cpConfirmPass.setCustomValidity(
+            cpConfirmPass.value && cpNewPass.value !== cpConfirmPass.value ? "Passwords do not match" : ""
+        );
+    });
+
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        import('../../shared/utils.js').then(m => {
+            m.setupRealtimeValidation('changePasswordForm');
+        });
+        changePasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const form = e.target;
+            if (form.checkValidity()) {
+                const modalEl = document.getElementById('changePasswordModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                form.reset();
+                showToast('Success', 'Password changed successfully.', 'success');
+            }
+        });
     }
 
     if (window.initIcons) window.initIcons();
+    hideProfileLoader();
 }
+
+
 
 // ─── Registrations ────────────────────────────────────────────────
 
@@ -493,9 +535,14 @@ function renderRegistrations() {
         const categoryTerm = categoryFilter?.value || 'All Categories';
 
         let filtered = registrations.filter(r => {
-            const matchesSearch = r.eventName.toLowerCase().includes(searchTerm) || r.id.includes(searchTerm);
-            const matchesVenue = venueTerm === 'All Venues' || r.location.includes(venueTerm);
-            const matchesCategory = categoryTerm === 'All Categories' || (r.category && r.category === categoryTerm);
+            const event = getEvent(r.eventId);
+            if (!event) return false;
+            const category = getCategory(event.categoryId);
+            const venue = getVenue(event.venueId);
+
+            const matchesSearch = event.title.toLowerCase().includes(searchTerm) || r.id.toLowerCase().includes(searchTerm);
+            const matchesVenue = venueTerm === 'All Venues' || (venue && (venue.name.includes(venueTerm) || venue.address.city.includes(venueTerm)));
+            const matchesCategory = categoryTerm === 'All Categories' || (category && category.name === categoryTerm);
             return matchesSearch && matchesVenue && matchesCategory;
         });
 
@@ -541,21 +588,27 @@ function renderRegistrations() {
     };
 
     const renderRegistrationItem = (reg) => {
-        const date = new Date(reg.date);
+        const event = getEvent(reg.eventId);
+        if (!event) return '';
+        const venue = getVenue(event.venueId) || { name: 'Unknown Venue', address: { city: 'Various' } };
+        const date = new Date(event.schedule.startDateTime);
         const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' • ' +
             date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
         const isCancelled = reg.status === 'CANCELLED';
+        const locName = venue.name || 'Unknown Venue';
+        const locCity = (venue.address && venue.address.city) || venue.city || 'Various';
+
         return `
         <div class="card card-custom border-0 shadow-sm mb-3 registration-card ${isCancelled ? 'opacity-75' : ''}" data-id="${reg.id}" style="border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s;">
                 <div class="card-body p-3">
                     <div class="d-flex flex-column flex-md-row gap-3">
                         <div class="position-relative">
-                            <img src="${reg.img}" class="rounded-3 object-fit-cover" style="width: 140px; height: 100px; aspect-ratio: 1.4;" alt="${reg.eventName}">
+                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 140px; height: 100px; aspect-ratio: 1.4;" alt="${event.title}">
                                 ${isCancelled ? '<div class="position-absolute top-50 start-50 translate-middle badge bg-dark bg-opacity-50 px-2 py-1 rounded-pill">Cancelled</div>' : ''}
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0 text-neutral-900 fs-5">${reg.eventName}</h6>
+                                <h6 class="fw-bold mb-0 text-neutral-900 fs-5">${event.title}</h6>
                                 ${!isCancelled ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-medium" style="font-size: 0.75rem;">Confirmed</span>' : ''}
                             </div>
 
@@ -564,13 +617,13 @@ function renderRegistrations() {
                                     <i data-lucide="calendar" width="14"></i> ${dateStr}
                                 </span>
                                 <span class="small text-neutral-400 d-flex align-items-center gap-1">
-                                    <i data-lucide="map-pin" width="14"></i> ${reg.location}
+                                    <i data-lucide="map-pin" width="14"></i> ${locName}, ${locCity}
                                 </span>
                                 <span class="small text-neutral-500 fw-medium bg-neutral-100 px-2 py-0.5 rounded">${reg.quantity} x ${reg.ticketType}</span>
                             </div>
 
                             <div class="d-flex align-items-center justify-content-between pt-3 border-top border-neutral-100">
-                                <div class="fw-bold text-neutral-900 fs-5">₹${reg.price}</div>
+                                <div class="fw-bold text-neutral-900 fs-5">₹${reg.totalAmount}</div>
                                 <div class="d-flex align-items-center gap-3">
                                     ${!isCancelled ? `
                                     <button class="btn btn-link text-danger p-0 small text-decoration-none btn-cancel-reg" data-id="${reg.id}" style="font-size: 0.85rem;">Cancel Booking</button>
@@ -614,16 +667,22 @@ function openRegistrationModal(reg) {
     const modalEl = document.getElementById('registrationDetailsModal');
     if (!modalEl) return;
 
-    document.getElementById('reg-modal-event').textContent = reg.eventName;
+    const event = getEvent(reg.eventId);
+    if (!event) return;
+    const venue = getVenue(event.venueId) || { name: 'Unknown Venue', address: { city: 'Various', street: '', pincode: '' } };
+    const locName = venue.name || 'Unknown Venue';
+    const locCity = (venue.address && venue.address.city) || venue.city || 'Various';
+
+    document.getElementById('reg-modal-event').textContent = event.title;
     document.getElementById('reg-modal-id').textContent = `#${reg.id.substring(0, 8).toUpperCase()} `;
 
     // date
-    const date = new Date(reg.date);
+    const date = new Date(event.schedule.startDateTime);
     document.getElementById('reg-modal-date').textContent = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 
-    document.getElementById('reg-modal-venue').textContent = reg.location;
+    document.getElementById('reg-modal-venue').textContent = `${locName}, ${locCity}`;
     document.getElementById('reg-modal-ticket-type').textContent = `${reg.ticketType} (${reg.quantity}x)`;
-    document.getElementById('reg-modal-amount').textContent = `₹${reg.price} `;
+    document.getElementById('reg-modal-amount').textContent = `₹${reg.totalAmount} `;
 
     const statusBadge = document.getElementById('reg-modal-status');
     if (reg.status === 'CANCELLED') {
@@ -656,10 +715,11 @@ function openCancelModal(reg) {
     const modalEl = document.getElementById('cancelBookingModal');
     const modal = new window.bootstrap.Modal(modalEl);
 
-    document.getElementById('cancel-event-name').textContent = reg.eventName;
-    document.getElementById('cancel-original-price').textContent = `₹${reg.price}`;
-    const fee = Math.round(reg.price * 0.20);
-    const refund = Math.round(reg.price - fee);
+    const event = getEvent(reg.eventId);
+    document.getElementById('cancel-event-name').textContent = event ? event.title : 'Event';
+    document.getElementById('cancel-original-price').textContent = `₹${reg.totalAmount}`;
+    const fee = Math.round(reg.totalAmount * 0.20);
+    const refund = Math.round(reg.totalAmount - fee);
     document.getElementById('cancel-fee').textContent = `-₹${fee}`;
     document.getElementById('cancel-refund').textContent = `₹${refund}`;
 
@@ -677,14 +737,14 @@ function openCancelModal(reg) {
         }).catch(err => console.error("Error updating local db", err));
 
         // Correlate and Process Refund on Payment
-        const payment = state.payments.find(p => p.userId == reg.userId && p.eventId == reg.eventId && p.status === 'Confirmed');
+        const payment = state.payments.find(p => p.userId == reg.userId && p.eventId == reg.eventId && (p.status === 'Confirmed' || p.status === 'PAID'));
         if (payment) {
-            payment.status = 'Refunded';
+            payment.status = 'REFUNDED';
             payment.refundDate = new Date().toISOString();
             fetch(`http://localhost:3000/payments/${payment.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'Refunded', refundDate: payment.refundDate })
+                body: JSON.stringify({ status: 'REFUNDED', refundDate: payment.refundDate })
             })
                 .then(res => {
                     if (!res.ok) throw new Error("Payment update failed");
@@ -721,8 +781,10 @@ function renderPastEvents() {
     let pastEvents = state.registrations
         .filter(r => r.userId === userId && (r.status === 'COMPLETED' || r.status === 'CANCELLED'))
         .filter(r => {
-            const matchesSearch = r.eventName.toLowerCase().includes(searchQuery);
-            const matchesYear = yearFilter === 'All Years' || new Date(r.date).getFullYear().toString() === yearFilter;
+            const event = getEvent(r.eventId);
+            if (!event) return false;
+            const matchesSearch = event.title.toLowerCase().includes(searchQuery);
+            const matchesYear = yearFilter === 'All Years' || new Date(event.schedule.startDateTime).getFullYear().toString() === yearFilter;
 
             if (matchesSearch && matchesYear) {
                 if (seenEventIds.has(r.eventId)) return false;
@@ -735,7 +797,11 @@ function renderPastEvents() {
     if (sortBy === 'Sort by: Rating') {
         pastEvents.sort((a, b) => (b.rating || 0) - (a.rating || 0));
     } else {
-        pastEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
+        pastEvents.sort((a, b) => {
+            const dateA = new Date(getEvent(a.eventId)?.schedule.startDateTime || 0);
+            const dateB = new Date(getEvent(b.eventId)?.schedule.startDateTime || 0);
+            return dateB - dateA;
+        });
     }
 
     setupGenericPagination({
@@ -743,39 +809,39 @@ function renderPastEvents() {
         containerId: 'past-events-list',
         paginationId: 'past-events-pagination',
         itemsPerPage: 5,
-        renderItem: (evt) => {
-            // ... (rest of the renderItem logic)
-            const date = new Date(evt.date);
+        renderItem: (reg) => {
+            const event = getEvent(reg.eventId);
+            if (!event) return '';
+            const date = new Date(event.schedule.startDateTime);
             const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const hasFeedback = evt.feedback && evt.rating > 0;
             return `
             <div class="card card-custom border-0 shadow-sm mb-3 past-event-card" style="border-radius: 12px; transition: all 0.2s;">
                 <div class="card-body p-3">
                     <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
                         <div class="flex-shrink-0">
-                            <img src="${evt.img}" class="rounded-3 object-fit-cover" style="width: 140px; height: 110px; min-width: 140px; filter: grayscale(40%);" alt="${evt.eventName}">
+                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 140px; height: 110px; min-width: 140px; filter: grayscale(40%);" alt="${event.title}">
                         </div>
                         <div class="flex-grow-1 overflow-hidden w-100">
                             <div class="d-flex justify-content-between align-items-start mb-1">
-                                <h6 class="fw-bold mb-0 text-neutral-900 text-truncate" style="font-size: 1rem;">${evt.eventName}</h6>
+                                <h6 class="fw-bold mb-0 text-neutral-900 text-truncate" style="font-size: 1rem;">${event.title}</h6>
                                 <span class="badge bg-neutral-100 text-neutral-500 rounded-pill px-2 py-1 fw-medium" style="font-size: 0.7rem;">Completed</span>
                             </div>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="small text-neutral-400 d-flex align-items-center gap-1">
                                     <i data-lucide="calendar" width="12"></i> ${dateStr}
                                 </span>
-                                <span class="small text-neutral-500 fw-medium bg-neutral-50 px-2 rounded" style="font-size: 0.75rem;">${evt.quantity} x ${evt.ticketType}</span>
+                                <span class="small text-neutral-500 fw-medium bg-neutral-50 px-2 rounded" style="font-size: 0.75rem;">${reg.quantity} x ${reg.ticketType}</span>
                             </div>
 
                             <div class="d-flex align-items-center justify-content-between pt-2 border-top border-neutral-50">
-                                <div class="small fw-bold text-neutral-800">Total: ₹${evt.price}</div>
-                                ${evt.feedbackSubmitted ? `
+                                <div class="small fw-bold text-neutral-800">Total: ₹${reg.totalAmount}</div>
+                                ${reg.feedbackSubmitted ? `
                                     <div class="d-flex align-items-center text-warning gap-1 small">
                                         <i data-lucide="star" class="fill-warning" width="12"></i>
-                                        <span class="fw-bold">${evt.rating}</span>
+                                        <span class="fw-bold">${reg.rating}</span>
                                     </div>
                                 ` : `
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 btn-feedback" data-id="${evt.id}" style="font-size: 0.75rem;">
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 btn-feedback" data-id="${reg.id}" style="font-size: 0.75rem;">
                                         Review Event
                                     </button>
                                 `}
@@ -786,10 +852,11 @@ function renderPastEvents() {
             </div>`;
         },
         onRender: () => {
+            if (window.initIcons) window.initIcons({ root: document.getElementById('past-events-list') });
             document.querySelectorAll('.btn-feedback').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const evt = state.registrations.find(e => e.id == btn.dataset.id);
-                    if (evt) openFeedbackModal(evt);
+                    const registration = state.registrations.find(e => e.id == btn.dataset.id);
+                    if (registration) openFeedbackModal(registration);
                 });
             });
         }
@@ -824,15 +891,36 @@ function openFeedbackModal(evt) {
         evt.feedback = document.getElementById('feedback-text').value;
 
         // Update Backend
-        fetch(`http://localhost:3000/registrations/${evt.id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                feedbackSubmitted: true,
-                rating: selectedRating,
-                feedback: evt.feedback
+        const userStr = localStorage.getItem('currentUser');
+        const user = userStr ? JSON.parse(userStr) : null;
+
+        const feedbackObj = {
+            id: 'FB-' + Date.now(),
+            eventId: evt.eventId,
+            userId: user ? user.id : 'GUEST',
+            registrationId: evt.id,
+            rating: selectedRating,
+            comment: evt.feedback,
+            createdAt: new Date().toISOString(),
+            status: 'VISIBLE'
+        };
+
+        Promise.all([
+            fetch(`http://localhost:3000/registrations/${evt.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    feedbackSubmitted: true,
+                    rating: selectedRating,
+                    feedback: evt.feedback
+                })
+            }),
+            fetch('http://localhost:3000/feedbacks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(feedbackObj)
             })
-        }).catch(err => console.error("Error saving feedback", err));
+        ]).catch(err => console.error("Error saving feedback", err));
 
         modal.hide();
         showToast('Thank You', 'Your feedback has been submitted.', 'success');
@@ -855,8 +943,6 @@ function openFeedbackModal(evt) {
     modal.show();
 }
 
-// ─── Payments ─────────────────────────────────────────────────────
-
 function renderPayments() {
     const view = document.getElementById('view-payments');
     if (!view) return;
@@ -873,7 +959,9 @@ function renderPayments() {
     let payments = state.payments
         .filter(p => p.userId === userId)
         .filter(p => {
-            const matchesSearch = p.orderId.toLowerCase().includes(searchQuery) || p.eventName.toLowerCase().includes(searchQuery);
+            const event = getEvent(p.eventId);
+            const eventTitle = event ? event.title : (p.eventTitle || 'Event Payment');
+            const matchesSearch = String(p.orderId || p.id).toLowerCase().includes(searchQuery) || eventTitle.toLowerCase().includes(searchQuery);
             const matchesStatus = statusFilter === 'All Statuses' || p.status === statusFilter;
             return matchesSearch && matchesStatus;
         });
@@ -895,44 +983,47 @@ function renderPayments() {
 
             let badgeClass = '';
             let statusText = pay.status;
-            if (pay.status === 'Confirmed') {
+            if (pay.status === 'Confirmed' || pay.status === 'PAID') {
                 badgeClass = 'bg-success-subtle text-success border-success-subtle';
-            } else if (pay.status === 'Refunded') {
-                badgeClass = 'bg-warning-subtle text-warning border-warning-subtle fw-bold';
+            } else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') {
+                badgeClass = 'bg-info-subtle text-info border-info-subtle fw-bold';
             } else {
                 badgeClass = 'bg-danger-subtle text-danger border-danger-subtle';
             }
 
-            return `
-            <div class="card card-custom border-0 shadow-sm mb-3 payment-card" style="border-radius: 12px; transition: all 0.2s;">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                <i data-lucide="credit-card" width="18"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-bold mb-0 text-neutral-900" style="font-size: 0.95rem;">${pay.eventName || pay.eventTitle}</h6>
-                                <small class="text-neutral-400">ID: #${pay.id.toUpperCase().substring(0, 8)}</small>
-                            </div>
-                        </div>
-                        <span class="badge ${badgeClass} border rounded-pill px-2 py-1 fw-medium" style="font-size: 0.7rem;">${statusText}</span>
-                    </div>
+            const event = getEvent(pay.eventId);
+            const eventTitle = event ? event.title : (pay.eventTitle || 'Event Payment');
 
-                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top border-neutral-50">
-                        <div>
-                            <div class="small text-neutral-400">Amount Paid</div>
-                            <div class="fw-bold text-neutral-900 fs-5">₹${pay.amount}</div>
+            return `
+                <div class="card card-custom border-0 shadow-sm mb-3 payment-card" style="border-radius: 12px; transition: all 0.2s;">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                    <i data-lucide="credit-card" width="18"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-neutral-900" style="font-size: 0.95rem;">${eventTitle}</h6>
+                                    <small class="text-neutral-400">ID: #${String(pay.id).toUpperCase().substring(0, 8)}</small>
+                                </div>
+                            </div>
+                            <span class="badge ${badgeClass} border rounded-pill px-2 py-1 fw-medium" style="font-size: 0.7rem;">${statusText}</span>
                         </div>
-                        <div class="text-end">
-                            <div class="small text-neutral-400">${dateStr}</div>
-                            <button class="btn btn-link text-primary p-0 small text-decoration-none btn-view-invoice mt-1" data-id="${pay.id}">
-                                View Invoice <i data-lucide="chevron-right" width="14"></i>
-                            </button>
+
+                        <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top border-neutral-50">
+                            <div>
+                                <div class="small text-neutral-400">Amount Paid</div>
+                                <div class="fw-bold text-neutral-900 fs-5">₹${pay.amount}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="small text-neutral-400">${dateStr}</div>
+                                <button class="btn btn-link text-primary p-0 small text-decoration-none btn-view-invoice mt-1" data-id="${pay.id}">
+                                    View Invoice <i data-lucide="chevron-right" width="14"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
         },
         onRender: () => {
             if (window.initIcons) window.initIcons();
@@ -959,21 +1050,19 @@ function openPaymentModal(pay) {
 
     // Find event title from state if missing in pay object
     let eventTitle = pay.eventTitle || pay.eventName;
-    if (!eventTitle && pay.eventId) {
-        const evt = state.events.find(e => String(e.id) === String(pay.eventId));
-        if (evt) eventTitle = evt.title;
-    }
+    const evt = getEvent(pay.eventId);
+    if (evt) eventTitle = evt.title;
     document.getElementById('pay-modal-event').textContent = eventTitle || 'Event Details';
 
     document.getElementById('pay-modal-method').textContent = pay.method || 'Credit/Debit Card';
     document.getElementById('pay-modal-booking').textContent = pay.bookingId ? `#${String(pay.bookingId).toUpperCase().substring(0, 8)}` : 'N/A';
 
     const statusBadge = document.getElementById('pay-modal-status');
-    if (pay.status === 'Confirmed') {
+    if (pay.status === 'Confirmed' || pay.status === 'PAID') {
         statusBadge.className = 'badge bg-success bg-opacity-10 text-success fw-medium px-3 py-1';
         statusBadge.textContent = 'SUCCESSFUL';
-    } else if (pay.status === 'Refunded') {
-        statusBadge.className = 'badge bg-warning bg-opacity-10 text-warning fw-medium px-3 py-1';
+    } else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') {
+        statusBadge.className = 'badge bg-info bg-opacity-10 text-info fw-medium px-3 py-1';
         statusBadge.textContent = 'REFUNDED';
     } else {
         statusBadge.className = 'badge bg-danger bg-opacity-10 text-danger fw-medium px-3 py-1';

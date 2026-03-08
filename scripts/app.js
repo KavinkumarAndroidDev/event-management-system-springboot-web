@@ -29,10 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetch('http://localhost:3000/users').then(res => res.json()),
         fetch('http://localhost:3000/events').then(res => res.json()),
         fetch('http://localhost:3000/registrations').then(res => res.json()),
-        fetch('http://localhost:3000/payments').then(res => res.json())
+        fetch('http://localhost:3000/payments').then(res => res.json()),
+        fetch('http://localhost:3000/categories').then(res => res.json()),
+        fetch('http://localhost:3000/venues').then(res => res.json())
     ])
-        .then(([users, events, registrations, payments]) => {
-            const data = { users, events, registrations, payments };
+        .then(([users, events, registrations, payments, categories, venues]) => {
+            const data = { users, events, registrations, payments, categories, venues };
             setGlobalData(data);
             // Dispatch custom event for legacy compatibility
             document.dispatchEvent(new CustomEvent('dataLoaded', { detail: data }));
@@ -55,11 +57,51 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Admin Logic
     if (path.includes('/pages/admin/')) {
-        const { initAdminPage, initOrganizerApprovals } = await import('./features/admin/admin.js');
+        const {
+            initAdminPage,
+            initAdminDashboard,
+            initEventApprovals,
+            initOrganizerApprovals,
+            initUserManagement,
+            initAdminEvents,
+            initAdminCategories,
+            initAdminVenues,
+            initAdminTickets,
+            initAdminPayments,
+            initAdminReports,
+            initAdminFeedback,
+            initAdminNotifications,
+            initAdminProfile
+        } = await import('./features/admin/admin.js');
+
         initAdminPage();
 
-        if (path.includes('organizer-approval.html')) {
+        if (path.includes('dashboard.html')) {
+            whenDataReady(() => initAdminDashboard());
+        } else if (path.includes('event-approvals.html')) {
+            whenDataReady(() => initEventApprovals());
+        } else if (path.includes('organizer-approval.html')) {
             whenDataReady(() => initOrganizerApprovals());
+        } else if (path.includes('user-management.html')) {
+            whenDataReady(() => initUserManagement());
+        } else if (path.includes('events.html')) {
+            whenDataReady(() => initAdminEvents());
+        } else if (path.includes('categories.html')) {
+            whenDataReady(() => initAdminCategories());
+        } else if (path.includes('venues.html')) {
+            whenDataReady(() => initAdminVenues());
+        } else if (path.includes('tickets-registrations.html')) {
+            whenDataReady(() => initAdminTickets());
+        } else if (path.includes('payments-revenue.html')) {
+            whenDataReady(() => initAdminPayments());
+        } else if (path.includes('reports-analytics.html')) {
+            whenDataReady(() => initAdminReports());
+        } else if (path.includes('feedback-moderation.html')) {
+            whenDataReady(() => initAdminFeedback());
+        } else if (path.includes('notifications.html')) {
+            whenDataReady(() => initAdminNotifications());
+        } else if (path.includes('profile.html')) {
+            initAdminProfile();
         }
     }
 

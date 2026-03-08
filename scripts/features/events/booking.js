@@ -1,4 +1,4 @@
-import { state } from '../../shared/state.js';
+import { state, getCategory, getVenue, getUser } from '../../shared/state.js';
 import { showToast, showLoading } from '../../shared/utils.js';
 
 export function initBookingPage() {
@@ -34,8 +34,10 @@ export function initBookingPage() {
     // Populate Header Info
     document.getElementById('booking-event-title').textContent = event.title;
     const date = new Date(event.schedule.startDateTime);
+    const venue = getVenue(event.venueId) || { name: 'Multiple Locations' };
+    const locName = venue.name || 'Unknown Venue';
     document.getElementById('booking-event-date').textContent =
-        date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' • ' + event.venue.name;
+        date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' • ' + locName;
     document.getElementById('summary-event-title').textContent = event.title;
     document.getElementById('summary-event-date').textContent =
         date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' +
@@ -106,7 +108,10 @@ export function initBookingPage() {
                     <div class="ticket-price fs-5 fw-bold text-primary"></div>
                 </div>
                 <div class="ticket-action">
-                    <button class="btn btn-outline-primary rounded-pill px-4 btn-add">Add</button>
+                    ${ticket.availableQuantity === 0 ?
+                `<span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill fw-bold">SOLD OUT</span>` :
+                `<button class="btn btn-outline-primary rounded-pill px-4 btn-add">Add</button>`
+            }
                     <div class="quantity-control d-none">
                         <button class="quantity-btn btn-minus"><i data-lucide="minus" width="16"></i></button>
                         <span class="fw-bold mx-2 count">0</span>
@@ -510,33 +515,34 @@ export function initBookingPage() {
             const regId = 'REG-' + Date.now();
             const payId = 'PAY-' + Date.now();
 
-            let firstTicketName = Object.keys(cart).length > 0 ? event.tickets.find(t => t.id === Object.keys(cart)[0]).type.replace('_', ' ') : 'General';
+            const firstTicketId = Object.keys(cart)[0];
+            const firstTicket = event.tickets.find(t => t.id === firstTicketId);
+            let firstTicketName = firstTicket ? firstTicket.type.replace('_', ' ') : 'General';
 
             const registrationData = {
                 id: regId,
                 userId: user.id,
                 eventId: event.id,
-                eventName: event.title,
-                date: event.schedule.startDateTime,
-                location: `${event.venue.name}, ${event.venue.address.city}`,
+                ticketId: firstTicketId,
                 ticketType: firstTicketName,
                 quantity: totalTickets,
-                price: totalAmount,
+                totalAmount: totalAmount,
                 status: 'CONFIRMED',
-                img: event.media.thumbnail
+                paymentId: payId,
+                createdAt: new Date().toISOString()
             };
 
             const paymentData = {
                 id: payId,
                 userId: user.id,
                 eventId: event.id,
-                eventTitle: event.title,
-                date: new Date().toISOString(),
-                tickets: `${firstTicketName} x ${totalTickets}`,
+                registrationId: regId,
+                ticketsSummary: `${firstTicketName} x ${totalTickets}`,
                 method: method,
                 amount: totalAmount,
-                status: 'Confirmed',
-                razorpayId: paymentRefId
+                status: 'CONFIRMED',
+                razorpayId: paymentRefId,
+                createdAt: new Date().toISOString()
             };
 
             // 1. Deduct ticket quantities

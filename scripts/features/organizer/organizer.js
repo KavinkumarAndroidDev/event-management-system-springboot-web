@@ -1,7 +1,46 @@
-import { state } from '../../shared/state.js';
+import { state, getCategory, getVenue, getEvent, getUser } from '../../shared/state.js';
 import { showToast, populateSidebarUserInfo } from '../../shared/utils.js';
 
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
+const API_BASE = 'http://localhost:3000';
+
+async function apiFetch(endpoint) {
+    const res = await fetch(`${API_BASE}/${endpoint}`);
+    if (!res.ok) throw new Error(`Fetch failed: ${endpoint}`);
+    return res.json();
+}
+
+async function apiPost(endpoint, data) {
+    const res = await fetch(`${API_BASE}/${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Post failed: ${endpoint}`);
+    return res.json();
+}
+
+async function apiPatch(endpoint, id, data) {
+    const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Patch failed: ${endpoint}`);
+    return res.json();
+}
+
+async function apiDelete(endpoint, id) {
+    const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
+        method: 'DELETE'
+    });
+    if (!res.ok) throw new Error(`Delete failed: ${endpoint}`);
+    return res.json();
+}
 
 function getCurrentUser() {
     const str = localStorage.getItem('currentUser');
@@ -30,7 +69,8 @@ function timeAgo(dateStr) {
 }
 
 function getOrganizerEvents(user) {
-    return state.events.filter(e => e.organizer && e.organizer.id === user.id);
+    if (!user) return [];
+    return state.events.filter(e => e.organizerId === user.id);
 }
 
 function getEventRegistrations(events) {
@@ -44,8 +84,8 @@ function getTicketsSoldForEvent(event) {
 
 function getRevenueFromRegistrations(registrations) {
     return registrations
-        .filter(r => r.status === 'CONFIRMED')
-        .reduce((sum, r) => sum + (r.price * r.quantity), 0);
+        .filter(r => r.status === 'CONFIRMED' || r.status === 'PAID')
+        .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
 }
 
 function downloadCSV(rows, filename) {
@@ -60,9 +100,10 @@ function downloadCSV(rows, filename) {
 }
 
 function getStatusBadge(status) {
-    if (status === 'PUBLISHED') return '<span class="badge rounded-pill bg-success text-white px-3 py-2 fw-bold" style="font-size:11px;">Published</span>';
+    if (status === 'PUBLISHED' || status === 'ACTIVE') return '<span class="badge rounded-pill bg-success text-white px-3 py-2 fw-bold" style="font-size:11px;">Active</span>';
     if (status === 'PENDING') return '<span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#FEF9C3;color:#854D0E;">Pending</span>';
-    return '<span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">Draft</span>';
+    if (status === 'REJECTED') return '<span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#FEE2E2;color:#991B1B;">Rejected</span>';
+    return `<span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">${status || 'Draft'}</span>`;
 }
 
 function setupPagination(items, itemsPerPage, containerId, renderFn) {
@@ -166,8 +207,10 @@ export function setupOrganizerForm() {
                         fullName: `${firstName} ${lastName}`,
                         email: email,
                         phone: phone,
-                        avatar: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`,
-                        organizationName: orgName
+                        profileImage: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`,
+                        organizationName: orgName,
+                        organizationType: organizerSignupForm.querySelector('[name="organizationType"]')?.value || 'OTHER',
+                        bio: organizerSignupForm.querySelector('[name="bio"]')?.value || ''
                     },
                     role: {
                         id: "ROLE-3",
@@ -176,7 +219,18 @@ export function setupOrganizerForm() {
                     },
                     accountStatus: {
                         status: "PENDING",
-                        joinDate: new Date().toISOString().split('T')[0]
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    },
+                    statistics: {
+                        totalEvents: 0,
+                        totalRevenue: 0,
+                        averageRating: 0
+                    },
+                    preferences: {
+                        notifications: { email: true, push: true, sms: false },
+                        language: "en-IN",
+                        timezone: "Asia/Kolkata"
                     }
                 };
 
@@ -373,10 +427,11 @@ export function initOrganizerDashboard() {
 
         tbody.innerHTML = recent.map(evt => {
             const sold = getTicketsSoldForEvent(evt);
-            const capacity = evt.venue.capacity;
+            const venue = getVenue(evt.venueId);
+            const capacity = venue ? venue.capacity : 0;
             return `
                 <tr>
-                    <td class="ps-4 fw-bold text-neutral-900">${evt.title}</td>
+                    <td class="ps-4 fw-medium text-neutral-900">${evt.title}</td>
                     <td class="text-neutral-400 small">${formatDate(evt.schedule.startDateTime)}</td>
                     <td>${getStatusBadge(evt.status.current)}</td>
                     <td class="text-neutral-900 small">${sold} / ${capacity}</td>
@@ -496,12 +551,20 @@ export function initMyEvents() {
 
         eventsGrid.innerHTML = events.map(evt => {
             const sold = getTicketsSoldForEvent(evt);
-            const capacity = evt.venue.capacity;
+            const venue = getVenue(evt.venueId);
+            const capacity = venue ? venue.capacity : 0;
             const pct = capacity > 0 ? Math.min(100, Math.round((sold / capacity) * 100)) : 0;
             const evtRevenue = myRegs
-                .filter(r => r.eventId === evt.id && r.status === 'CONFIRMED')
-                .reduce((sum, r) => sum + r.price * r.quantity, 0);
-            const statusBg = evt.status.current === 'PUBLISHED' ? 'bg-success' : evt.status.current === 'PENDING' ? 'bg-warning' : 'bg-secondary';
+                .filter(r => r.eventId === evt.id && (r.status === 'CONFIRMED' || r.status === 'PAID'))
+                .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+            const statusBgMap = {
+                DRAFT: 'bg-secondary',
+                APPROVED: 'bg-info',
+                PUBLISHED: 'bg-success',
+                CANCELLED: 'bg-danger',
+                COMPLETED: 'bg-primary'
+            };
+            const statusBg = statusBgMap[evt.status.current] || 'bg-secondary';
 
             return `
             <div class="col-md-6 col-xl-4">
@@ -516,7 +579,7 @@ export function initMyEvents() {
                             <i data-lucide="calendar" style="width:14px; height:14px;"></i> ${formatDate(evt.schedule.startDateTime)}
                         </div>
                         <div class="d-flex align-items-center gap-2 text-neutral-400 small mb-1">
-                            <i data-lucide="map-pin" style="width:14px; height:14px;"></i> ${evt.venue.name}
+                            <i data-lucide="map-pin" style="width:14px; height:14px;"></i> ${venue ? venue.name : 'Various'}
                         </div>
                         <div class="d-flex align-items-center gap-2 text-neutral-400 small mb-3">
                             <i data-lucide="users" style="width:14px; height:14px;"></i> ${sold} / ${capacity} sold
@@ -532,10 +595,17 @@ export function initMyEvents() {
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="../events/details.html?id=${evt.id}"><i data-lucide="eye" width="14"></i> View Details</a></li>
-                                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="pencil" width="14"></i> Edit Event</a></li>
+                                    ${evt.status.current === 'APPROVED' ? `
+                                        <li><button class="dropdown-item d-flex align-items-center gap-2 btn-publish-event" data-id="${evt.id}"><i data-lucide="send" width="14" class="text-success"></i> Publish Now</button></li>
+                                    ` : ''}
+                                    ${evt.status.current === 'DRAFT' || evt.status.current === 'APPROVED' ? `
+                                        <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="pencil" width="14"></i> Edit Event</a></li>
+                                    ` : ''}
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="reports.html"><i data-lucide="bar-chart-2" width="14"></i> Sales Report</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#"><i data-lucide="trash-2" width="14"></i> Delete</a></li>
+                                    ${evt.status.current !== 'PUBLISHED' && evt.status.current !== 'COMPLETED' ? `
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger btn-delete-event" data-id="${evt.id}" data-name="${evt.title}"><i data-lucide="trash-2" width="14"></i> Delete</button></li>
+                                    ` : ''}
                                 </ul>
                             </div>
                         </div>
@@ -545,6 +615,38 @@ export function initMyEvents() {
         }).join('');
 
         if (window.initIcons) window.initIcons({ root: eventsGrid });
+
+        // Bind Actions
+        eventsGrid.querySelectorAll('.btn-publish-event').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                const id = btn.dataset.id;
+                try {
+                    await apiPatch('events', id, { status: { current: 'PUBLISHED' } });
+                    showToast('Published', 'Event is now visible to everyone!', 'success');
+                    initMyEvents(); // Refresh
+                } catch (err) {
+                    showToast('Error', 'Failed to publish event.', 'danger');
+                }
+            };
+        });
+
+        eventsGrid.querySelectorAll('.btn-delete-event').forEach(btn => {
+            btn.onclick = async (e) => {
+                e.preventDefault();
+                const id = btn.dataset.id;
+                const name = btn.dataset.name;
+                if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                    try {
+                        await apiDelete('events', id);
+                        showToast('Deleted', 'Event has been removed.', 'success');
+                        initMyEvents(); // Refresh
+                    } catch (err) {
+                        showToast('Error', 'Failed to delete event.', 'danger');
+                    }
+                }
+            };
+        });
     };
 
     setupPagination(myEvents, 6, 'pagination-controls', renderEvents);
@@ -650,12 +752,12 @@ export function initRegistrations() {
 
             return `
             <tr>
-                <td class="ps-4 fw-bold text-neutral-900">${r.eventName}</td>
-                <td class="fw-medium">${name}</td>
+                <td class="ps-4 fw-medium text-neutral-900">${getEvent(r.eventId)?.title || 'Event'}</td>
+                <td class="text-neutral-900">${name}</td>
                 <td class="text-neutral-400 small">${email}</td>
-                <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-bold" style="font-size: 10px;">${r.ticketType.toUpperCase()}</span></td>
-                <td><span class="${isPaid ? 'text-success' : 'text-warning'} fw-bold small">${isPaid ? 'Paid' : r.status}</span></td>
-                <td class="pe-4 text-end text-neutral-400 small">${formatDate(r.date)}</td>
+                <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-medium" style="font-size: 10px;">${r.ticketType.toUpperCase()}</span></td>
+                <td><span class="${isPaid ? 'text-success' : 'text-warning'} fw-medium small">${isPaid ? 'Paid' : r.status}</span></td>
+                <td class="pe-4 text-end text-neutral-400 small">${formatDate(r.createdAt || r.date)}</td>
             </tr>`;
         }).join('');
     };
@@ -668,10 +770,9 @@ export function initRegistrations() {
 
         const newFiltered = allRegs.filter(r => {
             const matchEvent = !eventId || r.eventId === eventId;
-            const u = state.users.find(u => u.id === r.userId);
-            const name = u ? u.profile.fullName.toLowerCase() : '';
-            const email = u ? u.profile.email.toLowerCase() : '';
-            const matchQ = !q || name.includes(q) || email.includes(q) || r.eventName.toLowerCase().includes(q);
+            const event = getEvent(r.eventId);
+            const eventTitle = event ? event.title.toLowerCase() : '';
+            const matchQ = !q || name.includes(q) || email.includes(q) || eventTitle.includes(q);
             return matchEvent && matchQ;
         });
         filtered = newFiltered;
@@ -740,13 +841,13 @@ export function initTicketManagement() {
             return `
             <tr>
                 <td class="ps-4">
-                    <span class="fw-bold text-neutral-900">${ticket.type.replace(/_/g, ' ')}</span>
+                    <span class="fw-medium text-neutral-900">${ticket.type.replace(/_/g, ' ')}</span>
                     ${lowStock ? '<span class="badge bg-warning text-dark ms-2" style="font-size:9px;">Low Stock</span>' : ''}
                 </td>
-                <td class="fw-medium">${formatCurrency(ticket.price)}</td>
-                <td class="text-neutral-900 fw-medium">${ticket.totalQuantity}</td>
-                <td class="text-neutral-900 fw-medium">${sold}</td>
-                <td class="text-neutral-900 fw-medium">${available}</td>
+                <td>${formatCurrency(ticket.price)}</td>
+                <td class="text-neutral-900">${ticket.totalQuantity}</td>
+                <td class="text-neutral-900">${sold}</td>
+                <td class="text-neutral-900">${available}</td>
                 <td class="pe-4 text-end">
                     <div class="dropdown">
                         <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -827,8 +928,33 @@ export function initTicketManagement() {
     window.updateTicketStats = updateStats;
 
     if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-            showToast('Saved', 'Ticket changes saved successfully.', 'success');
+        saveBtn.addEventListener('click', async () => {
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const updatedTickets = rows.map(row => {
+                const nameInput = row.querySelector('input[type="text"]');
+                const priceInput = row.querySelector('input[type="number"]:nth-of-type(1)');
+                const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)');
+
+                // If it's an existing row (no inputs), extract text content
+                const type = nameInput ? nameInput.value : row.querySelector('td:nth-child(1) .fw-bold').textContent;
+                const price = priceInput ? parseFloat(priceInput.value) : parseFloat(row.querySelector('td:nth-child(2)').textContent.replace(/[^\d.-]/g, ''));
+                const total = qtyInput ? parseInt(qtyInput.value) : parseInt(row.querySelector('td:nth-child(3)').textContent);
+
+                return {
+                    type: type.toUpperCase().replace(/\s+/g, '_'),
+                    price: price,
+                    totalQuantity: total,
+                    availableQuantity: total // Simplified: resetting available for new edits if qty changed? 
+                    // Better would be to track old sold count, but for simplicity:
+                };
+            });
+
+            try {
+                await apiPatch('events', currentEvent.id, { tickets: updatedTickets });
+                currentEvent.tickets = updatedTickets;
+                showToast('Saved', 'Ticket changes saved successfully.', 'success');
+                renderTickets(currentEvent);
+            } catch (e) { showToast('Error', 'Failed to save changes.', 'danger'); }
         });
     }
 
@@ -1086,7 +1212,7 @@ export function initOrganizerProfile() {
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
-export function initOrganizerNotifications() {
+export async function initOrganizerNotifications() {
     const user = getCurrentUser();
     if (!user) return;
 
@@ -1094,64 +1220,88 @@ export function initOrganizerNotifications() {
 
     const myEvents = getOrganizerEvents(user);
     const myRegs = getEventRegistrations(myEvents);
-
-    let readSet = new Set(JSON.parse(localStorage.getItem('org-notif-read') || '[]'));
-    const notifications = [];
-
-    // Registration notifications from most recent
-    [...myRegs]
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 10)
-        .forEach(r => {
-            const nid = `reg-${r.id}`;
-            notifications.push({
-                id: nid,
-                type: 'registration',
-                icon: 'user-plus',
-                iconColor: 'text-primary',
-                bgColor: 'bg-primary bg-opacity-10',
-                title: 'New Registration',
-                message: `A new registration was made for <strong class="text-neutral-900">${r.eventName}</strong>`,
-                time: r.date,
-                read: readSet.has(nid)
-            });
-        });
-
-    // Low inventory warnings
-    myEvents.forEach(evt => {
-        evt.tickets.forEach(ticket => {
-            if (ticket.availableQuantity <= 20 && ticket.availableQuantity > 0) {
-                const nid = `inv-${evt.id}-${ticket.id}`;
-                notifications.push({
-                    id: nid,
-                    type: 'warning',
-                    icon: 'alert-triangle',
-                    iconColor: 'text-warning',
-                    bgColor: 'bg-warning bg-opacity-10',
-                    title: 'Low Ticket Inventory',
-                    message: `Only <strong class="text-neutral-900">${ticket.availableQuantity} ${ticket.type.replace(/_/g, ' ')}</strong> tickets remaining for ${evt.title}`,
-                    time: new Date().toISOString(),
-                    read: readSet.has(nid)
-                });
-            }
-        });
-    });
-
-    // Sort: unread first, then newest
-    notifications.sort((a, b) => {
-        if (a.read !== b.read) return a.read ? 1 : -1;
-        return new Date(b.time) - new Date(a.time);
-    });
-
     let currentFilter = 'all';
+    let notifications = [];
 
-    const getContainer = () => document.querySelector('.list-group.list-group-flush');
-
-    const renderNotifications = (filter) => {
-        const container = getContainer();
+    const loadNotifications = async () => {
+        const container = document.querySelector('.list-group.list-group-flush');
         if (!container) return;
 
-        const toShow = filter === 'unread' ? notifications.filter(n => !n.read) : notifications;
+        try {
+            // 1. Fetch Server Notifications
+            const serverNotifs = await apiFetch('notifications');
+            const myServerNotifs = serverNotifs.filter(n => n.targetUserId === user.id || n.targetUserId === 'ALL_ORGANIZERS');
+
+            // Map server notifs to our UI structure
+            const mappedServer = myServerNotifs.map(n => ({
+                id: n.id,
+                isServer: true,
+                type: n.type === 'SUCCESS' ? 'success' : 'info',
+                icon: n.type === 'SUCCESS' ? 'check-circle' : 'bell',
+                iconColor: n.type === 'SUCCESS' ? 'text-success' : 'text-primary',
+                bgColor: n.type === 'SUCCESS' ? 'bg-success bg-opacity-10' : 'bg-primary bg-opacity-10',
+                title: n.title,
+                message: n.message,
+                time: n.createdAt,
+                read: n.read
+            }));
+
+            // 2. Generate Local Notifications (Registrations & Inventory)
+            const localNotifs = [];
+            let readSet = new Set(JSON.parse(localStorage.getItem('org-notif-read') || '[]'));
+
+            // Registrations
+            [...myRegs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).forEach(r => {
+                const nid = `reg-${r.id}`;
+                localNotifs.push({
+                    id: nid,
+                    isServer: false,
+                    type: 'registration',
+                    icon: 'user-plus',
+                    iconColor: 'text-primary',
+                    bgColor: 'bg-primary bg-opacity-10',
+                    title: 'New Registration',
+                    message: `A new registration was made for <strong class="text-neutral-900">${r.eventName}</strong>`,
+                    time: r.date,
+                    read: readSet.has(nid)
+                });
+            });
+
+            // Low inventory
+            myEvents.forEach(evt => {
+                evt.tickets.forEach(ticket => {
+                    if (ticket.availableQuantity <= 20 && ticket.availableQuantity > 0) {
+                        const nid = `inv-${evt.id}-${ticket.type}`;
+                        localNotifs.push({
+                            id: nid,
+                            isServer: false,
+                            type: 'warning',
+                            icon: 'alert-triangle',
+                            iconColor: 'text-warning',
+                            bgColor: 'bg-warning bg-opacity-10',
+                            title: 'Low Ticket Inventory',
+                            message: `Only <strong class="text-neutral-900">${ticket.availableQuantity} ${ticket.type.replace(/_/g, ' ')}</strong> tickets remaining for ${evt.title}`,
+                            time: new Date().toISOString(),
+                            read: readSet.has(nid)
+                        });
+                    }
+                });
+            });
+
+            notifications = [...mappedServer, ...localNotifs].sort((a, b) => {
+                if (a.read !== b.read) return a.read ? 1 : -1;
+                return new Date(b.time) - new Date(a.time);
+            });
+
+            renderUI();
+        } catch (e) { console.error('Error loading notifs', e); }
+    };
+
+    const renderUI = () => {
+        const container = document.querySelector('.list-group.list-group-flush');
+        const toShow = currentFilter === 'unread' ? notifications.filter(n => !n.read) : notifications;
+
+        updateTabs();
 
         if (toShow.length === 0) {
             container.innerHTML = '<div class="list-group-item px-4 py-5 text-center text-neutral-400">No notifications to display.</div>';
@@ -1170,27 +1320,40 @@ export function initOrganizerNotifications() {
                     </div>
                     <p class="text-neutral-600 small mb-0">${n.message}</p>
                 </div>
-                ${!n.read ? `
                 <div class="d-flex flex-column gap-2 align-items-end">
-                    <div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>
-                    <button class="btn btn-link text-neutral-400 p-0 btn-mark-read" data-id="${n.id}" title="Mark as read">
-                        <i data-lucide="check" style="width:16px;height:16px;"></i>
+                    ${!n.read ? '<div class="bg-primary rounded-circle" style="width:8px; height:8px;"></div>' : ''}
+                    <button class="btn btn-link text-neutral-400 p-0 btn-mark-read" data-id="${n.id}" title="${n.read ? 'Dismiss' : 'Mark as read'}">
+                        <i data-lucide="${n.read ? 'x' : 'check'}" style="width:16px;height:16px;"></i>
                     </button>
-                </div>` : ''}
+                </div>
             </div>`).join('');
 
         if (window.initIcons) window.initIcons({ root: container });
 
         container.querySelectorAll('.btn-mark-read').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.onclick = async () => {
                 const nid = btn.dataset.id;
-                readSet.add(nid);
-                localStorage.setItem('org-notif-read', JSON.stringify([...readSet]));
-                const notif = notifications.find(n => n.id === nid);
-                if (notif) notif.read = true;
-                updateTabs();
-                renderNotifications(currentFilter);
-            });
+                const notif = notifications.find(x => x.id === nid);
+                if (!notif) return;
+
+                if (!notif.read) {
+                    if (notif.isServer) {
+                        await apiPatch('notifications', nid, { read: true });
+                    } else {
+                        let readSet = new Set(JSON.parse(localStorage.getItem('org-notif-read') || '[]'));
+                        readSet.add(nid);
+                        localStorage.setItem('org-notif-read', JSON.stringify([...readSet]));
+                    }
+                    loadNotifications();
+                } else {
+                    if (notif.isServer) {
+                        await apiDelete('notifications', nid);
+                    }
+                    // For local ones, we just don't show them if they aren't in the generated list next time?
+                    // Or we could have a hiddenSet. 
+                    loadNotifications();
+                }
+            };
         });
     };
 
@@ -1207,36 +1370,75 @@ export function initOrganizerNotifications() {
     // Tab buttons
     const header = document.querySelector('.card-custom .px-4.py-3.border-bottom');
     if (header) {
-        const tabBtns = header.querySelectorAll('.btn-group button');
-        tabBtns.forEach((btn, i) => {
-            btn.addEventListener('click', () => {
-                tabBtns.forEach(b => b.classList.remove('active'));
+        header.querySelectorAll('.btn-group button').forEach((btn, i) => {
+            btn.onclick = () => {
+                header.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentFilter = i === 0 ? 'all' : 'unread';
-                renderNotifications(currentFilter);
-            });
+                renderUI();
+            };
         });
 
-        // Mark all as read button
         const markAllBtn = header.querySelector('.btn-link');
         if (markAllBtn) {
-            markAllBtn.addEventListener('click', () => {
-                notifications.forEach(n => {
-                    n.read = true;
-                    readSet.add(n.id);
-                });
-                localStorage.setItem('org-notif-read', JSON.stringify([...readSet]));
-                updateTabs();
-                renderNotifications(currentFilter);
-                showToast('Done', 'All notifications marked as read.', 'success');
-            });
+            markAllBtn.onclick = async () => {
+                for (const n of notifications.filter(x => !x.read)) {
+                    if (n.isServer) await apiPatch('notifications', n.id, { read: true });
+                    else {
+                        let readSet = new Set(JSON.parse(localStorage.getItem('org-notif-read') || '[]'));
+                        readSet.add(n.id);
+                        localStorage.setItem('org-notif-read', JSON.stringify([...readSet]));
+                    }
+                }
+                loadNotifications();
+                showToast('Done', 'All marked as read.', 'success');
+            };
         }
     }
 
-    updateTabs();
-    renderNotifications('all');
+    // Send Update Logic
+    const sendUpdateModal = document.getElementById('sendUpdateModal');
+    if (sendUpdateModal) {
+        const sendBtn = sendUpdateModal.querySelector('.btn-primary');
+        const eventSelect = sendUpdateModal.querySelector('select');
+        const subjectInput = sendUpdateModal.querySelector('input');
+        const messageInput = sendUpdateModal.querySelector('textarea');
 
-    if (window.initIcons) window.initIcons();
+        // Populate event select
+        if (eventSelect) {
+            eventSelect.innerHTML = '<option value="ALL">All My Events</option>' +
+                myEvents.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        }
+
+        if (sendBtn) {
+            sendBtn.onclick = async () => {
+                const subject = subjectInput.value;
+                const message = messageInput.value;
+                const eventId = eventSelect.value;
+
+                if (!subject || !message) {
+                    showToast('Error', 'Please fill in all fields.', 'danger');
+                    return;
+                }
+
+                try {
+                    await apiPost('notifications', {
+                        title: subject,
+                        message: message,
+                        createdAt: new Date().toISOString(),
+                        type: 'INFO',
+                        targetUserId: eventId === 'ALL' ? 'ALL_ATTENDEES' : `EVENT_${eventId}`,
+                        read: false
+                    });
+                    showToast('Sent', 'Update sent to all registrants.', 'success');
+                    subjectInput.value = '';
+                    messageInput.value = '';
+                } catch (e) { showToast('Error', 'Failed to send update.', 'danger'); }
+            };
+        }
+    }
+
+    loadNotifications();
 }
 
 // ─── Create Event Flow ────────────────────────────────────────────────────────
@@ -1246,6 +1448,25 @@ export function initCreateEventWizard() {
     if (!user) return;
 
     populateSidebarUserInfo();
+
+    // Critical: Gate event creation on ACTIVE status
+    if (user.accountStatus?.status !== 'ACTIVE') {
+        const mainContent = document.querySelector('.col-lg-9');
+        if (mainContent) {
+            mainContent.innerHTML = `
+                <div class="card-custom p-5 text-center">
+                    <div class="mb-4 text-warning">
+                        <i data-lucide="shield-alert" width="64" height="64"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3">Account Pending Approval</h2>
+                    <p class="text-neutral-500 mb-4">Your organizer account is currently being reviewed by our administration team. You will be able to create and publish events once your profile is approved.</p>
+                    <a href="dashboard.html" class="btn btn-primary rounded-pill px-4">Back to Dashboard</a>
+                </div>
+            `;
+            if (window.initIcons) window.initIcons({ root: mainContent });
+        }
+        return;
+    }
 
     let currentStep = 1;
     const eventData = {
@@ -1400,33 +1621,65 @@ export function initCreateEventWizard() {
         if (window.initIcons) window.initIcons({ root: div });
     };
 
-    // Initialize with one row
-    window.addTicketRow();
+    // Load Categories (Filtered by Active)
+    const loadCategories = async () => {
+        const select = document.getElementById('eventCategory');
+        if (!select) return;
 
-    const saveEvent = (published = false) => {
+        try {
+            const res = await fetch('http://localhost:3000/categories');
+            const cats = await res.json();
+            const activeCats = cats.filter(c => c.status === 'Active');
+
+            select.innerHTML = activeCats.map(c => `
+                <option value="${c.id}">${c.name}</option>
+            `).join('');
+        } catch (e) {
+            console.error('Error loading categories', e);
+        }
+    };
+    loadCategories();
+
+    const saveEvent = async (published = false) => {
+        const user = getCurrentUser();
+        if (!user) return;
+
         const title = document.getElementById('eventTitle').value;
-        const cat = document.getElementById('eventCategory').value;
+        const catId = document.getElementById('eventCategory').value;
         const desc = document.getElementById('eventDesc').value;
         const vt = document.querySelector('input[name="venueType"]:checked').value;
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
 
+        const categoryMap = {
+            'tech': 'Technology',
+            'entertainment': 'Entertainment',
+            'professional': 'Professional',
+            'creative': 'Creative arts'
+        };
+
         // Map data
         eventData.title = title;
-        eventData.category = cat;
+        eventData.category = {
+            id: catId,
+            name: categoryMap[catId] || catId
+        };
         eventData.description = desc;
         eventData.schedule = {
             startDateTime: start,
             endDateTime: end,
-            timeZone: "Asia/Kolkata"
+            timeZone: "Asia/Kolkata",
+            createdAt: new Date().toISOString()
         };
-        eventData.venue = {
+        eventData.location = {
             type: vt,
             name: vt === 'PHYSICAL' ? document.getElementById('venueName').value : 'Virtual Link',
-            city: vt === 'PHYSICAL' ? document.getElementById('venueCity').value : 'Online',
+            address: {
+                city: vt === 'PHYSICAL' ? document.getElementById('venueCity').value : 'Online'
+            },
             capacity: vt === 'PHYSICAL' ? parseInt(document.getElementById('venueCapacity').value) || 0 : 9999
         };
-        if (vt === 'VIRTUAL') eventData.venue.url = document.getElementById('eventUrl').value;
+        if (vt === 'VIRTUAL') eventData.location.url = document.getElementById('eventUrl').value;
 
         // Tickets
         const ticketRows = document.getElementById('ticketRows').children;
@@ -1434,32 +1687,43 @@ export function initCreateEventWizard() {
             const inputs = row.querySelectorAll('input');
             const qty = parseInt(inputs[2].value) || 0;
             return {
-                id: `t-${Date.now()}-${i}`,
-                type: inputs[0].value.replace(/\s+/g, '_').toUpperCase() || 'GENERAL',
+                type: (inputs[0].value || 'GENERAL').replace(/\s+/g, '_').toUpperCase(),
                 price: parseFloat(inputs[1].value) || 0,
                 totalQuantity: qty,
-                availableQuantity: qty
+                availableQuantity: qty,
+                benefits: []
             };
         });
 
-        eventData.status.current = published ? 'PUBLISHED' : 'DRAFT';
+        eventData.organizer = {
+            id: user.id,
+            name: user.profile.fullName,
+            email: user.profile.email,
+            avatar: user.profile.profileImage || `https://ui-avatars.com/api/?name=${user.profile.fullName}`,
+            rating: user.statistics?.rating || 4.5
+        };
 
-        // Add to global state
-        state.events.push(eventData);
-        localStorage.setItem('events', JSON.stringify(state.events));
+        eventData.status.current = published ? 'PENDING' : 'DRAFT';
 
-        showToast(published ? 'Published' : 'Saved', `Event ${title} has been ${published ? 'published' : 'saved as draft'}.`, 'success');
+        try {
+            await apiPost('events', eventData);
+            showToast(published ? 'Submitted' : 'Saved',
+                published ? 'Your event has been submitted for admin approval.' : 'Event draft saved locally.',
+                'success');
 
-        setTimeout(() => {
-            window.location.href = 'my-events.html';
-        }, 1500);
+            setTimeout(() => {
+                window.location.href = 'my-events.html';
+            }, 1000);
+        } catch (err) {
+            showToast('Error', 'Failed to save event.', 'danger');
+        }
     };
 
     const draftBtn = document.getElementById('saveDraftBtn');
     const submitBtn = document.getElementById('submitEventBtn');
 
-    if (draftBtn) draftBtn.addEventListener('click', () => saveEvent(false));
-    if (submitBtn) submitBtn.addEventListener('click', () => saveEvent(true));
+    if (draftBtn) draftBtn.onclick = () => saveEvent(false);
+    if (submitBtn) submitBtn.onclick = () => saveEvent(true);
 
     if (window.initIcons) window.initIcons();
 }

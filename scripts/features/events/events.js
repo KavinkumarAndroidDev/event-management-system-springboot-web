@@ -1,4 +1,4 @@
-import { state } from '../../shared/state.js';
+import { state, getCategory, getVenue, getUser } from '../../shared/state.js';
 import { showLoading, hideLoading } from '../../shared/utils.js';
 
 export function initializeEvents() {
@@ -7,7 +7,7 @@ export function initializeEvents() {
     // Show loading for main grid if it exists
     let eventsGrid = document.getElementById('events-grid');
     if (eventsGrid) {
-        if (!events || events.length === 0) {
+        if (events === null) {
             showLoading('events-grid', 'Fetching the latest events...');
         } else {
             hideLoading('events-grid');
@@ -16,28 +16,39 @@ export function initializeEvents() {
 
     // Homepage: Featured Events Carousel
     const carouselInner = document.getElementById('featured-events-carousel-inner');
-    if (carouselInner && events) {
-        const featured = events.filter(e => e.status.isFeatured && !e.title.toLowerCase().includes('template') && !e.title.toLowerCase().includes('placeholder'));
-        if (featured.length > 0) {
-            carouselInner.innerHTML = '';
+    if (carouselInner) {
+        if (events) {
+            const featured = events.filter(e => e.status?.current === 'PUBLISHED' && (e.status?.isFeatured || e.isFeatured) && !e.title.toLowerCase().includes('template') && !e.title.toLowerCase().includes('placeholder'));
+            if (featured.length > 0) {
+                carouselInner.innerHTML = '';
 
-            const itemsPerPage = 4;
-            for (let i = 0; i < featured.length; i += itemsPerPage) {
-                const slideEvents = featured.slice(i, i + itemsPerPage);
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `carousel-item ${i === 0 ? 'active' : ''}`;
+                const itemsPerPage = 4;
+                for (let i = 0; i < featured.length; i += itemsPerPage) {
+                    const slideEvents = featured.slice(i, i + itemsPerPage);
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = `carousel-item ${i === 0 ? 'active' : ''}`;
 
-                const row = document.createElement('div');
-                row.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 py-2';
+                    const row = document.createElement('div');
+                    row.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 py-2';
 
-                slideEvents.forEach(e => {
-                    row.appendChild(createEventCard(e));
-                });
+                    slideEvents.forEach(e => {
+                        try {
+                            row.appendChild(createEventCard(e));
+                        } catch (err) {
+                            console.error('Failed to render featured event:', e, err);
+                        }
+                    });
 
-                itemDiv.appendChild(row);
-                carouselInner.appendChild(itemDiv);
+                    itemDiv.appendChild(row);
+                    carouselInner.appendChild(itemDiv);
+                }
+                if (window.initIcons) window.initIcons({ root: carouselInner });
+            } else {
+                carouselInner.innerHTML = '<div class="text-center py-5 text-neutral-400">No featured events available at the moment.</div>';
             }
-            if (window.initIcons) window.initIcons({ root: carouselInner });
+        } else {
+            // Still loading
+            carouselInner.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
         }
     }
 
@@ -47,8 +58,9 @@ export function initializeEvents() {
         // Extract unique organizers from events and sort by rating
         const uniqueOrganizersMap = new Map();
         events.forEach(e => {
-            if (e.organizer && !uniqueOrganizersMap.has(e.organizer.id)) {
-                uniqueOrganizersMap.set(e.organizer.id, e.organizer);
+            const org = getUser(e.organizerId)?.profile;
+            if (org && !uniqueOrganizersMap.has(e.organizerId)) {
+                uniqueOrganizersMap.set(e.organizerId, { ...org, id: e.organizerId, rating: 4.8 }); // Default rating if missing
             }
         });
         const topOrganizers = Array.from(uniqueOrganizersMap.values())
@@ -56,15 +68,19 @@ export function initializeEvents() {
             .slice(0, 3);
 
         organizersGrid.innerHTML = '';
-        topOrganizers.forEach(org => {
-            const col = document.createElement('div');
-            col.className = 'col';
-            col.innerHTML = `
+
+        // Combine original and a copy for seamless loop
+        const displayOrganizers = [...topOrganizers, ...topOrganizers];
+
+        displayOrganizers.forEach((org, index) => {
+            const item = document.createElement('div');
+            item.className = 'marquee-item';
+            item.innerHTML = `
                 <div class="card card-custom border-0 shadow-sm p-4 h-100 text-center rounded-4 d-flex flex-column align-items-center">
                     <div class="org-avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;"></div>
                     <div class="mt-auto w-100">
                         <div class="org-name fw-bold text-neutral-900 fs-5 mb-1"></div>
-                        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                        <div class="d-flex align-items-center justify-content-center gap-2">
                             <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
                                 <i data-lucide="check-circle" width="12"></i> Verified
                             </span>
@@ -72,16 +88,21 @@ export function initializeEvents() {
                                 <i data-lucide="star" class="fill-warning me-1" width="12"></i> <span class="org-rating"></span>
                             </span>
                         </div>
-                        <a href="#" class="org-contact btn btn-outline-primary rounded-pill w-100 btn-sm">Contact Organizer</a>
                     </div>
                 </div>
             `;
-            col.querySelector('.org-avatar').textContent = org.name.charAt(0);
-            col.querySelector('.org-name').textContent = org.name;
-            col.querySelector('.org-rating').textContent = org.rating;
-            col.querySelector('.org-contact').href = `mailto:${org.contactEmail}`;
-            organizersGrid.appendChild(col);
+            const displayName = org.fullName || org.name || 'Organizer';
+            const avatarChar = displayName ? displayName.charAt(0) : '?';
+            const avatarEl = item.querySelector('.org-avatar');
+            const nameEl = item.querySelector('.org-name');
+            const ratingEl = item.querySelector('.org-rating');
+
+            if (avatarEl) avatarEl.textContent = avatarChar;
+            if (nameEl) nameEl.textContent = displayName;
+            if (ratingEl) ratingEl.textContent = org.rating || '4.8';
+            organizersGrid.appendChild(item);
         });
+
 
         if (window.lucide) {
             if (window.initIcons) window.initIcons({ root: organizersGrid });
@@ -91,6 +112,36 @@ export function initializeEvents() {
     // Events Page: All Events
     if (eventsGrid && events) {
         setupPagination(events);
+        loadDynamicCategories();
+    }
+}
+
+async function loadDynamicCategories() {
+    const container = document.getElementById('collapseCategories');
+    if (!container) return;
+
+    try {
+        const res = await fetch('http://localhost:3000/categories');
+        const cats = await res.json();
+        const activeCats = cats.filter(c => c.status === 'Active');
+
+        const row = container.querySelector('.d-flex.flex-column.gap-2');
+        if (row) {
+            row.innerHTML = activeCats.map(c => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="cat-${c.id}" value="${c.name}">
+                    <label class="form-check-label text-neutral-900" for="cat-${c.id}"
+                        style="font-family: 'Inter', sans-serif; font-size: 14px;">${c.name}</label>
+                </div>
+            `).join('');
+
+            // Re-bind listeners for the new checkboxes
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', () => filterEvents());
+            });
+        }
+    } catch (e) {
+        console.error('Error loading categories', e);
     }
 }
 
@@ -125,11 +176,15 @@ export function createEventCard(event) {
         </div>
     `;
 
-    col.querySelector('.ec-img').src = event.media.thumbnail;
+    const loc = getVenue(event.venueId) || { name: 'Multiple Locations', address: { city: 'Various' } };
+    const locName = loc.name || 'Unknown Venue';
+    const locCity = (loc.address && loc.address.city) || loc.city || 'Various';
+
+    col.querySelector('.ec-img').src = event.media?.thumbnail || 'https://dummyimage.com/600x400/eeeeee/999999&text=No+Image';
     col.querySelector('.ec-img').alt = event.title;
     col.querySelector('.ec-datetime').textContent = `${dateStr} • ${timeStr}`;
     col.querySelector('.ec-title').textContent = event.title;
-    col.querySelector('.ec-location').textContent = `${event.venue.name}, ${event.venue.address.city}`;
+    col.querySelector('.ec-location').textContent = `${locName}, ${locCity}`;
     col.querySelector('.ec-price').textContent = minPrice === 0 ? 'Free' : '₹' + minPrice + ' onwards';
     col.querySelector('.ec-link').href = link;
 
@@ -278,7 +333,8 @@ export function setupGlobalInteractions() {
 function filterEvents(query) {
     if (!state.events) return;
 
-    let filtered = state.events;
+    // 0. Status Filter (MANDATORY: Only PUBLISHED events in public listing)
+    let filtered = state.events.filter(e => e.status?.current === 'PUBLISHED');
 
     // 1. Search Query
     if (typeof query !== 'string') {
@@ -287,11 +343,13 @@ function filterEvents(query) {
     }
 
     if (query) {
-        filtered = filtered.filter(e =>
-            e.title.toLowerCase().includes(query) ||
-            e.venue.address.city.toLowerCase().includes(query) ||
-            (e.category && e.category.name.toLowerCase().includes(query))
-        );
+        filtered = filtered.filter(e => {
+            const venue = getVenue(e.venueId);
+            const category = getCategory(e.categoryId);
+            return e.title.toLowerCase().includes(query) ||
+                (venue?.address?.city?.toLowerCase().includes(query)) ||
+                (category?.name?.toLowerCase().includes(query));
+        });
     }
 
     // 2. City Filters
@@ -302,7 +360,10 @@ function filterEvents(query) {
             .map(cb => cb.nextElementSibling.textContent.trim().toLowerCase());
 
         if (selectedCities.length > 0) {
-            filtered = filtered.filter(e => selectedCities.includes(e.venue.address.city.toLowerCase()));
+            filtered = filtered.filter(e => {
+                const city = getVenue(e.venueId)?.address?.city?.toLowerCase();
+                return city && selectedCities.includes(city);
+            });
         }
     }
 
@@ -314,7 +375,10 @@ function filterEvents(query) {
             .map(cb => cb.nextElementSibling.textContent.trim().toLowerCase());
 
         if (selectedCategories.length > 0) {
-            filtered = filtered.filter(e => e.category && selectedCategories.includes(e.category.name.toLowerCase()));
+            filtered = filtered.filter(e => {
+                const catName = getCategory(e.categoryId)?.name?.toLowerCase();
+                return catName && selectedCategories.includes(catName);
+            });
         }
     }
 

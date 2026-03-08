@@ -1,0 +1,1484 @@
+{
+  "users": [
+    {
+      "id": "USR-1001",
+      "password": "Admin@123",
+      "profile": {
+        "fullName": "Arjun Sharma",
+        "email": "admin@syncevent.in",
+        "phone": "9876543210",
+        "gender": "MALE",
+        "dateOfBirth": "1990-05-15",
+        "profileImage": "https://dummyimage.com/200x200/6366f1/ffffff&text=AS",
+        "bio": "Platform administrator"
+      },
+      "role": {
+        "id": "ROLE-1",
+        "name": "ADMIN",
+        "permissions": [
+          "ALL"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": true,
+        "isPhoneVerified": true,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-08T08:00:00.000Z",
+        "createdAt": "2024-01-01T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": true,
+          "push": true
+        },
+        "interestedCategories": []
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 0,
+        "totalSpent": 0,
+        "averageRatingGiven": 0
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1002",
+      "password": "Org@123",
+      "profile": {
+        "fullName": "Priya Menon",
+        "email": "priya@techevents.in",
+        "phone": "9845012345",
+        "gender": "FEMALE",
+        "dateOfBirth": "1992-08-20",
+        "profileImage": "https://dummyimage.com/200x200/10B981/ffffff&text=PM",
+        "bio": "Organizer of tech & startup events across South India",
+        "organizationName": "Priya Events",
+        "organizationType": "Private Company",
+        "website": "",
+        "address": ""
+      },
+      "role": {
+        "id": "ROLE-3",
+        "name": "ORGANIZER",
+        "permissions": [
+          "CREATE_EVENT",
+          "MANAGE_EVENT",
+          "VIEW_ANALYTICS",
+          "MANAGE_TICKETS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": true,
+        "isPhoneVerified": true,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-07T10:30:00.000Z",
+        "createdAt": "2024-03-15T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": true
+        },
+        "interestedCategories": [
+          "CAT-1",
+          "CAT-2"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 5,
+        "eventsAttended": 2,
+        "totalSpent": 0,
+        "averageRatingGiven": 4.2
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1003",
+      "password": "Org@456",
+      "profile": {
+        "fullName": "Karthik Rajan",
+        "email": "karthik@musicfest.in",
+        "phone": "9812345678",
+        "gender": "MALE",
+        "dateOfBirth": "1988-12-05",
+        "profileImage": "https://dummyimage.com/200x200/F59E0B/ffffff&text=KR",
+        "bio": "Music festival organizer with 8+ years of experience",
+        "organizationName": "Karthik Events",
+        "organizationType": "Private Company",
+        "website": "",
+        "address": ""
+      },
+      "role": {
+        "id": "ROLE-3",
+        "name": "ORGANIZER",
+        "permissions": [
+          "CREATE_EVENT",
+          "MANAGE_EVENT",
+          "VIEW_ANALYTICS",
+          "MANAGE_TICKETS"
+        ]
+      },
+      "accountStatus": {
+        "status": "PENDING",
+        "isEmailVerified": true,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-06T14:00:00.000Z",
+        "createdAt": "2026-02-20T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": false
+        },
+        "interestedCategories": [
+          "CAT-3"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 3,
+        "totalSpent": 2500,
+        "averageRatingGiven": 4.0
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1004",
+      "password": "Org@789",
+      "profile": {
+        "fullName": "Sneha Iyer",
+        "email": "sneha@workshops.in",
+        "phone": "9900112233",
+        "gender": "FEMALE",
+        "dateOfBirth": "1995-03-18",
+        "profileImage": "https://dummyimage.com/200x200/EC4899/ffffff&text=SI",
+        "bio": "Workshop & training session organizer",
+        "organizationName": "Sneha Events",
+        "organizationType": "Private Company",
+        "website": "",
+        "address": ""
+      },
+      "role": {
+        "id": "ROLE-3",
+        "name": "ORGANIZER",
+        "permissions": [
+          "CREATE_EVENT",
+          "MANAGE_EVENT",
+          "VIEW_ANALYTICS",
+          "MANAGE_TICKETS"
+        ]
+      },
+      "accountStatus": {
+        "status": "PENDING",
+        "isEmailVerified": true,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-05T09:15:00.000Z",
+        "createdAt": "2026-03-01T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": true,
+          "push": false
+        },
+        "interestedCategories": [
+          "CAT-2",
+          "CAT-4"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 5,
+        "totalSpent": 4800,
+        "averageRatingGiven": 4.5
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1005",
+      "password": "mocked-otp-user",
+      "profile": {
+        "fullName": "Rahul Nair",
+        "email": "rahul.nair@gmail.com",
+        "phone": "9871234567",
+        "gender": "MALE",
+        "dateOfBirth": "1997-07-22",
+        "profileImage": "https://dummyimage.com/200x200/3B82F6/ffffff&text=RN",
+        "bio": "Tech enthusiast and event lover"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": true,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-07T20:00:00.000Z",
+        "createdAt": "2025-06-10T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": true
+        },
+        "interestedCategories": [
+          "CAT-1",
+          "CAT-2"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 4,
+        "totalSpent": 6500,
+        "averageRatingGiven": 4.3
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1006",
+      "password": "mocked-otp-user",
+      "profile": {
+        "fullName": "Deepika Pillai",
+        "email": "deepika.p@outlook.com",
+        "phone": "9988776655",
+        "gender": "FEMALE",
+        "dateOfBirth": "1999-11-30",
+        "profileImage": "https://dummyimage.com/200x200/8B5CF6/ffffff&text=DP",
+        "bio": "Arts & culture enthusiast"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": false,
+        "isPhoneVerified": true,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-06T16:45:00.000Z",
+        "createdAt": "2025-09-01T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": false,
+          "sms": true,
+          "push": false
+        },
+        "interestedCategories": [
+          "CAT-3",
+          "CAT-5"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 2,
+        "totalSpent": 3200,
+        "averageRatingGiven": 3.8
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1007",
+      "password": "mocked-otp-user",
+      "profile": {
+        "fullName": "Arun Kumar",
+        "email": "arun.k@yahoo.com",
+        "phone": "9654321098",
+        "gender": "MALE",
+        "dateOfBirth": "1994-02-14",
+        "profileImage": "https://dummyimage.com/200x200/EF4444/ffffff&text=AK",
+        "bio": "Startup founder attending business events"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "SUSPENDED",
+        "isEmailVerified": true,
+        "isPhoneVerified": true,
+        "failedLoginAttempts": 5,
+        "lastLogin": "2026-02-15T11:00:00.000Z",
+        "createdAt": "2025-01-20T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": false
+        },
+        "interestedCategories": [
+          "CAT-1"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 1,
+        "totalSpent": 1500,
+        "averageRatingGiven": 2.5
+      },
+      "savedEvents": []
+    },
+    {
+      "id": "USR-1008",
+      "password": "mocked-otp-user",
+      "profile": {
+        "fullName": "Lakshmi Devi",
+        "email": "lakshmi.d@gmail.com",
+        "phone": "9123456780",
+        "gender": "FEMALE",
+        "dateOfBirth": "2001-06-08",
+        "profileImage": "https://dummyimage.com/200x200/14B8A6/ffffff&text=LD",
+        "bio": "College student exploring events"
+      },
+      "role": {
+        "id": "ROLE-2",
+        "name": "ATTENDEE",
+        "permissions": [
+          "VIEW_EVENTS",
+          "REGISTER_EVENT",
+          "BOOK_TICKETS",
+          "WRITE_REVIEWS",
+          "SAVE_EVENTS"
+        ]
+      },
+      "accountStatus": {
+        "status": "ACTIVE",
+        "isEmailVerified": true,
+        "isPhoneVerified": false,
+        "failedLoginAttempts": 0,
+        "lastLogin": "2026-03-08T07:30:00.000Z",
+        "createdAt": "2026-01-05T00:00:00.000Z"
+      },
+      "preferences": {
+        "language": "en",
+        "notifications": {
+          "email": true,
+          "sms": false,
+          "push": true
+        },
+        "interestedCategories": [
+          "CAT-2",
+          "CAT-3"
+        ]
+      },
+      "statistics": {
+        "eventsCreated": 0,
+        "eventsAttended": 6,
+        "totalSpent": 8900,
+        "averageRatingGiven": 4.7
+      },
+      "savedEvents": []
+    }
+  ],
+  "categories": [
+    {
+      "id": "CAT-1",
+      "name": "Technology",
+      "icon": "cpu",
+      "color": "#6366f1",
+      "status": "ACTIVE",
+      "description": "Tech talks, hackathons, developer meetups"
+    },
+    {
+      "id": "CAT-2",
+      "name": "Business & Startup",
+      "icon": "briefcase",
+      "color": "#10B981",
+      "status": "ACTIVE",
+      "description": "Conferences, networking, pitch events"
+    },
+    {
+      "id": "CAT-3",
+      "name": "Music & Arts",
+      "icon": "music",
+      "color": "#F59E0B",
+      "status": "ACTIVE",
+      "description": "Concerts, art exhibitions, open mics"
+    },
+    {
+      "id": "CAT-4",
+      "name": "Health & Wellness",
+      "icon": "heart",
+      "color": "#EC4899",
+      "status": "ACTIVE",
+      "description": "Yoga, fitness, mental health workshops"
+    },
+    {
+      "id": "CAT-5",
+      "name": "Education",
+      "icon": "book-open",
+      "color": "#8B5CF6",
+      "status": "ACTIVE",
+      "description": "Workshops, seminars, certification programs"
+    },
+    {
+      "id": "CAT-6",
+      "name": "Sports",
+      "icon": "trophy",
+      "color": "#EF4444",
+      "status": "INACTIVE",
+      "description": "Tournaments, marathons, sports meetups"
+    }
+  ],
+  "venues": [
+    {
+      "id": "VEN-1",
+      "name": "Chennai Trade Centre",
+      "location": "Nandambakkam, Chennai",
+      "address": {
+        "street": "Kathipara Junction",
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": "600069"
+      },
+      "capacity": 5000,
+      "status": "ACTIVE",
+      "amenities": [
+        "Parking",
+        "AC",
+        "Wi-Fi",
+        "Catering",
+        "Stage"
+      ]
+    },
+    {
+      "id": "VEN-2",
+      "name": "Phoenix MarketCity",
+      "location": "Velachery, Chennai",
+      "address": {
+        "street": "142 Velachery Main Road",
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": "600042"
+      },
+      "capacity": 2000,
+      "status": "ACTIVE",
+      "amenities": [
+        "Parking",
+        "AC",
+        "Wi-Fi"
+      ]
+    },
+    {
+      "id": "VEN-3",
+      "name": "IIT Madras Research Park",
+      "location": "Taramani, Chennai",
+      "address": {
+        "street": "Kanagam Village, Taramani",
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": "600113"
+      },
+      "capacity": 800,
+      "status": "ACTIVE",
+      "amenities": [
+        "Parking",
+        "AC",
+        "Wi-Fi",
+        "Projectors"
+      ]
+    },
+    {
+      "id": "VEN-4",
+      "name": "Coimbatore CODISSIA Trade Fair Complex",
+      "location": "Coimbatore",
+      "address": {
+        "street": "CODISSIA Complex, Huzur Road",
+        "city": "Coimbatore",
+        "state": "Tamil Nadu",
+        "pincode": "641018"
+      },
+      "capacity": 3000,
+      "status": "ACTIVE",
+      "amenities": [
+        "Parking",
+        "Catering",
+        "Stage",
+        "Wi-Fi"
+      ]
+    },
+    {
+      "id": "VEN-5",
+      "name": "Hotel Leela Palace Ballroom",
+      "location": "Bangalore",
+      "address": {
+        "street": "23 Airport Road",
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "pincode": "560008"
+      },
+      "capacity": 600,
+      "status": "ACTIVE",
+      "amenities": [
+        "Parking",
+        "AC",
+        "Catering",
+        "AV Equipment"
+      ]
+    },
+    {
+      "id": "VEN-6",
+      "name": "Old Venue - Under Renovation",
+      "location": "Chennai",
+      "address": {
+        "street": "12 Mount Road",
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "pincode": "600002"
+      },
+      "capacity": 400,
+      "status": "INACTIVE",
+      "amenities": []
+    }
+  ],
+  "events": [
+    {
+      "id": "EVT-1001",
+      "title": "DevFest Chennai 2026",
+      "description": "Annual developer festival featuring talks on AI, Cloud, and Web Development by industry experts. Hands-on workshops and networking sessions included.",
+      "fullDescription": "Annual developer festival featuring talks on AI, Cloud, and Web Development by industry experts. Hands-on workshops, networking sessions, and live demos. Hosted at IIT Madras Research Park with 800+ developers from across India.",
+      "categoryId": "CAT-1",
+      "tags": [
+        "AI",
+        "Cloud",
+        "Web",
+        "Open Source"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-3",
+      "schedule": {
+        "startDateTime": "2026-04-15T09:00:00.000Z",
+        "endDateTime": "2026-04-15T18:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-04-10T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1001-1",
+          "type": "GENERAL",
+          "price": 499,
+          "totalQuantity": 500,
+          "availableQuantity": 312,
+          "benefits": [
+            "Event access",
+            "Workshop materials",
+            "Certificate",
+            "Lunch"
+          ]
+        },
+        {
+          "id": "TKT-1001-2",
+          "type": "VIP",
+          "price": 1499,
+          "totalQuantity": 100,
+          "availableQuantity": 44,
+          "benefits": [
+            "Priority seating",
+            "All workshops",
+            "Networking dinner",
+            "Swag kit"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/6366f1/ffffff&text=DevFest+Chennai",
+        "banner": "https://dummyimage.com/1200x400/6366f1/ffffff&text=DevFest+Chennai+2026"
+      },
+      "status": {
+        "current": "PUBLISHED",
+        "history": [
+          "DRAFT",
+          "PENDING",
+          "PUBLISHED"
+        ],
+        "isFeatured": true
+      },
+      "stats": {
+        "totalRegistrations": 244,
+        "totalRevenue": 187556,
+        "views": 3400
+      },
+      "policies": {
+        "refundPolicy": "Full refund if cancelled 7+ days before the event.",
+        "termsAndConditions": "Laptop recommended. Professional attire preferred."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "DEVFEST20",
+            "discountPercentage": 20
+          },
+          {
+            "code": "EARLYBIRD",
+            "discountPercentage": 15
+          }
+        ]
+      },
+      "createdAt": "2026-02-01T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1002",
+      "title": "Startup Pitch Night — Coimbatore",
+      "description": "The biggest startup pitch competition in Tier-2 Tamil Nadu. 20 startups compete for ₹10L in funding. Mentors from top VCs will be present.",
+      "fullDescription": "The biggest startup pitch competition in Tier-2 Tamil Nadu. 20 startups compete for ₹10L in funding. Mentors from top VCs will be present for Q&A and networking. A must-attend for founders and investors.",
+      "categoryId": "CAT-2",
+      "tags": [
+        "Startup",
+        "Funding",
+        "Networking",
+        "Pitch"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-4",
+      "schedule": {
+        "startDateTime": "2026-05-10T10:00:00.000Z",
+        "endDateTime": "2026-05-10T20:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-05-05T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1002-1",
+          "type": "GENERAL",
+          "price": 299,
+          "totalQuantity": 1000,
+          "availableQuantity": 680,
+          "benefits": [
+            "Event access",
+            "Networking session",
+            "Refreshments"
+          ]
+        },
+        {
+          "id": "TKT-1002-2",
+          "type": "INVESTOR",
+          "price": 4999,
+          "totalQuantity": 50,
+          "availableQuantity": 28,
+          "benefits": [
+            "VIP lounge access",
+            "1-on-1 with investors",
+            "Premium dinner"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/10B981/ffffff&text=Startup+Pitch+Night",
+        "banner": "https://dummyimage.com/1200x400/10B981/ffffff&text=Startup+Pitch+Night+Coimbatore"
+      },
+      "status": {
+        "current": "PUBLISHED",
+        "history": [
+          "DRAFT",
+          "PENDING",
+          "PUBLISHED"
+        ],
+        "isFeatured": true
+      },
+      "stats": {
+        "totalRegistrations": 342,
+        "totalRevenue": 239658,
+        "views": 2800
+      },
+      "policies": {
+        "refundPolicy": "No refunds after registration.",
+        "termsAndConditions": "Business attire required. Valid ID mandatory."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "STARTUP10",
+            "discountPercentage": 10
+          }
+        ]
+      },
+      "createdAt": "2026-02-15T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1003",
+      "title": "Chennai Jazz & Blues Night",
+      "description": "A soulful evening of live jazz and blues performances by acclaimed artists. Dinner and drinks included in premium tickets.",
+      "fullDescription": "A soulful evening of live jazz and blues performances by acclaimed artists from across India. Dinner and drinks included in premium tickets. Intimate club setting for an unforgettable experience.",
+      "categoryId": "CAT-3",
+      "tags": [
+        "Jazz",
+        "Blues",
+        "Live Music",
+        "Dinner"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-2",
+      "schedule": {
+        "startDateTime": "2026-03-25T18:00:00.000Z",
+        "endDateTime": "2026-03-25T23:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-03-22T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1003-1",
+          "type": "GENERAL",
+          "price": 799,
+          "totalQuantity": 300,
+          "availableQuantity": 96,
+          "benefits": [
+            "Event access",
+            "Drinks voucher"
+          ]
+        },
+        {
+          "id": "TKT-1003-2",
+          "type": "PREMIUM",
+          "price": 1999,
+          "totalQuantity": 50,
+          "availableQuantity": 15,
+          "benefits": [
+            "Front row seating",
+            "Dinner included",
+            "Meet the artists",
+            "Drinks package"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/F59E0B/ffffff&text=Jazz+%26+Blues+Night",
+        "banner": "https://dummyimage.com/1200x400/F59E0B/ffffff&text=Chennai+Jazz+%26+Blues"
+      },
+      "status": {
+        "current": "PUBLISHED",
+        "history": [
+          "DRAFT",
+          "PENDING",
+          "PUBLISHED"
+        ],
+        "isFeatured": true
+      },
+      "stats": {
+        "totalRegistrations": 239,
+        "totalRevenue": 236761,
+        "views": 1900
+      },
+      "policies": {
+        "refundPolicy": "50% refund if cancelled 3+ days before.",
+        "termsAndConditions": "18+ only. Valid ID required at entry."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "SAVE20",
+            "discountPercentage": 20
+          },
+          {
+            "code": "MUSIC15",
+            "discountPercentage": 15
+          }
+        ]
+      },
+      "createdAt": "2026-02-20T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1004",
+      "title": "React & Next.js Deep Dive Workshop",
+      "description": "Two-day hands-on workshop for intermediate developers on building production-ready apps with React 19 and Next.js 15. Includes project certificate.",
+      "fullDescription": "Two-day hands-on workshop for intermediate developers on building production-ready apps with React 19 and Next.js 15. Build 3 real-world projects. Includes project certificate from IIT Madras Research Park.",
+      "categoryId": "CAT-1",
+      "tags": [
+        "React",
+        "Next.js",
+        "Workshop",
+        "Frontend"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-3",
+      "schedule": {
+        "startDateTime": "2026-06-20T09:00:00.000Z",
+        "endDateTime": "2026-06-21T17:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-06-15T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1004-1",
+          "type": "STANDARD",
+          "price": 2499,
+          "totalQuantity": 60,
+          "availableQuantity": 60,
+          "benefits": [
+            "2-day workshop",
+            "Course materials",
+            "Certificate",
+            "Lunch both days",
+            "GitHub repo access"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/3B82F6/ffffff&text=React+Workshop",
+        "banner": "https://dummyimage.com/1200x400/3B82F6/ffffff&text=React+Next.js+Workshop"
+      },
+      "status": {
+        "current": "PENDING",
+        "history": [
+          "DRAFT",
+          "PENDING"
+        ],
+        "isFeatured": false
+      },
+      "stats": {
+        "totalRegistrations": 0,
+        "totalRevenue": 0,
+        "views": 420
+      },
+      "policies": {
+        "refundPolicy": "Full refund if cancelled 5+ days before.",
+        "termsAndConditions": "Bring your own laptop. Node.js pre-installed required."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "REACT10",
+            "discountPercentage": 10
+          }
+        ]
+      },
+      "createdAt": "2026-03-05T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1005",
+      "title": "Wellness Summit 2026",
+      "description": "A full-day summit covering mindfulness, nutrition, fitness, and mental health with expert panelists and yoga sessions.",
+      "fullDescription": "A full-day summit covering mindfulness, nutrition, fitness, and mental health with expert panelists and yoga sessions. Includes healthy meals and a wellness kit. Perfect for professionals seeking work-life balance.",
+      "categoryId": "CAT-4",
+      "tags": [
+        "Wellness",
+        "Yoga",
+        "Nutrition",
+        "Mental Health"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-5",
+      "schedule": {
+        "startDateTime": "2025-11-05T08:00:00.000Z",
+        "endDateTime": "2025-11-05T18:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2025-11-01T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1005-1",
+          "type": "GENERAL",
+          "price": 999,
+          "totalQuantity": 400,
+          "availableQuantity": 0,
+          "benefits": [
+            "All sessions",
+            "Healthy lunch",
+            "Wellness kit"
+          ]
+        },
+        {
+          "id": "TKT-1005-2",
+          "type": "VIP",
+          "price": 2499,
+          "totalQuantity": 50,
+          "availableQuantity": 0,
+          "benefits": [
+            "All sessions",
+            "Gourmet lunch",
+            "Premium wellness kit",
+            "Personal coaching session"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/EC4899/ffffff&text=Wellness+Summit",
+        "banner": "https://dummyimage.com/1200x400/EC4899/ffffff&text=Wellness+Summit+2026"
+      },
+      "status": {
+        "current": "COMPLETED",
+        "history": [
+          "DRAFT",
+          "PENDING",
+          "PUBLISHED",
+          "COMPLETED"
+        ],
+        "isFeatured": false
+      },
+      "stats": {
+        "totalRegistrations": 450,
+        "totalRevenue": 524550,
+        "views": 6100
+      },
+      "policies": {
+        "refundPolicy": "No refunds for completed events.",
+        "termsAndConditions": "Comfortable clothing recommended."
+      },
+      "pricing": {
+        "offers": []
+      },
+      "createdAt": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1006",
+      "title": "AI/ML Bootcamp — Chennai",
+      "description": "Intensive 3-day bootcamp on Machine Learning and Generative AI with hands-on projects. Certification provided by partnering institutes.",
+      "fullDescription": "Intensive 3-day bootcamp on Machine Learning and Generative AI with hands-on projects. Build 5 ML models from scratch. Certification provided by partnering institutes. Limited to 300 seats.",
+      "categoryId": "CAT-1",
+      "tags": [
+        "AI",
+        "ML",
+        "GenAI",
+        "Bootcamp",
+        "Certificate"
+      ],
+      "organizerId": "USR-1002",
+      "venueId": "VEN-1",
+      "schedule": {
+        "startDateTime": "2026-07-12T09:00:00.000Z",
+        "endDateTime": "2026-07-14T17:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-07-05T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1006-1",
+          "type": "EARLY_BIRD",
+          "price": 3999,
+          "totalQuantity": 100,
+          "availableQuantity": 100,
+          "benefits": [
+            "Early bird access",
+            "3-day bootcamp",
+            "Certificate",
+            "Lunch all days"
+          ]
+        },
+        {
+          "id": "TKT-1006-2",
+          "type": "STANDARD",
+          "price": 5999,
+          "totalQuantity": 200,
+          "availableQuantity": 200,
+          "benefits": [
+            "3-day bootcamp",
+            "Certificate",
+            "Lunch all days",
+            "Project mentorship"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/8B5CF6/ffffff&text=AI+ML+Bootcamp",
+        "banner": "https://dummyimage.com/1200x400/8B5CF6/ffffff&text=AI+ML+Bootcamp+Chennai"
+      },
+      "status": {
+        "current": "DRAFT",
+        "history": [
+          "DRAFT"
+        ],
+        "isFeatured": false
+      },
+      "stats": {
+        "totalRegistrations": 0,
+        "totalRevenue": 0,
+        "views": 110
+      },
+      "policies": {
+        "refundPolicy": "Full refund before 10 days of event.",
+        "termsAndConditions": "Python basics required. Laptop mandatory."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "AIML25",
+            "discountPercentage": 25
+          }
+        ]
+      },
+      "createdAt": "2026-03-07T00:00:00.000Z"
+    },
+    {
+      "id": "EVT-1007",
+      "title": "Carnatic Music Festival",
+      "description": "Three evenings of classical Carnatic music by legendary artists. A celebration of heritage and culture.",
+      "fullDescription": "Three evenings of classical Carnatic music by legendary artists. A celebration of heritage and culture in Chennai, the cultural capital of South India. Artists include Padma Bhushan awardees.",
+      "categoryId": "CAT-3",
+      "tags": [
+        "Classical",
+        "Carnatic",
+        "Culture",
+        "Heritage"
+      ],
+      "organizerId": "USR-1003",
+      "venueId": "VEN-1",
+      "schedule": {
+        "startDateTime": "2026-08-01T17:00:00.000Z",
+        "endDateTime": "2026-08-03T22:00:00.000Z",
+        "timezone": "Asia/Kolkata",
+        "registrationDeadline": "2026-07-25T23:59:00.000Z"
+      },
+      "tickets": [
+        {
+          "id": "TKT-1007-1",
+          "type": "GENERAL",
+          "price": 599,
+          "totalQuantity": 2000,
+          "availableQuantity": 2000,
+          "benefits": [
+            "3-evening pass",
+            "Program brochure"
+          ]
+        }
+      ],
+      "media": {
+        "thumbnail": "https://dummyimage.com/600x400/EF4444/ffffff&text=Carnatic+Festival",
+        "banner": "https://dummyimage.com/1200x400/EF4444/ffffff&text=Carnatic+Music+Festival"
+      },
+      "status": {
+        "current": "PENDING",
+        "history": [
+          "DRAFT",
+          "PENDING"
+        ],
+        "isFeatured": true
+      },
+      "stats": {
+        "totalRegistrations": 0,
+        "totalRevenue": 0,
+        "views": 320
+      },
+      "policies": {
+        "refundPolicy": "No refunds after purchase.",
+        "termsAndConditions": "Traditional attire encouraged. Late entry not permitted after first 15 minutes."
+      },
+      "pricing": {
+        "offers": [
+          {
+            "code": "CLASSICAL10",
+            "discountPercentage": 10
+          }
+        ]
+      },
+      "createdAt": "2026-03-02T00:00:00.000Z"
+    }
+  ],
+  "registrations": [
+    {
+      "id": "REG-101",
+      "userId": "USR-1005",
+      "eventId": "EVT-1001",
+      "ticketId": "TKT-1001-1",
+      "ticketType": "GENERAL",
+      "quantity": 1,
+      "totalAmount": 499,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1001",
+      "createdAt": "2026-02-10T12:30:00.000Z"
+    },
+    {
+      "id": "REG-102",
+      "userId": "USR-1006",
+      "eventId": "EVT-1001",
+      "ticketId": "TKT-1001-2",
+      "ticketType": "VIP",
+      "quantity": 2,
+      "totalAmount": 2998,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1002",
+      "createdAt": "2026-02-12T14:10:00.000Z"
+    },
+    {
+      "id": "REG-103",
+      "userId": "USR-1008",
+      "eventId": "EVT-1001",
+      "ticketId": "TKT-1001-1",
+      "ticketType": "GENERAL",
+      "quantity": 1,
+      "totalAmount": 499,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1003",
+      "createdAt": "2026-02-18T09:00:00.000Z"
+    },
+    {
+      "id": "REG-104",
+      "userId": "USR-1005",
+      "eventId": "EVT-1002",
+      "ticketId": "TKT-1002-1",
+      "ticketType": "GENERAL",
+      "quantity": 2,
+      "totalAmount": 598,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1004",
+      "createdAt": "2026-02-20T11:00:00.000Z"
+    },
+    {
+      "id": "REG-105",
+      "userId": "USR-1008",
+      "eventId": "EVT-1002",
+      "ticketId": "TKT-1002-2",
+      "ticketType": "INVESTOR",
+      "quantity": 1,
+      "totalAmount": 4999,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1005",
+      "createdAt": "2026-02-22T16:45:00.000Z"
+    },
+    {
+      "id": "REG-106",
+      "userId": "USR-1006",
+      "eventId": "EVT-1003",
+      "ticketId": "TKT-1003-2",
+      "ticketType": "PREMIUM",
+      "quantity": 1,
+      "totalAmount": 1999,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1006",
+      "createdAt": "2026-03-01T10:20:00.000Z"
+    },
+    {
+      "id": "REG-107",
+      "userId": "USR-1005",
+      "eventId": "EVT-1003",
+      "ticketId": "TKT-1003-1",
+      "ticketType": "GENERAL",
+      "quantity": 1,
+      "totalAmount": 799,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1007",
+      "createdAt": "2026-03-02T17:00:00.000Z"
+    },
+    {
+      "id": "REG-108",
+      "userId": "USR-1008",
+      "eventId": "EVT-1005",
+      "ticketId": "TKT-1005-2",
+      "ticketType": "VIP",
+      "quantity": 1,
+      "totalAmount": 2499,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1008",
+      "createdAt": "2025-10-15T08:00:00.000Z"
+    },
+    {
+      "id": "REG-109",
+      "userId": "USR-1005",
+      "eventId": "EVT-1005",
+      "ticketId": "TKT-1005-1",
+      "ticketType": "GENERAL",
+      "quantity": 1,
+      "totalAmount": 999,
+      "status": "CONFIRMED",
+      "paymentId": "PAY-1009",
+      "createdAt": "2025-10-17T13:30:00.000Z"
+    },
+    {
+      "id": "REG-110",
+      "userId": "USR-1006",
+      "eventId": "EVT-1005",
+      "ticketId": "TKT-1005-1",
+      "ticketType": "GENERAL",
+      "quantity": 2,
+      "totalAmount": 1998,
+      "status": "CANCELLED",
+      "paymentId": "PAY-1010",
+      "createdAt": "2025-10-18T11:00:00.000Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "PAY-1001",
+      "userId": "USR-1005",
+      "eventId": "EVT-1001",
+      "registrationId": "REG-101",
+      "ticketsSummary": "GENERAL x 1",
+      "method": "RAZORPAY",
+      "amount": 499,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1001",
+      "createdAt": "2026-02-10T12:30:00.000Z"
+    },
+    {
+      "id": "PAY-1002",
+      "userId": "USR-1006",
+      "eventId": "EVT-1001",
+      "registrationId": "REG-102",
+      "ticketsSummary": "VIP x 2",
+      "method": "RAZORPAY",
+      "amount": 2998,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1002",
+      "createdAt": "2026-02-12T14:10:00.000Z"
+    },
+    {
+      "id": "PAY-1003",
+      "userId": "USR-1008",
+      "eventId": "EVT-1001",
+      "registrationId": "REG-103",
+      "ticketsSummary": "GENERAL x 1",
+      "method": "RAZORPAY",
+      "amount": 499,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1003",
+      "createdAt": "2026-02-18T09:00:00.000Z"
+    },
+    {
+      "id": "PAY-1004",
+      "userId": "USR-1005",
+      "eventId": "EVT-1002",
+      "registrationId": "REG-104",
+      "ticketsSummary": "GENERAL x 2",
+      "method": "RAZORPAY",
+      "amount": 598,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1004",
+      "createdAt": "2026-02-20T11:00:00.000Z"
+    },
+    {
+      "id": "PAY-1005",
+      "userId": "USR-1008",
+      "eventId": "EVT-1002",
+      "registrationId": "REG-105",
+      "ticketsSummary": "INVESTOR x 1",
+      "method": "RAZORPAY",
+      "amount": 4999,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1005",
+      "createdAt": "2026-02-22T16:45:00.000Z"
+    },
+    {
+      "id": "PAY-1006",
+      "userId": "USR-1006",
+      "eventId": "EVT-1003",
+      "registrationId": "REG-106",
+      "ticketsSummary": "PREMIUM x 1",
+      "method": "RAZORPAY",
+      "amount": 1999,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1006",
+      "createdAt": "2026-03-01T10:20:00.000Z"
+    },
+    {
+      "id": "PAY-1007",
+      "userId": "USR-1005",
+      "eventId": "EVT-1003",
+      "registrationId": "REG-107",
+      "ticketsSummary": "GENERAL x 1",
+      "method": "RAZORPAY",
+      "amount": 799,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1007",
+      "createdAt": "2026-03-02T17:00:00.000Z"
+    },
+    {
+      "id": "PAY-1008",
+      "userId": "USR-1008",
+      "eventId": "EVT-1005",
+      "registrationId": "REG-108",
+      "ticketsSummary": "VIP x 1",
+      "method": "RAZORPAY",
+      "amount": 2499,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1008",
+      "createdAt": "2025-10-15T08:00:00.000Z"
+    },
+    {
+      "id": "PAY-1009",
+      "userId": "USR-1005",
+      "eventId": "EVT-1005",
+      "registrationId": "REG-109",
+      "ticketsSummary": "GENERAL x 1",
+      "method": "RAZORPAY",
+      "amount": 999,
+      "status": "CONFIRMED",
+      "razorpayId": "rzp_test_abc1009",
+      "createdAt": "2025-10-17T13:30:00.000Z"
+    },
+    {
+      "id": "PAY-1010",
+      "userId": "USR-1006",
+      "eventId": "EVT-1005",
+      "registrationId": "REG-110",
+      "ticketsSummary": "GENERAL x 2",
+      "method": "RAZORPAY",
+      "amount": 1998,
+      "status": "REFUNDED",
+      "razorpayId": "rzp_test_abc1010",
+      "createdAt": "2025-10-18T11:00:00.000Z"
+    }
+  ],
+  "feedbacks": [
+    {
+      "id": "FB-1",
+      "eventId": "EVT-1001",
+      "userId": "USR-1005",
+      "registrationId": "REG-101",
+      "rating": 5,
+      "comment": "Absolutely fantastic! The speakers were world-class and the networking was amazing. Can't wait for next year.",
+      "createdAt": "2026-04-16T10:00:00.000Z",
+      "status": "VISIBLE"
+    },
+    {
+      "id": "FB-2",
+      "eventId": "EVT-1001",
+      "userId": "USR-1008",
+      "registrationId": "REG-103",
+      "rating": 4,
+      "comment": "Great event overall. The workshop sessions were very hands-on. Minor issue with the venue food, otherwise perfect.",
+      "createdAt": "2026-04-16T14:30:00.000Z",
+      "status": "VISIBLE"
+    },
+    {
+      "id": "FB-3",
+      "eventId": "EVT-1003",
+      "userId": "USR-1006",
+      "registrationId": "REG-106",
+      "rating": 5,
+      "comment": "The Jazz evening was pure magic. I loved every moment. The premium ticket was worth every rupee!",
+      "createdAt": "2026-03-26T09:00:00.000Z",
+      "status": "VISIBLE"
+    },
+    {
+      "id": "FB-4",
+      "eventId": "EVT-1002",
+      "userId": "USR-1005",
+      "registrationId": "REG-104",
+      "rating": 4,
+      "comment": "Good pitches, learned a lot from the investor panel. Venue could have been better organized though.",
+      "createdAt": "2026-05-11T08:00:00.000Z",
+      "status": "VISIBLE"
+    },
+    {
+      "id": "FB-5",
+      "eventId": "EVT-1005",
+      "userId": "USR-1008",
+      "registrationId": "REG-108",
+      "rating": 5,
+      "comment": "Life-changing experience. The mindfulness sessions were exceptional. Booking tickets for next year already!",
+      "createdAt": "2025-11-06T07:00:00.000Z",
+      "status": "VISIBLE"
+    },
+    {
+      "id": "FB-6",
+      "eventId": "EVT-1002",
+      "userId": "USR-1008",
+      "registrationId": "REG-105",
+      "rating": 2,
+      "comment": "The event was poorly managed. Long queues and some sessions were cancelled without notice. Very disappointing.",
+      "createdAt": "2026-05-12T10:00:00.000Z",
+      "status": "FLAGGED"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "NOTIF-1",
+      "type": "SYSTEM",
+      "title": "New Organizer Request",
+      "message": "Karthik Rajan has submitted an organizer application. Please review and approve or reject.",
+      "targetRole": "ADMIN",
+      "targetUserId": "USR-1001",
+      "relatedUserId": "USR-1003",
+      "eventId": null,
+      "read": false,
+      "createdAt": "2026-02-20T10:00:00.000Z"
+    },
+    {
+      "id": "NOTIF-2",
+      "type": "SYSTEM",
+      "title": "New Organizer Request",
+      "message": "Sneha Iyer has submitted an organizer application. Please review and approve or reject.",
+      "targetRole": "ADMIN",
+      "targetUserId": "USR-1001",
+      "relatedUserId": "USR-1004",
+      "eventId": null,
+      "read": false,
+      "createdAt": "2026-03-01T09:15:00.000Z"
+    },
+    {
+      "id": "NOTIF-3",
+      "type": "EVENT_APPROVAL",
+      "title": "Event Pending Approval",
+      "message": "React & Next.js Deep Dive Workshop by Priya Menon is awaiting admin approval.",
+      "targetRole": "ADMIN",
+      "targetUserId": "USR-1001",
+      "relatedUserId": null,
+      "eventId": "EVT-1004",
+      "read": true,
+      "createdAt": "2026-03-05T12:00:00.000Z"
+    },
+    {
+      "id": "NOTIF-4",
+      "type": "EVENT_APPROVAL",
+      "title": "Event Pending Approval",
+      "message": "Carnatic Music Festival by Karthik Rajan is awaiting admin approval.",
+      "targetRole": "ADMIN",
+      "targetUserId": "USR-1001",
+      "relatedUserId": null,
+      "eventId": "EVT-1007",
+      "read": false,
+      "createdAt": "2026-03-02T08:00:00.000Z"
+    },
+    {
+      "id": "NOTIF-5",
+      "type": "BOOKING_CONFIRMED",
+      "title": "Booking Confirmed!",
+      "message": "Your booking for DevFest Chennai 2026 is confirmed. See you there!",
+      "targetRole": "ATTENDEE",
+      "targetUserId": "USR-1005",
+      "relatedUserId": null,
+      "eventId": "EVT-1001",
+      "read": true,
+      "createdAt": "2026-02-10T12:35:00.000Z"
+    },
+    {
+      "id": "NOTIF-6",
+      "type": "REFUND",
+      "title": "Refund Processed",
+      "message": "Your refund of ₹1,998 for Wellness Summit 2026 has been processed. It will reflect in 3–5 business days.",
+      "targetRole": "ATTENDEE",
+      "targetUserId": "USR-1006",
+      "relatedUserId": null,
+      "eventId": "EVT-1005",
+      "read": false,
+      "createdAt": "2025-10-19T09:00:00.000Z"
+    }
+  ]
+}
