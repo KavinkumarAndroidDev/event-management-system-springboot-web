@@ -71,7 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             initAdminReports,
             initAdminFeedback,
             initAdminNotifications,
-            initAdminProfile
+            initAdminProfile,
+            initAdminOffers
         } = await import('./features/admin/admin.js');
 
         initAdminPage();
@@ -86,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             whenDataReady(() => initUserManagement());
         } else if (path.includes('events.html')) {
             whenDataReady(() => initAdminEvents());
+        } else if (path.includes('offers.html')) {
+            whenDataReady(() => initAdminOffers());
         } else if (path.includes('categories.html')) {
             whenDataReady(() => initAdminCategories());
         } else if (path.includes('venues.html')) {
@@ -117,7 +120,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             initTicketManagement,
             initReports,
             initOrganizerProfile,
-            initOrganizerNotifications
+            initOrganizerNotifications,
+            initOrganizerPayments,
+            initOrganizerOffers
         } = await import('./features/organizer/organizer.js');
 
         if (path.includes('dashboard.html')) {
@@ -134,6 +139,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             whenDataReady(() => initOrganizerProfile());
         } else if (path.includes('notifications.html')) {
             whenDataReady(() => initOrganizerNotifications());
+        } else if (path.includes('payments.html')) {
+            whenDataReady(() => initOrganizerPayments());
+        } else if (path.includes('offers.html')) {
+            whenDataReady(() => initOrganizerOffers());
         }
     }
 

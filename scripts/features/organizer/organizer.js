@@ -75,7 +75,13 @@ function getOrganizerEvents(user) {
 
 function getEventRegistrations(events) {
     const eventIds = new Set(events.map(e => e.id));
-    return state.registrations.filter(r => eventIds.has(r.eventId));
+    const eventMap = new Map(events.map(e => [e.id, e.title]));
+    return state.registrations
+        .filter(r => eventIds.has(r.eventId))
+        .map(r => ({
+            ...r,
+            eventName: eventMap.get(r.eventId) || 'Unknown Event'
+        }));
 }
 
 function getTicketsSoldForEvent(event) {
@@ -84,7 +90,7 @@ function getTicketsSoldForEvent(event) {
 
 function getRevenueFromRegistrations(registrations) {
     return registrations
-        .filter(r => r.status === 'CONFIRMED' || r.status === 'PAID')
+        .filter(r => r.status === 'CONFIRMED')
         .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
 }
 
@@ -98,6 +104,124 @@ function downloadCSV(rows, filename) {
     a.click();
     URL.revokeObjectURL(url);
 }
+
+function injectRegistrationModal() {
+    if (document.getElementById('registrationDetailModal')) return;
+    const modalHtml = `
+    <div class="modal fade" id="registrationDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom border-light px-4 py-3">
+                    <h5 class="modal-title fw-bold text-neutral-900">Registration Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="registration-modal-body">
+                    <!-- Dynamic Content -->
+                </div>
+                <div class="modal-footer border-top border-light px-4 py-3">
+                    <button type="button" class="btn btn-outline-neutral-900 rounded-pill px-4 fw-medium" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary rounded-pill px-4 fw-medium" onclick="window.print()">Print Receipt</button>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+window.viewRegistrationDetails = (id) => {
+    const reg = state.registrations.find(r => r.id === id);
+    if (!reg) {
+        showToast('Error', 'Registration details not found.', 'danger');
+        return;
+    }
+
+    const event = getEvent(reg.eventId);
+    const user = state.users.find(u => u.id === reg.userId);
+    const payment = state.payments.find(p => p.registrationId === reg.id || p.id === reg.paymentId);
+
+    const body = document.getElementById('registration-modal-body');
+    if (!body) return;
+
+    let participantsHtml = '';
+    if (reg.participants && reg.participants.length > 0) {
+        participantsHtml = `
+            <div class="mt-4">
+                <h6 class="fw-bold text-neutral-900 mb-3">Participant Details</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered small">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3">Name</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reg.participants.map(p => `
+                                <tr>
+                                    <td class="ps-3 fw-medium">${p.name}</td>
+                                    <td>${p.email}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    body.innerHTML = `
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="mb-4">
+                    <label class="text-neutral-400 small fw-bold text-uppercase mb-1" style="font-size: 10px;">Attendee Information</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-circle bg-primary bg-opacity-10 text-primary fw-bold" style="width: 48px; height: 48px; font-size: 1.2rem;">
+                            ${user ? user.profile.fullName.charAt(0) : '?'}
+                        </div>
+                        <div>
+                            <div class="fw-bold text-neutral-900">${user ? user.profile.fullName : 'Unknown'}</div>
+                            <div class="text-neutral-400 small">${user ? user.profile.email : '—'}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="text-neutral-400 small fw-bold text-uppercase mb-1" style="font-size: 10px;">Event Details</label>
+                    <div class="fw-bold text-neutral-900">${event ? event.title : 'Event'}</div>
+                    <div class="text-neutral-400 small">${formatDate(reg.date)}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-custom bg-light border-0 p-3 mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-neutral-500 small">Ticket Type</span>
+                        <span class="badge rounded-pill bg-white text-neutral-900 border fw-bold px-3" style="font-size: 10px;">${reg.ticketType.toUpperCase()}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-neutral-500 small">Quantity</span>
+                        <span class="fw-bold text-neutral-900">${reg.quantity}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-neutral-500 small">Amount Paid</span>
+                        <span class="fw-bold text-primary">${formatCurrency(reg.totalAmount || reg.price)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top border-neutral-200">
+                        <span class="text-neutral-500 small">Status</span>
+                        <span class="text-success fw-bold small">${reg.status}</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-neutral-400 small fw-bold text-uppercase mb-1" style="font-size: 10px;">Transaction Info</label>
+                    <div class="text-neutral-900 small fw-medium">ID: <span class="text-neutral-500">${reg.id}</span></div>
+                    <div class="text-neutral-900 small fw-medium">Payment Ref: <span class="text-neutral-500">${payment ? payment.razorpayId || payment.id : 'N/A'}</span></div>
+                </div>
+            </div>
+        </div>
+        ${participantsHtml}
+    `;
+
+    const modal = new window.bootstrap.Modal(document.getElementById('registrationDetailModal'));
+    modal.show();
+};
 
 function getStatusBadge(status) {
     if (status === 'PUBLISHED' || status === 'ACTIVE') return '<span class="badge rounded-pill bg-success text-white px-3 py-2 fw-bold" style="font-size:11px;">Active</span>';
@@ -210,28 +334,36 @@ export function setupOrganizerForm() {
                         profileImage: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`,
                         organizationName: orgName,
                         organizationType: organizerSignupForm.querySelector('[name="organizationType"]')?.value || 'OTHER',
-                        bio: organizerSignupForm.querySelector('[name="bio"]')?.value || ''
+                        bio: organizerSignupForm.querySelector('[name="bio"]')?.value || '',
+                        gender: "UNKNOWN",
+                        dateOfBirth: "",
+                        website: "",
+                        address: ""
                     },
                     role: {
                         id: "ROLE-3",
                         name: "ORGANIZER",
-                        permissions: ["CREATE_EVENT", "MANAGE_EVENTS", "VIEW_REPORTS"]
+                        permissions: ["CREATE_EVENT", "MANAGE_EVENT", "VIEW_ANALYTICS", "MANAGE_TICKETS"]
                     },
                     accountStatus: {
                         status: "PENDING",
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
+                        isEmailVerified: false,
+                        isPhoneVerified: false,
+                        failedLoginAttempts: 0,
+                        lastLogin: new Date().toISOString(),
+                        createdAt: new Date().toISOString()
                     },
                     statistics: {
-                        totalEvents: 0,
-                        totalRevenue: 0,
-                        averageRating: 0
+                        eventsCreated: 0,
+                        eventsAttended: 0,
+                        totalSpent: 0,
+                        averageRatingGiven: 0
                     },
                     preferences: {
                         notifications: { email: true, push: true, sms: false },
-                        language: "en-IN",
-                        timezone: "Asia/Kolkata"
-                    }
+                        language: "en"
+                    },
+                    savedEvents: []
                 };
 
                 fetch('http://localhost:3000/users', {
@@ -438,7 +570,7 @@ export function initOrganizerDashboard() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i data-lucide="more-vertical" style="width:16px;height:16px;"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
                                 <li><a class="dropdown-item d-flex align-items-center gap-2" href="../events/details.html?id=${evt.id}"><i data-lucide="eye" width="14"></i> View Details</a></li>
@@ -455,14 +587,14 @@ export function initOrganizerDashboard() {
     const notifPanel = document.querySelector('.col-lg-5 .p-4.flex-1');
     if (notifPanel) {
         const recentRegs = [...myRegs]
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
             .slice(0, 3);
 
         if (recentRegs.length > 0) {
             notifPanel.innerHTML = recentRegs.map(r => `
                 <div class="mb-4">
                     <div class="fw-bold text-neutral-900 small">New registration for ${r.eventName}</div>
-                    <div class="text-neutral-400" style="font-size: 11px;">${timeAgo(r.date)}</div>
+                    <div class="text-neutral-400" style="font-size: 11px;">${timeAgo(r.createdAt)}</div>
                 </div>`).join('');
         }
     }
@@ -473,11 +605,11 @@ export function initOrganizerDashboard() {
     const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     const monthRevenue = myRegs
-        .filter(r => r.status === 'CONFIRMED' && new Date(r.date) >= startOfMonth)
-        .reduce((sum, r) => sum + r.price * r.quantity, 0);
+        .filter(r => r.status === 'CONFIRMED' && new Date(r.createdAt) >= startOfMonth)
+        .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
     const todayRevenue = myRegs
-        .filter(r => r.status === 'CONFIRMED' && new Date(r.date) >= startOfDay)
-        .reduce((sum, r) => sum + r.price * r.quantity, 0);
+        .filter(r => r.status === 'CONFIRMED' && new Date(r.createdAt) >= startOfDay)
+        .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
 
     const revCols = document.querySelectorAll('.row.g-3.mb-4 .col-6');
     if (revCols[0]) {
@@ -591,7 +723,7 @@ export function initMyEvents() {
                             <span class="fw-bold text-primary small">${formatCurrency(evtRevenue)}</span>
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-icon border p-2 rounded-3 text-neutral-900 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i data-lucide="more-vertical" style="width:16px;height:16px;"></i>
+                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
                                     <li><a class="dropdown-item d-flex align-items-center gap-2" href="../events/details.html?id=${evt.id}"><i data-lucide="eye" width="14"></i> View Details</a></li>
@@ -662,7 +794,8 @@ export function initMyEvents() {
             const status = statusSelect ? statusSelect.value : '';
 
             const filtered = myEvents.filter(evt => {
-                const matchQ = !q || evt.title.toLowerCase().includes(q) || evt.venue.name.toLowerCase().includes(q);
+                const venue = getVenue(evt.venueId);
+                const matchQ = !q || evt.title.toLowerCase().includes(q) || (venue && venue.name.toLowerCase().includes(q));
                 const matchStatus = !status || status === 'All Events' || status === '' || evt.status.current === status.toUpperCase();
                 return matchQ && matchStatus;
             });
@@ -683,6 +816,7 @@ export function initRegistrations() {
     if (!user) return;
 
     populateSidebarUserInfo();
+    injectRegistrationModal();
 
     const myEvents = getOrganizerEvents(user);
     const allRegs = getEventRegistrations(myEvents);
@@ -724,9 +858,9 @@ export function initRegistrations() {
                         u ? u.profile.email : '—',
                         r.ticketType,
                         r.quantity,
-                        r.price,
+                        r.totalAmount,
                         r.status,
-                        formatDate(r.date)
+                        formatDate(r.createdAt)
                     ]);
                 });
                 downloadCSV(rows, 'registrations.csv');
@@ -757,7 +891,12 @@ export function initRegistrations() {
                 <td class="text-neutral-400 small">${email}</td>
                 <td><span class="badge rounded-pill bg-light text-neutral-900 border fw-medium" style="font-size: 10px;">${r.ticketType.toUpperCase()}</span></td>
                 <td><span class="${isPaid ? 'text-success' : 'text-warning'} fw-medium small">${isPaid ? 'Paid' : r.status}</span></td>
-                <td class="pe-4 text-end text-neutral-400 small">${formatDate(r.createdAt || r.date)}</td>
+                <td class="text-neutral-400 small">${formatDate(r.createdAt || r.date)}</td>
+                <td class="pe-4 text-end">
+                    <button class="btn btn-sm text-primary p-0" title="View Details" onclick="viewRegistrationDetails('${r.id}')">
+                        <i data-lucide="eye" width="16"></i>
+                    </button>
+                </td>
             </tr>`;
         }).join('');
     };
@@ -771,6 +910,9 @@ export function initRegistrations() {
         const newFiltered = allRegs.filter(r => {
             const matchEvent = !eventId || r.eventId === eventId;
             const event = getEvent(r.eventId);
+            const u = state.users.find(u => u.id === r.userId);
+            const name = u ? u.profile.fullName.toLowerCase() : '';
+            const email = u ? u.profile.email.toLowerCase() : '';
             const eventTitle = event ? event.title.toLowerCase() : '';
             const matchQ = !q || name.includes(q) || email.includes(q) || eventTitle.includes(q);
             return matchEvent && matchQ;
@@ -803,22 +945,49 @@ export function initTicketManagement() {
 
     let currentEvent = myEvents[0];
 
+    // const updateStats = () => {
+    //     const rows = Array.from(tbody.querySelectorAll('tr'));
+    //     const totalCapacity = rows.reduce((sum, row) => {
+    //         const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)') || row.querySelector('td:nth-child(3)');
+    //         const qty = qtyInput ? parseInt(qtyInput.value || qtyInput.textContent) || 0 : 0;
+    //         return sum + qty;
+    //     }, 0);
+
+    //     const totalSold = currentEvent.tickets.reduce((sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0);
+    //     const potentialRevenue = rows.reduce((sum, row) => {
+    //         const priceInput = row.querySelector('input[type="number"]:nth-of-type(1)') || row.querySelector('td:nth-child(2)');
+    //         const price = priceInput ? parseFloat(priceInput.value || priceInput.textContent.replace(/[^\d.-]/g, '')) || 0 : 0;
+    //         const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)') || row.querySelector('td:nth-child(3)');
+    //         const qty = qtyInput ? parseInt(qtyInput.value || qtyInput.textContent) || 0 : 0;
+    //         return sum + (price * qty);
+    //     }, 0);
+
+    //     const statsRow = document.querySelector('.row.g-4:last-of-type');
+    //     if (statsRow) {
+    //         const nums = statsRow.querySelectorAll('.h3');
+    //         if (nums[0]) nums[0].textContent = totalCapacity.toLocaleString('en-IN');
+    //         if (nums[1]) nums[1].textContent = totalSold.toLocaleString('en-IN');
+    //         if (nums[2]) nums[2].textContent = formatCurrency(potentialRevenue);
+    //     }
+    // };
+
     const updateStats = () => {
         const rows = Array.from(tbody.querySelectorAll('tr'));
-        const totalCapacity = rows.reduce((sum, row) => {
-            const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)') || row.querySelector('td:nth-child(3)');
-            const qty = qtyInput ? parseInt(qtyInput.value || qtyInput.textContent) || 0 : 0;
-            return sum + qty;
-        }, 0);
+        let totalCapacity = 0, potentialRevenue = 0;
 
-        const totalSold = currentEvent.tickets.reduce((sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0);
-        const potentialRevenue = rows.reduce((sum, row) => {
-            const priceInput = row.querySelector('input[type="number"]:nth-of-type(1)') || row.querySelector('td:nth-child(2)');
-            const price = priceInput ? parseFloat(priceInput.value || priceInput.textContent.replace(/[^\d.-]/g, '')) || 0 : 0;
-            const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)') || row.querySelector('td:nth-child(3)');
-            const qty = qtyInput ? parseInt(qtyInput.value || qtyInput.textContent) || 0 : 0;
-            return sum + (price * qty);
-        }, 0);
+        rows.forEach(row => {
+            const tds = row.querySelectorAll('td');
+            const priceEl = tds[1]?.querySelector('input') || tds[1];
+            const qtyEl = tds[2]?.querySelector('input') || tds[2];
+            const price = parseFloat(priceEl?.value ?? priceEl?.textContent?.replace(/[^\d.-]/g, '')) || 0;
+            const qty = parseInt(qtyEl?.value ?? qtyEl?.textContent) || 0;
+            totalCapacity += qty;
+            potentialRevenue += price * qty;
+        });
+
+        const totalSold = currentEvent.tickets.reduce(
+            (sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0
+        );
 
         const statsRow = document.querySelector('.row.g-4:last-of-type');
         if (statsRow) {
@@ -839,30 +1008,24 @@ export function initTicketManagement() {
             const lowStock = available <= 20;
 
             return `
-            <tr>
+            <tr data-ticket-type="${ticket.type}">
                 <td class="ps-4">
                     <span class="fw-medium text-neutral-900">${ticket.type.replace(/_/g, ' ')}</span>
                     ${lowStock ? '<span class="badge bg-warning text-dark ms-2" style="font-size:9px;">Low Stock</span>' : ''}
                 </td>
-                <td>${formatCurrency(ticket.price)}</td>
+                <td><input type="number" class="form-control form-control-sm border-0 bg-light ticket-price-input" min="0" value="${Number(ticket.price || 0)}"></td>
                 <td class="text-neutral-900">${ticket.totalQuantity}</td>
                 <td class="text-neutral-900">${sold}</td>
                 <td class="text-neutral-900">${available}</td>
                 <td class="pe-4 text-end">
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i data-lucide="more-vertical" width="18"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="eye" width="14"></i> View Details</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="copy" width="14"></i> Duplicate</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" onclick="this.closest('tr').remove(); window.updateTicketStats();"><i data-lucide="trash-2" width="14"></i> Delete Type</a></li>
-                        </ul>
-                    </div>
+                    <span class="text-neutral-400 small">Price only</span>
                 </td>
             </tr>`;
         }).join('');
+
+        tbody.querySelectorAll('.ticket-price-input').forEach((input) => {
+            input.addEventListener('input', updateStats);
+        });
 
         if (window.initIcons) window.initIcons({ root: tbody });
         updateStats();
@@ -880,49 +1043,8 @@ export function initTicketManagement() {
     }
 
     if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            const currentTotal = Array.from(tbody.querySelectorAll('tr')).reduce((sum, row) => {
-                const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)') || row.querySelector('td:nth-child(3)');
-                return sum + (parseInt(qtyInput.value || qtyInput.textContent) || 0);
-            }, 0);
-
-            if (currentTotal >= currentEvent.venue.capacity) {
-                showToast('Capacity Met', `Cannot add more tickets. Total capacity (${currentEvent.venue.capacity}) reached.`, 'warning');
-                return;
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="ps-4">
-                    <input type="text" class="form-control form-control-sm fw-bold border-0 bg-light" placeholder="Ticket Name">
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Price" min="0">
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Qty" min="1" value="50">
-                </td>
-                <td class="text-neutral-900 fw-medium">0</td>
-                <td class="text-neutral-900 fw-medium">50</td>
-                <td class="pe-4 text-end">
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i data-lucide="more-vertical" width="18"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size: 13px; min-width: 140px;">
-                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="#" onclick="this.closest('tr').remove(); window.updateTicketStats();"><i data-lucide="trash-2" width="14"></i> Delete</a></li>
-                        </ul>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(tr);
-            if (window.initIcons) window.initIcons({ root: tr });
-
-            tr.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', updateStats);
-            });
-            updateStats();
-        });
+        addBtn.disabled = true;
+        addBtn.classList.add('d-none');
     }
 
     window.updateTicketStats = updateStats;
@@ -930,29 +1052,19 @@ export function initTicketManagement() {
     if (saveBtn) {
         saveBtn.addEventListener('click', async () => {
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            const updatedTickets = rows.map(row => {
-                const nameInput = row.querySelector('input[type="text"]');
-                const priceInput = row.querySelector('input[type="number"]:nth-of-type(1)');
-                const qtyInput = row.querySelector('input[type="number"]:nth-of-type(2)');
-
-                // If it's an existing row (no inputs), extract text content
-                const type = nameInput ? nameInput.value : row.querySelector('td:nth-child(1) .fw-bold').textContent;
-                const price = priceInput ? parseFloat(priceInput.value) : parseFloat(row.querySelector('td:nth-child(2)').textContent.replace(/[^\d.-]/g, ''));
-                const total = qtyInput ? parseInt(qtyInput.value) : parseInt(row.querySelector('td:nth-child(3)').textContent);
-
-                return {
-                    type: type.toUpperCase().replace(/\s+/g, '_'),
-                    price: price,
-                    totalQuantity: total,
-                    availableQuantity: total // Simplified: resetting available for new edits if qty changed? 
-                    // Better would be to track old sold count, but for simplicity:
-                };
+            const updatedTickets = currentEvent.tickets.map((ticket) => {
+                const row = rows.find((r) => r.dataset.ticketType === ticket.type);
+                const priceInput = row ? row.querySelector('.ticket-price-input') : null;
+                const nextPrice = priceInput ? parseFloat(priceInput.value) : ticket.price;
+                return Object.assign({}, ticket, {
+                    price: Number.isFinite(nextPrice) ? nextPrice : ticket.price
+                });
             });
 
             try {
                 await apiPatch('events', currentEvent.id, { tickets: updatedTickets });
                 currentEvent.tickets = updatedTickets;
-                showToast('Saved', 'Ticket changes saved successfully.', 'success');
+                showToast('Saved', 'Ticket prices updated successfully.', 'success');
                 renderTickets(currentEvent);
             } catch (e) { showToast('Error', 'Failed to save changes.', 'danger'); }
         });
@@ -968,6 +1080,7 @@ export function initReports() {
     if (!user) return;
 
     populateSidebarUserInfo();
+    injectRegistrationModal();
 
     const myEvents = getOrganizerEvents(user);
     const allRegs = getEventRegistrations(myEvents);
@@ -998,7 +1111,7 @@ export function initReports() {
             btn.addEventListener('click', () => {
                 const rows = [['Event', 'Ticket Type', 'Qty', 'Revenue', 'Date']];
                 allRegs.filter(r => r.status === 'CONFIRMED').forEach(r => {
-                    rows.push([r.eventName, r.ticketType, r.quantity, r.price * r.quantity, formatDate(r.date)]);
+                    rows.push([r.eventName, r.ticketType, r.quantity, r.totalAmount, formatDate(r.createdAt)]);
                 });
                 downloadCSV(rows, 'revenue-report.csv');
                 showToast('Exported', 'CSV report downloaded.', 'success');
@@ -1011,9 +1124,9 @@ export function initReports() {
     if (revenueCtx && typeof Chart !== 'undefined') {
         const months = {};
         allRegs.filter(r => r.status === 'CONFIRMED').forEach(r => {
-            const d = new Date(r.date);
+            const d = new Date(r.createdAt);
             const key = d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
-            months[key] = (months[key] || 0) + r.price * r.quantity;
+            months[key] = (months[key] || 0) + (r.totalAmount || 0);
         });
 
         // Ensure we have at least some labels
@@ -1092,63 +1205,86 @@ export function initOrganizerProfile() {
 
     populateSidebarUserInfo();
 
-    // Populate the large profile avatar in main content
+    // Mapping fields
+    const fields = {
+        name: document.getElementById('profileName'),
+        email: document.getElementById('profileEmail'),
+        orgName: document.getElementById('profileOrgName'),
+        orgType: document.getElementById('profileOrgType'),
+        address: document.getElementById('profileAddress'),
+        bio: document.getElementById('profileBio'),
+        website: document.getElementById('profileWebsite'),
+        twitter: document.getElementById('profileTwitter'),
+        linkedIn: document.getElementById('profileLinkedIn')
+    };
+
+    // Populate data
+    if (fields.name) fields.name.value = user.profile.fullName || '';
+    if (fields.email) fields.email.value = user.profile.email || '';
+    if (fields.orgName) fields.orgName.value = user.profile.organizationName || '';
+    if (fields.orgType) fields.orgType.value = user.profile.organizationType || '';
+    if (fields.address) fields.address.value = user.profile.address || '';
+    if (fields.bio) fields.bio.value = user.profile.bio || '';
+    if (fields.website) fields.website.value = user.profile.website || '';
+    if (fields.twitter) fields.twitter.value = user.profile.twitter || '';
+    if (fields.linkedIn) fields.linkedIn.value = user.profile.linkedIn || '';
+
+    // Profile Avatar
     const profileAvatar = document.querySelector('.mb-4.text-center .avatar-circle');
     if (profileAvatar) {
-        const initials = user.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-        profileAvatar.textContent = initials;
-    }
-
-    // Card 0 – Basic Information
-    const allCards = document.querySelectorAll('.card-custom.mb-4.p-4');
-    if (allCards[0]) {
-        const inputs = allCards[0].querySelectorAll('input');
-        if (inputs[0]) inputs[0].value = user.profile.fullName;
-        if (inputs[1]) {
-            inputs[1].value = user.profile.email;
-            inputs[1].setAttribute('disabled', 'disabled');
-            inputs[1].title = 'Email cannot be changed';
-        }
-        // Organization name – use bio or placeholder
-        if (inputs[2]) inputs[2].value = user.profile.bio || '';
-
-        const saveBtn = allCards[0].querySelector('.btn-primary');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                if (inputs[0]) user.profile.fullName = inputs[0].value;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                populateSidebarUserInfo();
-                fetch(`http://localhost:3000/users/${user.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ profile: user.profile })
-                }).catch(() => { });
-                showToast('Saved', 'Profile updated successfully.', 'success');
-            });
+        if (user.profile.profileImage) {
+            profileAvatar.style.backgroundImage = `url(${user.profile.profileImage})`;
+            profileAvatar.style.backgroundSize = 'cover';
+            profileAvatar.style.backgroundPosition = 'center';
+            profileAvatar.textContent = '';
+        } else {
+            const initials = user.profile.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            profileAvatar.textContent = initials;
         }
     }
 
-    // Card 1 – Public Profile
-    if (allCards[1]) {
-        const textarea = allCards[1].querySelector('textarea');
-        if (textarea) textarea.value = user.profile.bio || '';
+    // Save Basic Info
+    const saveBasicBtn = document.getElementById('saveBasicInfoBtn');
+    if (saveBasicBtn) {
+        saveBasicBtn.addEventListener('click', async () => {
+            user.profile.fullName = fields.name.value;
+            user.profile.organizationName = fields.orgName.value;
+            user.profile.organizationType = fields.orgType.value;
+            user.profile.address = fields.address.value;
 
-        const updateBtn = allCards[1].querySelector('.btn-primary');
-        if (updateBtn) {
-            updateBtn.addEventListener('click', () => {
-                if (textarea) user.profile.bio = textarea.value;
-                localStorage.setItem('currentUser', JSON.stringify(user));
-                fetch(`http://localhost:3000/users/${user.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ profile: user.profile })
-                }).catch(() => { });
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            populateSidebarUserInfo();
+
+            try {
+                await apiPatch('users', user.id, { profile: user.profile });
+                showToast('Saved', 'Basic information updated.', 'success');
+            } catch (e) {
+                showToast('Error', 'Failed to save changes.', 'danger');
+            }
+        });
+    }
+
+    // Save Public Profile
+    const savePublicBtn = document.getElementById('savePublicProfileBtn');
+    if (savePublicBtn) {
+        savePublicBtn.addEventListener('click', async () => {
+            user.profile.bio = fields.bio.value;
+            user.profile.website = fields.website.value;
+            user.profile.twitter = fields.twitter.value;
+            user.profile.linkedIn = fields.linkedIn.value;
+
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            try {
+                await apiPatch('users', user.id, { profile: user.profile });
                 showToast('Updated', 'Public profile updated.', 'success');
-            });
-        }
+            } catch (e) {
+                showToast('Error', 'Failed to update profile.', 'danger');
+            }
+        });
     }
 
-    // Card 2 – Security / Change Password
+    const allCards = document.querySelectorAll('.card-custom');
     if (allCards[2]) {
         const pwInputs = allCards[2].querySelectorAll('input[type="password"]');
         const changeBtn = allCards[2].querySelector('.btn-primary');
@@ -1233,25 +1369,45 @@ export async function initOrganizerNotifications() {
             const myServerNotifs = serverNotifs.filter(n => n.targetUserId === user.id || n.targetUserId === 'ALL_ORGANIZERS');
 
             // Map server notifs to our UI structure
-            const mappedServer = myServerNotifs.map(n => ({
-                id: n.id,
-                isServer: true,
-                type: n.type === 'SUCCESS' ? 'success' : 'info',
-                icon: n.type === 'SUCCESS' ? 'check-circle' : 'bell',
-                iconColor: n.type === 'SUCCESS' ? 'text-success' : 'text-primary',
-                bgColor: n.type === 'SUCCESS' ? 'bg-success bg-opacity-10' : 'bg-primary bg-opacity-10',
-                title: n.title,
-                message: n.message,
-                time: n.createdAt,
-                read: n.read
-            }));
+            const mappedServer = myServerNotifs.map(n => {
+                let icon = 'bell';
+                let iconColor = 'text-primary';
+                let bgColor = 'bg-primary bg-opacity-10';
+
+                if (n.type === 'SUCCESS' || n.type === 'BOOKING_CONFIRMED') {
+                    icon = 'check-circle';
+                    iconColor = 'text-success';
+                    bgColor = 'bg-success bg-opacity-10';
+                } else if (n.type === 'EVENT_APPROVAL') {
+                    icon = 'clock';
+                    iconColor = 'text-warning';
+                    bgColor = 'bg-warning bg-opacity-10';
+                } else if (n.type === 'REFUND') {
+                    icon = 'refresh-ccw';
+                    iconColor = 'text-danger';
+                    bgColor = 'bg-danger bg-opacity-10';
+                }
+
+                return {
+                    id: n.id,
+                    isServer: true,
+                    type: n.type.toLowerCase(),
+                    icon: icon,
+                    iconColor: iconColor,
+                    bgColor: bgColor,
+                    title: n.title || 'Notification',
+                    message: n.message || 'No message content',
+                    time: n.createdAt || new Date().toISOString(),
+                    read: n.read
+                };
+            });
 
             // 2. Generate Local Notifications (Registrations & Inventory)
             const localNotifs = [];
             let readSet = new Set(JSON.parse(localStorage.getItem('org-notif-read') || '[]'));
 
             // Registrations
-            [...myRegs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10).forEach(r => {
+            [...myRegs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10).forEach(r => {
                 const nid = `reg-${r.id}`;
                 localNotifs.push({
                     id: nid,
@@ -1262,7 +1418,7 @@ export async function initOrganizerNotifications() {
                     bgColor: 'bg-primary bg-opacity-10',
                     title: 'New Registration',
                     message: `A new registration was made for <strong class="text-neutral-900">${r.eventName}</strong>`,
-                    time: r.date,
+                    time: r.createdAt,
                     read: readSet.has(nid)
                 });
             });
@@ -1498,27 +1654,214 @@ export function initCreateEventWizard() {
         if (window.initIcons) window.initIcons();
     };
 
+    // Premium Live Character Counters
+    const setupCounters = () => {
+        const titleInput = document.getElementById('eventTitle');
+        const titleCounter = document.getElementById('titleCounter');
+        const titleFeedback = document.getElementById('titleFeedback');
+
+        if (titleInput && titleCounter) {
+            const updateTitle = () => {
+                const len = titleInput.value.length;
+                titleCounter.textContent = `${len} / 35`;
+                if (len > 0 && (len < 15 || len > 35)) {
+                    titleCounter.classList.add('text-danger');
+                    titleInput.classList.add('is-invalid');
+                    if (titleFeedback) {
+                        titleFeedback.textContent = len < 15 ? 'Title too short (min 15 chars)' : 'Title too long (max 35 chars)';
+                    }
+                } else {
+                    titleCounter.classList.remove('text-danger');
+                    titleInput.classList.remove('is-invalid');
+                    if (titleFeedback) titleFeedback.textContent = '';
+                }
+            };
+            titleInput.addEventListener('input', updateTitle);
+            updateTitle();
+        }
+
+        const descInput = document.getElementById('eventDesc');
+        const descCounter = document.getElementById('descCounter');
+        const descFeedback = document.getElementById('descFeedback');
+
+        if (descInput && descCounter) {
+            const updateDesc = () => {
+                const len = descInput.value.length;
+                descCounter.textContent = `${len} / 300`;
+                if (len > 0 && (len < 150 || len > 300)) {
+                    descCounter.classList.add('text-danger');
+                    descInput.classList.add('is-invalid');
+                    if (descFeedback) {
+                        descFeedback.textContent = len < 150 ? 'Description too short (min 150 chars)' : 'Description too long (max 300 chars)';
+                    }
+                } else {
+                    descCounter.classList.remove('text-danger');
+                    descInput.classList.remove('is-invalid');
+                    if (descFeedback) descFeedback.textContent = '';
+                }
+            };
+            descInput.addEventListener('input', updateDesc);
+            updateDesc();
+        }
+    };
+    setupCounters();
+
     window.nextStep = (n) => {
         if (n > currentStep) {
-            // Basic validation for Step 1
+            // Validation for Step 1
             if (currentStep === 1) {
-                const title = document.getElementById('eventTitle').value;
+                let s1Valid = true;
+
+                const titleInput = document.getElementById('eventTitle');
+                const titleFeedback = document.getElementById('titleFeedback');
+                const title = titleInput ? titleInput.value.trim() : '';
+
                 if (!title) {
-                    showToast('Title Required', 'Please enter an event title.', 'warning');
+                    titleInput?.classList.add('is-invalid');
+                    if (titleFeedback) titleFeedback.textContent = 'Event Title is required.';
+                    s1Valid = false;
+                } else if (title.length < 15 || title.length > 35) {
+                    titleInput?.classList.add('is-invalid');
+                    s1Valid = false;
+                }
+
+                const catInput = document.getElementById('eventCategory');
+                const catFeedback = document.getElementById('categoryFeedback');
+                if (!catInput || !catInput.value) {
+                    catInput?.classList.add('is-invalid');
+                    if (catFeedback) catFeedback.textContent = 'Please select a category.';
+                    s1Valid = false;
+                }
+
+                const descInput = document.getElementById('eventDesc');
+                const descFeedback = document.getElementById('descFeedback');
+                const desc = descInput ? descInput.value.trim() : '';
+                if (!desc) {
+                    descInput?.classList.add('is-invalid');
+                    if (descFeedback) descFeedback.textContent = 'Description is required.';
+                    s1Valid = false;
+                } else if (desc.length < 150 || desc.length > 300) {
+                    descInput?.classList.add('is-invalid');
+                    s1Valid = false;
+                }
+
+                const bannerImg = document.getElementById('bannerPrev');
+                const bannerHb = document.getElementById('bannerFeedback');
+                if (!bannerImg || bannerImg.classList.contains('d-none')) {
+                    if (bannerHb) {
+                        bannerHb.textContent = 'Banner Image is required.';
+                        bannerHb.classList.remove('d-none');
+                        document.getElementById('bannerUpload')?.classList.add('border-danger');
+                    }
+                    s1Valid = false;
+                }
+
+                const policiesInput = document.getElementById('eventPolicies');
+                const policiesFeedback = document.getElementById('policiesFeedback');
+                if (!policiesInput || !policiesInput.value.trim()) {
+                    policiesInput?.classList.add('is-invalid');
+                    if (policiesFeedback) policiesFeedback.classList.add('d-block');
+                    s1Valid = false;
+                } else {
+                    policiesInput?.classList.remove('is-invalid');
+                    if (policiesFeedback) policiesFeedback.classList.remove('d-block');
+                }
+
+                if (!s1Valid) {
+                    showToast('Validation Error', 'Please resolve all errors in Step 1.', 'danger');
                     return;
                 }
             }
             // Validation for Step 2
             if (currentStep === 2) {
-                const start = document.getElementById('startDate').value;
-                if (!start) {
-                    showToast('Date Required', 'Please enter a start date.', 'warning');
+                let s2Valid = true;
+
+                const isPhysical = document.getElementById('vt-physical').checked;
+                if (isPhysical) {
+                    const vs = document.getElementById('venueSelect');
+                    const vFeedback = document.getElementById('venueFeedback');
+                    if (!vs || !vs.value) {
+                        vs?.classList.add('is-invalid');
+                        if (vFeedback) vFeedback.textContent = 'Please select a venue.';
+                        s2Valid = false;
+                    }
+                } else {
+                    const eu = document.getElementById('eventUrl');
+                    let euv = eu ? eu.value.trim() : '';
+                    if (!euv || !/^https?:\/\//i.test(euv)) {
+                        eu?.classList.add('is-invalid');
+                        s2Valid = false;
+                    }
+                }
+
+                const startInput = document.getElementById('startDate');
+                const endInput = document.getElementById('endDate');
+                const sFeedback = document.getElementById('startDateFeedback');
+                const eFeedback = document.getElementById('endDateFeedback');
+
+                if (!startInput?.value) {
+                    startInput?.classList.add('is-invalid');
+                    if (sFeedback) sFeedback.textContent = 'Start date is required.';
+                    s2Valid = false;
+                } else if (new Date(startInput.value) < new Date()) {
+                    startInput?.classList.add('is-invalid');
+                    if (sFeedback) sFeedback.textContent = 'Cannot schedule in the past.';
+                    s2Valid = false;
+                }
+
+                if (!endInput?.value) {
+                    endInput?.classList.add('is-invalid');
+                    if (eFeedback) eFeedback.textContent = 'End date is required.';
+                    s2Valid = false;
+                } else if (startInput?.value && new Date(endInput.value) <= new Date(startInput.value)) {
+                    endInput?.classList.add('is-invalid');
+                    if (eFeedback) eFeedback.textContent = 'End must be after start.';
+                    s2Valid = false;
+                }
+
+                if (!s2Valid) {
+                    showToast('Validation Error', 'Please resolve all errors in Step 2.', 'danger');
                     return;
                 }
             }
         }
 
+        if (n === 4 && currentStep === 3) {
+            let s3Valid = true;
+            const ticketRows = document.getElementById('ticketRows').querySelectorAll('.p-3.border');
+            if (ticketRows.length === 0) {
+                showToast('No Tickets', 'Please add at least one ticket type.', 'warning');
+                return;
+            }
+            let totalTicketCount = 0;
+            ticketRows.forEach(row => {
+                const nameInput = row.querySelector('input[type="text"]');
+                const priceInput = row.querySelectorAll('input[type="number"]')[0];
+                const qtyInput = row.querySelectorAll('input[type="number"]')[1];
+
+                if (!nameInput.value.trim()) { nameInput.classList.add('is-invalid'); nameInput.classList.remove('border-0'); s3Valid = false; } else { nameInput.classList.remove('is-invalid'); nameInput.classList.add('border-0'); }
+                if (!priceInput.value || priceInput.value < 0) { priceInput.classList.add('is-invalid'); priceInput.classList.remove('border-0'); s3Valid = false; } else { priceInput.classList.remove('is-invalid'); priceInput.classList.add('border-0'); }
+                if (!qtyInput.value || qtyInput.value <= 0) { qtyInput.classList.add('is-invalid'); qtyInput.classList.remove('border-0'); s3Valid = false; } else { qtyInput.classList.remove('is-invalid'); qtyInput.classList.add('border-0'); }
+
+                totalTicketCount += (parseInt(qtyInput.value) || 0);
+            });
+
+            if (!s3Valid) {
+                showToast('Validation Error', 'Please complete all ticket fields correctly.', 'danger');
+                return;
+            }
+
+            const isPhysical = document.querySelector('input[name="venueType"]:checked').value === 'PHYSICAL';
+            if (isPhysical) {
+                const venueCap = parseInt(document.getElementById('venueCapacity').value) || 0;
+                if (totalTicketCount !== venueCap) {
+                    showToast('Capacity Mismatch', `Total tickets (${totalTicketCount}) must equal venue capacity (${venueCap}).`, 'warning');
+                    return;
+                }
+            }
+        }
         document.getElementById(`step${currentStep}`).classList.add('d-none');
+
         document.getElementById(`step${n}`).classList.remove('d-none');
         currentStep = n;
         updateStepper(n);
@@ -1530,29 +1873,42 @@ export function initCreateEventWizard() {
         const reviewContent = document.getElementById('reviewContent');
         if (!reviewContent) return;
 
-        const title = document.getElementById('eventTitle').value;
-        const cat = document.getElementById('eventCategory').value;
-        const vt = document.querySelector('input[name="venueType"]:checked').value;
-        const start = document.getElementById('startDate').value;
-        const venue = vt === 'PHYSICAL' ? document.getElementById('venueName').value : 'Virtual';
+        const title = document.getElementById('eventTitle') ? document.getElementById('eventTitle').value : '';
+        const catSelect = document.getElementById('eventCategory');
+        const cat = catSelect && catSelect.selectedIndex > -1 ? catSelect.options[catSelect.selectedIndex].text : '';
+        const vtElement = document.querySelector('input[name="venueType"]:checked');
+        const vt = vtElement ? vtElement.value : 'VIRTUAL';
+        const start = document.getElementById('startDate') ? document.getElementById('startDate').value : '';
+
+        let venue = 'Virtual';
+        if (vt === 'PHYSICAL') {
+            const venueSelect = document.getElementById('venueSelect');
+            venue = venueSelect && venueSelect.selectedIndex > -1 ? venueSelect.options[venueSelect.selectedIndex].text : '';
+        }
+
+        const policies = document.getElementById('eventPolicies') ? document.getElementById('eventPolicies').value : '';
 
         reviewContent.innerHTML = `
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="small text-neutral-400 mb-1">Title</div>
-                    <div class="fw-bold">${title}</div>
+                    <div class="fw-bold text-neutral-900">${title}</div>
                 </div>
                 <div class="col-md-6">
                     <div class="small text-neutral-400 mb-1">Category</div>
-                    <div class="fw-bold">${cat}</div>
+                    <div class="fw-bold text-neutral-900">${cat}</div>
                 </div>
                 <div class="col-md-6">
                     <div class="small text-neutral-400 mb-1">Date & Time</div>
-                    <div class="fw-bold">${new Date(start).toLocaleString('en-IN')}</div>
+                    <div class="fw-bold text-neutral-900">${new Date(start).toLocaleString('en-IN')}</div>
                 </div>
                 <div class="col-md-6">
                     <div class="small text-neutral-400 mb-1">Venue</div>
-                    <div class="fw-bold">${venue} (${vt})</div>
+                    <div class="fw-bold text-neutral-900">${venue} (${vt})</div>
+                </div>
+                <div class="col-12 mt-3 pt-3 border-top">
+                    <div class="small text-neutral-400 mb-1">Event Policies</div>
+                    <div class="small text-neutral-600" style="white-space: pre-wrap;">${policies || 'No specific policies provided.'}</div>
                 </div>
             </div>
         `;
@@ -1602,43 +1958,118 @@ export function initCreateEventWizard() {
     window.addTicketRow = () => {
         const rowCont = document.getElementById('ticketRows');
         const div = document.createElement('div');
-        div.className = 'p-3 border rounded-3 d-flex gap-3 align-items-center bg-white';
+        div.className = 'p-3 border rounded-3 d-flex flex-column gap-2 bg-white';
         div.innerHTML = `
-            <div class="flex-grow-1">
-                <input type="text" class="form-control form-control-sm border-0 bg-light fw-bold" placeholder="Ticket Name (e.g. VIP)">
+            <div class="row g-2 align-items-start">
+                <div class="col-6">
+                    <input type="text" class="form-control form-control-sm border-0 bg-light ticket-name-input" placeholder="Ticket Name (e.g. VIP)" maxlength="15">
+                    <div class="d-flex justify-content-between mt-1 px-1">
+                        <div class="invalid-feedback d-block ticket-name-feedback" style="font-size: 10px;"></div>
+                        <small class="text-neutral-400 ticket-name-counter" style="font-size: 10px;">0 / 15</small>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Price (₹)">
+                </div>
+                <div class="col-2">
+                    <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Qty">
+                </div>
+                <div class="col-1 pt-1">
+                    <button class="btn btn-sm text-danger p-0" onclick="this.closest('.p-3').remove()">
+                        <i data-lucide="trash-2" width="16"></i>
+                    </button>
+                </div>
             </div>
-            <div style="width: 100px;">
-                <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Price">
-            </div>
-            <div style="width: 80px;">
-                <input type="number" class="form-control form-control-sm border-0 bg-light" placeholder="Qty">
-            </div>
-            <button class="btn btn-sm text-danger p-0" onclick="this.closest('div').remove()">
-                <i data-lucide="trash-2" width="16"></i>
-            </button>
         `;
+
+        const nameInput = div.querySelector('.ticket-name-input');
+        const nameCounter = div.querySelector('.ticket-name-counter');
+        nameInput.addEventListener('input', () => {
+            nameCounter.textContent = `${nameInput.value.length} / 15`;
+        });
+
         rowCont.appendChild(div);
         if (window.initIcons) window.initIcons({ root: div });
     };
 
-    // Load Categories (Filtered by Active)
+    // Load Categories (Filtered by ACTIVE)
     const loadCategories = async () => {
         const select = document.getElementById('eventCategory');
         if (!select) return;
 
-        try {
-            const res = await fetch('http://localhost:3000/categories');
-            const cats = await res.json();
-            const activeCats = cats.filter(c => c.status === 'Active');
+        // Show loading state
+        select.innerHTML = '<option value="">Category (Loading...)</option>';
+        select.disabled = true;
 
-            select.innerHTML = activeCats.map(c => `
-                <option value="${c.id}">${c.name}</option>
+        try {
+            // First check if already in state
+            let cats = state.categories;
+            if (cats.length === 0) {
+                const res = await fetch('http://localhost:3000/categories');
+                cats = await res.json();
+            }
+            const activeCats = cats.filter(c => c.status === 'ACTIVE');
+
+            select.innerHTML = '<option value="">Select a Category</option>' + activeCats.map(c => `
+                <option value="${c.id}" style="color: #0f172a; background-color: #ffffff;">${c.name}</option>
             `).join('');
+            select.disabled = false;
         } catch (e) {
             console.error('Error loading categories', e);
+            select.innerHTML = '<option value="">Failed to load categories</option>';
         }
     };
+
+    // Load Venues
+    const loadVenues = async () => {
+        const select = document.getElementById('venueSelect');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Venues (Loading...)</option>';
+        select.disabled = true;
+
+        try {
+            let venues = state.venues;
+            if (venues.length === 0) {
+                const res = await fetch('http://localhost:3000/venues');
+                venues = await res.json();
+            }
+            const activeVenues = venues.filter(v => v.status === 'ACTIVE');
+
+            select.innerHTML = '<option value="">Select a Venue</option>' + activeVenues.map(v => `
+                <option value="${v.id}" data-city="${v.address.city}" data-capacity="${v.capacity}" style="color: #0f172a; background-color: #ffffff;">${v.name}</option>
+            `).join('');
+            select.disabled = false;
+
+            select.addEventListener('change', () => {
+                const opt = select.options[select.selectedIndex];
+                if (opt.value) {
+                    eventData.venueId = opt.value;
+                    const vNameInput = document.getElementById('venueName');
+                    if (vNameInput) vNameInput.value = opt.text;
+
+                    document.getElementById('venueCity').value = opt.dataset.city || '';
+                    document.getElementById('venueCapacity').value = opt.dataset.capacity || '';
+
+                    // Trigger validation hide
+                    select.classList.remove('is-invalid');
+                } else {
+                    eventData.venueId = null;
+                    const vNameInput = document.getElementById('venueName');
+                    if (vNameInput) vNameInput.value = '';
+
+                    document.getElementById('venueCity').value = '';
+                    document.getElementById('venueCapacity').value = '';
+                }
+            });
+        } catch (e) {
+            console.error('Error loading venues', e);
+            select.innerHTML = '<option value="">Failed to load venues</option>';
+        }
+    };
+
     loadCategories();
+    loadVenues();
 
     const saveEvent = async (published = false) => {
         const user = getCurrentUser();
@@ -1647,6 +2078,7 @@ export function initCreateEventWizard() {
         const title = document.getElementById('eventTitle').value;
         const catId = document.getElementById('eventCategory').value;
         const desc = document.getElementById('eventDesc').value;
+        const policies = document.getElementById('eventPolicies').value;
         const vt = document.querySelector('input[name="venueType"]:checked').value;
         const start = document.getElementById('startDate').value;
         const end = document.getElementById('endDate').value;
@@ -1665,6 +2097,7 @@ export function initCreateEventWizard() {
             name: categoryMap[catId] || catId
         };
         eventData.description = desc;
+        eventData.policies = policies;
         eventData.schedule = {
             startDateTime: start,
             endDateTime: end,
@@ -1673,7 +2106,8 @@ export function initCreateEventWizard() {
         };
         eventData.location = {
             type: vt,
-            name: vt === 'PHYSICAL' ? document.getElementById('venueName').value : 'Virtual Link',
+            venueId: vt === 'PHYSICAL' ? (eventData.venueId || document.getElementById('venueSelect').value) : null,
+            name: vt === 'PHYSICAL' ? (document.getElementById('venueName') ? document.getElementById('venueName').value : '') : 'Virtual Link',
             address: {
                 city: vt === 'PHYSICAL' ? document.getElementById('venueCity').value : 'Online'
             },
@@ -1724,6 +2158,394 @@ export function initCreateEventWizard() {
 
     if (draftBtn) draftBtn.onclick = () => saveEvent(false);
     if (submitBtn) submitBtn.onclick = () => saveEvent(true);
+
+    if (window.initIcons) window.initIcons();
+}
+
+export async function initOrganizerOffers() {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    populateSidebarUserInfo();
+
+    const tableBody = document.getElementById('offersTableBody');
+    const card = document.getElementById('organizer-offers-card');
+    const searchInput = document.getElementById('offerSearch');
+    const eventFilter = document.getElementById('eventFilter');
+    const addBtn = document.getElementById('addOfferBtn');
+    const modalEl = document.getElementById('offerModal');
+    const form = document.getElementById('offerForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const eventSelect = document.getElementById('offerEventSelect');
+    const codeInput = document.getElementById('offerCodeInput');
+    const discountInput = document.getElementById('offerDiscountInput');
+    const codeFeedback = codeInput ? codeInput.parentElement.querySelector('.invalid-feedback') : null;
+    const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+    if (!tableBody || !card || !form || !eventSelect || !codeInput || !discountInput) return;
+
+    let events = (await apiFetch('events')).filter((ev) => ev.organizerId === user.id);
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    let editing = null;
+
+    let pagContainer = document.getElementById('offers-pagination');
+    if (!pagContainer) {
+        pagContainer = document.createElement('div');
+        pagContainer.id = 'offers-pagination';
+        card.appendChild(pagContainer);
+    }
+
+    const isPublished = (ev) => {
+        const status = (ev.status && ev.status.current) || '';
+        return status === 'PUBLISHED' || status === 'ACTIVE';
+    };
+
+    const toOfferRows = () => events.flatMap((ev) => {
+        const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+        return offers.map((offer) => ({
+            eventId: ev.id,
+            eventTitle: ev.title || ev.name || `Event ${ev.id}`,
+            code: (offer.code || '').toUpperCase(),
+            discountPercentage: Number(offer.discountPercentage || 0)
+        }));
+    });
+
+    const populateFilters = () => {
+        if (eventFilter) {
+            eventFilter.innerHTML = '<option value="all">All My Events</option>' +
+                events.map((ev) => `<option value="${ev.id}">${ev.title || ev.name || ev.id}</option>`).join('');
+        }
+        eventSelect.innerHTML = events
+            .filter(isPublished)
+            .map((ev) => `<option value="${ev.id}">${ev.title || ev.name || ev.id}</option>`)
+            .join('');
+    };
+
+    const applyFilters = () => {
+        const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        const selectedEvent = eventFilter ? eventFilter.value : 'all';
+        return toOfferRows().filter((row) => {
+            const matchEvent = selectedEvent === 'all' || row.eventId === selectedEvent;
+            const matchSearch = !q || row.code.toLowerCase().includes(q) || row.eventTitle.toLowerCase().includes(q);
+            return matchEvent && matchSearch;
+        });
+    };
+
+    const resetForm = () => {
+        editing = null;
+        modalTitle.textContent = 'Create New Offer';
+        form.reset();
+        codeInput.classList.remove('is-invalid');
+        if (codeFeedback) codeFeedback.textContent = 'Code must be unique for this event.';
+        if (eventSelect.options.length > 0) eventSelect.selectedIndex = 0;
+    };
+
+    const validateUniqueForEvent = (eventId, code) => {
+        const normalized = code.trim().toUpperCase();
+        const ev = events.find((x) => x.id === eventId);
+        if (!ev) return false;
+        const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+        return !offers.some((offer) => {
+            const sameCode = (offer.code || '').toUpperCase() === normalized;
+            if (!sameCode) return false;
+            if (!editing) return true;
+            return !(editing.eventId === eventId && editing.code === normalized);
+        });
+    };
+
+    const openForCreate = () => {
+        resetForm();
+        if (bsModal) bsModal.show();
+    };
+
+    const openForEdit = (eventId, code, discount) => {
+        resetForm();
+        editing = { eventId, code: code.toUpperCase() };
+        modalTitle.textContent = 'Edit Offer';
+        eventSelect.value = eventId;
+        codeInput.value = code.toUpperCase();
+        discountInput.value = discount;
+        if (bsModal) bsModal.show();
+    };
+
+    const bindRowActions = () => {
+        tableBody.querySelectorAll('.btn-edit-offer').forEach((btn) => {
+            btn.onclick = () => openForEdit(btn.dataset.eventId, btn.dataset.code, btn.dataset.discount);
+        });
+
+        tableBody.querySelectorAll('.btn-delete-offer').forEach((btn) => {
+            btn.onclick = () => {
+                const eventId = btn.dataset.eventId;
+                const code = btn.dataset.code.toUpperCase();
+                if (!window.confirm(`Delete offer "${code}"?`)) return;
+                (async () => {
+                    try {
+                        const ev = events.find((x) => x.id === eventId);
+                        if (!ev) return;
+                        const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+                        const updatedOffers = offers.filter((o) => (o.code || '').toUpperCase() !== code);
+                        await apiPatch('events', eventId, { pricing: Object.assign({}, ev.pricing, { offers: updatedOffers }) });
+                        ev.pricing = Object.assign({}, ev.pricing, { offers: updatedOffers });
+                        showToast('Deleted', `Offer "${code}" removed.`, 'warning');
+                        render();
+                    } catch (e) {
+                        showToast('Error', 'Failed to delete offer.', 'danger');
+                    }
+                })();
+            };
+        });
+    };
+
+    const render = () => {
+        const rows = applyFilters();
+        const start = (currentPage - 1) * itemsPerPage;
+        const pageRows = rows.slice(start, start + itemsPerPage);
+
+        if (rows.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-5 text-neutral-400">No offers found.</td></tr>';
+            pagContainer.innerHTML = '';
+        } else {
+            tableBody.innerHTML = pageRows.map((row) => `
+                <tr>
+                    <td class="ps-4 fw-medium text-neutral-900 small">${row.code}</td>
+                    <td class="text-neutral-400 small">${row.eventTitle}</td>
+                    <td class="text-neutral-900 small fw-medium">${row.discountPercentage}%</td>
+                    <td class="pe-4 text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
+                                <span style="font-size:1.2rem;font-weight:bold;line-height:1;">&#8942;</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
+                                <li><button class="dropdown-item d-flex align-items-center gap-2 btn-edit-offer" data-event-id="${row.eventId}" data-code="${row.code}" data-discount="${row.discountPercentage}"><i data-lucide="edit-2" width="14"></i> Edit</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger btn-delete-offer" data-event-id="${row.eventId}" data-code="${row.code}"><i data-lucide="trash-2" width="14"></i> Delete</button></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            setupPagination(rows, itemsPerPage, 'offers-pagination', (items) => {
+                tableBody.innerHTML = items.map((row) => `
+                    <tr>
+                        <td class="ps-4 fw-medium text-neutral-900 small">${row.code}</td>
+                        <td class="text-neutral-400 small">${row.eventTitle}</td>
+                        <td class="text-neutral-900 small fw-medium">${row.discountPercentage}%</td>
+                        <td class="pe-4 text-end">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
+                                    <span style="font-size:1.2rem;font-weight:bold;line-height:1;">&#8942;</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
+                                    <li><button class="dropdown-item d-flex align-items-center gap-2 btn-edit-offer" data-event-id="${row.eventId}" data-code="${row.code}" data-discount="${row.discountPercentage}"><i data-lucide="edit-2" width="14"></i> Edit</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger btn-delete-offer" data-event-id="${row.eventId}" data-code="${row.code}"><i data-lucide="trash-2" width="14"></i> Delete</button></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                bindRowActions();
+                if (window.initIcons) window.initIcons({ root: card });
+            });
+            return;
+        }
+
+        if (window.initIcons) window.initIcons({ root: card });
+    };
+
+    if (addBtn) addBtn.addEventListener('click', openForCreate);
+    if (searchInput) searchInput.addEventListener('input', () => {
+        currentPage = 1;
+        render();
+    });
+    if (eventFilter) eventFilter.addEventListener('change', () => {
+        currentPage = 1;
+        render();
+    });
+
+    codeInput.addEventListener('input', () => {
+        codeInput.value = codeInput.value.toUpperCase().replace(/\s+/g, '');
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const eventId = eventSelect.value;
+        const code = codeInput.value.trim().toUpperCase();
+        const discountPercentage = Number(discountInput.value);
+
+        if (!eventId || !code || !(discountPercentage > 0 && discountPercentage <= 100)) return;
+
+        const targetEvent = events.find((ev) => ev.id === eventId);
+        if (!targetEvent || targetEvent.organizerId !== user.id || !isPublished(targetEvent)) {
+            showToast('Error', 'You can create offers only for your published events.', 'danger');
+            return;
+        }
+
+        const unique = validateUniqueForEvent(eventId, code);
+        codeInput.classList.toggle('is-invalid', !unique);
+        if (!unique) {
+            if (codeFeedback) codeFeedback.textContent = 'Offer code already exists for this event.';
+            return;
+        }
+
+        try {
+            if (editing && (editing.eventId !== eventId || editing.code !== code)) {
+                const oldEvent = events.find((ev) => ev.id === editing.eventId);
+                if (oldEvent) {
+                    const oldOffers = (oldEvent.pricing && Array.isArray(oldEvent.pricing.offers)) ? oldEvent.pricing.offers : [];
+                    const cleaned = oldOffers.filter((o) => (o.code || '').toUpperCase() !== editing.code);
+                    await apiPatch('events', oldEvent.id, { pricing: Object.assign({}, oldEvent.pricing, { offers: cleaned }) });
+                    oldEvent.pricing = Object.assign({}, oldEvent.pricing, { offers: cleaned });
+                }
+            }
+
+            const currentOffers = (targetEvent.pricing && Array.isArray(targetEvent.pricing.offers)) ? targetEvent.pricing.offers : [];
+            const withoutCurrent = currentOffers.filter((o) => {
+                if (!editing || editing.eventId !== eventId) return true;
+                return (o.code || '').toUpperCase() !== editing.code;
+            });
+            const updatedOffers = [...withoutCurrent, { code, discountPercentage }];
+            await apiPatch('events', eventId, { pricing: Object.assign({}, targetEvent.pricing, { offers: updatedOffers }) });
+            targetEvent.pricing = Object.assign({}, targetEvent.pricing, { offers: updatedOffers });
+
+            showToast('Saved', editing ? 'Offer updated successfully.' : 'Offer created successfully.', 'success');
+            if (bsModal) bsModal.hide();
+            resetForm();
+            currentPage = 1;
+            render();
+        } catch (err) {
+            showToast('Error', 'Failed to save offer.', 'danger');
+        }
+    });
+
+    populateFilters();
+    render();
+}
+
+export function initOrganizerPayments() {
+    const user = getCurrentUser();
+    if (!user) return;
+
+    populateSidebarUserInfo();
+    injectRegistrationModal();
+
+    const myEvents = getOrganizerEvents(user);
+    const allRegs = getEventRegistrations(myEvents);
+    let filtered = [...allRegs];
+
+    // Stats calculation
+    const calcStats = (regs) => {
+        const totalRevenue = regs.reduce((sum, r) => sum + (r.totalAmount || r.price), 0);
+
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const todayRevenue = regs
+            .filter(r => new Date(r.createdAt || r.date) >= startOfDay)
+            .reduce((sum, r) => sum + (r.totalAmount || r.price), 0);
+
+        const confirmedCount = regs.filter(r => r.status === 'CONFIRMED' || r.status === 'PAID').length;
+        const pendingCount = regs.filter(r => r.status === 'PENDING').length;
+
+        const trEl = document.getElementById('totalRevenue');
+        const drEl = document.getElementById('todayRevenue');
+        const cpEl = document.getElementById('confirmedPayments');
+        const ppEl = document.getElementById('pendingPayments');
+
+        if (trEl) trEl.textContent = formatCurrency(totalRevenue);
+        if (drEl) drEl.textContent = formatCurrency(todayRevenue);
+        if (cpEl) cpEl.textContent = confirmedCount.toLocaleString('en-IN');
+        if (ppEl) ppEl.textContent = pendingCount.toLocaleString('en-IN');
+    };
+
+    // Populate Event Filter
+    const eventFilter = document.getElementById('eventFilter');
+    if (eventFilter) {
+        eventFilter.innerHTML = '<option value="">All Events</option>' +
+            myEvents.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+    }
+
+    const renderTable = (regs) => {
+        const tbody = document.querySelector('#paymentsTable tbody');
+        if (!tbody) return;
+
+        if (regs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-neutral-400">No payments found.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = regs.map(r => {
+            const u = state.users.find(u => u.id === r.userId);
+            const event = getEvent(r.eventId);
+            const isPaid = r.status === 'CONFIRMED' || r.status === 'PAID';
+
+            return `
+            <tr>
+                <td class="ps-4 fw-medium text-neutral-900">${event ? event.title : 'Event'}</td>
+                <td>
+                    <div class="fw-medium text-neutral-900">${u ? u.profile.fullName : 'Guest'}</div>
+                    <div class="text-neutral-400 small">${u ? u.profile.email : '—'}</div>
+                </td>
+                <td class="fw-bold text-primary">${formatCurrency(r.totalAmount || r.price)}</td>
+                <td class="text-neutral-400 small">${formatDate(r.createdAt || r.date)}</td>
+                <td><span class="badge rounded-pill ${isPaid ? 'bg-success' : 'bg-warning'} px-3 py-2 fw-bold" style="font-size: 10px;">${r.status}</span></td>
+                <td class="pe-4 text-end">
+                    <button class="btn btn-sm text-primary p-0" title="View Details" onclick="viewRegistrationDetails('${r.id}')">
+                        <i data-lucide="eye" width="16"></i>
+                    </button>
+                </td>
+            </tr>`;
+        }).join('');
+
+        if (window.initIcons) window.initIcons({ root: tbody });
+    };
+
+    const applyFilters = () => {
+        const eventId = eventFilter ? eventFilter.value : '';
+        const q = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
+
+        const newFiltered = allRegs.filter(r => {
+            const matchEvent = !eventId || r.eventId === eventId;
+            const u = state.users.find(u => u.id === r.userId);
+            const userEmail = u ? u.profile.email.toLowerCase() : '';
+            const userName = u ? u.profile.fullName.toLowerCase() : '';
+            const matchQ = !q || r.id.toLowerCase().includes(q) || userEmail.includes(q) || userName.includes(q);
+            return matchEvent && matchQ;
+        });
+        filtered = newFiltered;
+        setupPagination(filtered, 10, 'pagination-controls', renderTable);
+        calcStats(filtered);
+    };
+
+    if (eventFilter) eventFilter.addEventListener('change', applyFilters);
+    const searchInput = document.getElementById('paymentSearch');
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+
+    // Export CSV
+    const exportBtn = document.getElementById('exportPaymentsBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const rows = [['Transaction ID', 'Event', 'Customer', 'Email', 'Amount', 'Date', 'Status']];
+            filtered.forEach(r => {
+                const u = state.users.find(u => u.id === r.userId);
+                rows.push([
+                    r.id,
+                    getEvent(r.eventId)?.title || 'Event',
+                    u ? u.profile.fullName : 'Guest',
+                    u ? u.profile.email : '—',
+                    r.totalAmount || r.price,
+                    formatDate(r.createdAt || r.date),
+                    r.status
+                ]);
+            });
+            downloadCSV(rows, 'organizer-payments.csv');
+            showToast('Exported', 'Payments data exported to CSV.', 'success');
+        });
+    }
+
+    setupPagination(filtered, 10, 'pagination-controls', renderTable);
+    calcStats(filtered);
 
     if (window.initIcons) window.initIcons();
 }

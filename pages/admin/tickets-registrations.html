@@ -57,6 +57,7 @@
                             <a href="organizer-approval.html" class="sidebar-item"><i data-lucide="user-check" class="sidebar-icon"></i> Organizer Approvals <span class="badge rounded-pill ms-auto" id="pending-org-count" style="background:#17b978;color:#fff;font-size:10px;">0</span></a>
                             <a href="event-approvals.html" class="sidebar-item"><i data-lucide="check-circle" class="sidebar-icon"></i> Event Approvals <span class="badge rounded-pill ms-auto" style="background:#17b978;color:#fff;font-size:10px;">8</span></a>
                             <a href="events.html" class="sidebar-item"><i data-lucide="calendar" class="sidebar-icon"></i> Events</a>
+                            <a href="offers.html" class="sidebar-item"><i data-lucide="percent" class="sidebar-icon"></i> Offers</a>
                             <a href="categories.html" class="sidebar-item"><i data-lucide="tag" class="sidebar-icon"></i> Categories</a>
                             <a href="venues.html" class="sidebar-item"><i data-lucide="map-pin" class="sidebar-icon"></i> Venues</a>
                             <a href="tickets-registrations.html" class="sidebar-item active"><i data-lucide="ticket" class="sidebar-icon"></i> Tickets &amp; Registrations</a>
@@ -91,7 +92,7 @@
                         <h4 class="fw-bold mb-0">Tickets &amp; Registrations</h4>
                     </div>
 
-                    <div class="card-custom p-0 overflow-hidden">
+                    <div class="card-custom p-0 overflow-hidden" id="admin-tickets-card">
                         <div class="px-4 py-3 border-bottom d-flex align-items-center gap-3 flex-wrap">
                             <select class="form-select" style="width:200px;">
                                 <option>All Events</option>
@@ -140,7 +141,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -170,7 +171,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -200,7 +201,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -231,7 +232,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -255,7 +256,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -286,7 +287,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -310,7 +311,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">
@@ -340,7 +341,7 @@
                                                 <button
                                                     class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none"
                                                     type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i data-lucide="more-vertical" width="18"></i>
+                                                    <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2"
                                                     style="font-size: 13px; min-width: 140px;">

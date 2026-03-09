@@ -25,27 +25,24 @@
     <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
         <div class="container-fluid px-4 h-100">
             <div class="d-flex align-items-center justify-content-between h-100">
-                <!-- Left: Logo & Search -->
+                <!-- Left: Logo -->
                 <div class="d-flex align-items-center gap-4">
                     <a class="brand" href="dashboard.html" style="width: 140px;">
                         <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
                     </a>
-                    <div class="position-relative d-none d-md-block" style="width: 300px;">
-                        <i data-lucide="search"
-                            class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
-                            width="18"></i>
-                        <input type="text" class="form-control border-transparent ps-5"
-                            placeholder="Search events, orders...">
-                    </div>
+                </div>
+
+                <!-- Center: Search -->
+                <div class="position-relative d-none d-md-block mx-auto flex-grow-1 px-4" style="max-width: 600px;">
+                    <i data-lucide="search"
+                        class="position-absolute top-50 start-0 translate-middle-y ms-5 text-neutral-400"
+                        width="18"></i>
+                    <input type="text" class="form-control border-transparent ps-5 bg-neutral-100"
+                        placeholder="Search events, orders..." style="border-radius: 8px;">
                 </div>
 
                 <!-- Right: Actions & Profile -->
                 <div class="d-flex align-items-center gap-3">
-                    <a href="create-event.html"
-                        class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
-                        <i data-lucide="plus" width="16"></i> Create Event
-                    </a>
-
                     <a href="notifications.html"
                         class="icon-circle position-relative text-decoration-none bg-white ms-2">
                         <i data-lucide="bell" style="width:20px;height:20px;"></i>
@@ -88,6 +85,10 @@
                             <a href="registrations.html" class="sidebar-item">
                                 <i data-lucide="users" class="sidebar-icon"></i> Registrations
                             </a>
+                            <a href="payments.html" class="sidebar-item">
+                                <i data-lucide="credit-card" class="sidebar-icon"></i> Payments
+                            </a>
+
                             <a href="reports.html" class="sidebar-item active">
                                 <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
                             </a>
@@ -120,12 +121,7 @@
                     </nav>
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="d-flex align-items-center"><a href="dashboard.html"
-                                class="icon-circle text-decoration-none me-3" title="Back to Dashboard"
-                                style="flex-shrink:0;"><i data-lucide="arrow-left"
-                                    style="width:18px;height:18px;"></i></a>
-                            <h4 class="fw-bold mb-0">Reports</h4>
-                        </div>
+                        <h4 class="fw-bold mb-0">Reports</h4>
                     </div>
                     <div class="mb-4">
                         <h2 class="h3 fw-bold text-neutral-900 mb-1">Reports &amp; Analytics</h2>
@@ -152,8 +148,8 @@
                                 <input type="date" class="form-control px-3 fw-medium">
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-primary rounded-pill w-100 fw-medium">
-                                    <i data-lucide="download" style="width:18px;height:18px;"></i> Export
+                                <button class="btn btn-outline-primary rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2">
+                                    <i data-lucide="download" style="width:16px;height:16px;"></i> Export CSV
                                 </button>
                             </div>
                         </div>

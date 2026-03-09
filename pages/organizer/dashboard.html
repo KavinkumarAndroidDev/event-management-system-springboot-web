@@ -25,27 +25,24 @@
     <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
         <div class="container-fluid px-4 h-100">
             <div class="d-flex align-items-center justify-content-between h-100">
-                <!-- Left: Logo & Search -->
+                <!-- Left: Logo -->
                 <div class="d-flex align-items-center gap-4">
                     <a class="brand" href="dashboard.html" style="width: 140px;">
                         <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
                     </a>
-                    <div class="position-relative d-none d-md-block" style="width: 300px;">
-                        <i data-lucide="search"
-                            class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
-                            width="18"></i>
-                        <input type="text" class="form-control border-transparent ps-5"
-                            placeholder="Search events, orders...">
-                    </div>
+                </div>
+
+                <!-- Center: Search -->
+                <div class="position-relative d-none d-md-block mx-auto flex-grow-1 px-4" style="max-width: 600px;">
+                    <i data-lucide="search"
+                        class="position-absolute top-50 start-0 translate-middle-y ms-5 text-neutral-400"
+                        width="18"></i>
+                    <input type="text" class="form-control border-transparent ps-5 bg-neutral-100"
+                        placeholder="Search events, orders..." style="border-radius: 8px;">
                 </div>
 
                 <!-- Right: Actions & Profile -->
                 <div class="d-flex align-items-center gap-3">
-                    <a href="create-event.html"
-                        class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
-                        <i data-lucide="plus" width="16"></i> Create Event
-                    </a>
-
                     <a href="notifications.html"
                         class="icon-circle position-relative text-decoration-none bg-white ms-2">
                         <i data-lucide="bell" style="width:20px;height:20px;"></i>
@@ -88,6 +85,10 @@
                             <a href="registrations.html" class="sidebar-item">
                                 <i data-lucide="users" class="sidebar-icon"></i> Registrations
                             </a>
+                            <a href="payments.html" class="sidebar-item">
+                                <i data-lucide="credit-card" class="sidebar-icon"></i> Payments
+                            </a>
+
                             <a href="reports.html" class="sidebar-item">
                                 <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
                             </a>
@@ -127,7 +128,7 @@
                                     <i data-lucide="calendar" style="width:24px; height:24px;"></i>
                                 </div>
                                 <div class="h2 fw-medium text-neutral-900 mb-1">24</div>
-                                <div class="text-neutral-400 small fw-medium">Total Events</div>
+                                <div class="text-neutral-400 small">Total Events</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl-3">
@@ -137,7 +138,7 @@
                                     <i data-lucide="ticket" style="width:24px; height:24px;"></i>
                                 </div>
                                 <div class="h2 fw-medium text-neutral-900 mb-1">1,245</div>
-                                <div class="text-neutral-400 small fw-medium">Total Tickets Sold</div>
+                                <div class="text-neutral-400 small">Total Tickets Sold</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl-3">
@@ -146,7 +147,7 @@
                                     <i data-lucide="indian-rupee" style="width:24px; height:24px;"></i>
                                 </div>
                                 <div class="h2 fw-medium text-primary mb-1">₹48,320</div>
-                                <div class="text-neutral-400 small fw-medium">Total Revenue</div>
+                                <div class="text-neutral-400 small">Total Revenue</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl-3">
@@ -156,7 +157,7 @@
                                     <i data-lucide="clock" style="width:24px; height:24px;"></i>
                                 </div>
                                 <div class="h2 fw-medium text-neutral-900 mb-1">8</div>
-                                <div class="text-neutral-400 small fw-medium">Pending Approvals</div>
+                                <div class="text-neutral-400 small">Pending Approvals</div>
                             </div>
                         </div>
                     </div>

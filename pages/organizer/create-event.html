@@ -25,27 +25,24 @@
     <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
         <div class="container-fluid px-4 h-100">
             <div class="d-flex align-items-center justify-content-between h-100">
-                <!-- Left: Logo & Search -->
+                <!-- Left: Logo -->
                 <div class="d-flex align-items-center gap-4">
                     <a class="brand" href="dashboard.html" style="width: 140px;">
                         <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
                     </a>
-                    <div class="position-relative d-none d-md-block" style="width: 300px;">
-                        <i data-lucide="search"
-                            class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400"
-                            width="18"></i>
-                        <input type="text" class="form-control border-transparent ps-5"
-                            placeholder="Search events, orders...">
-                    </div>
+                </div>
+
+                <!-- Center: Search -->
+                <div class="position-relative d-none d-md-block mx-auto flex-grow-1 px-4" style="max-width: 600px;">
+                    <i data-lucide="search"
+                        class="position-absolute top-50 start-0 translate-middle-y ms-5 text-neutral-400"
+                        width="18"></i>
+                    <input type="text" class="form-control border-transparent ps-5 bg-neutral-100"
+                        placeholder="Search events, orders..." style="border-radius: 8px;">
                 </div>
 
                 <!-- Right: Actions & Profile -->
                 <div class="d-flex align-items-center gap-3">
-                    <a href="create-event.html"
-                        class="btn btn-outline-primary rounded-pill d-none d-md-flex align-items-center gap-2">
-                        <i data-lucide="plus" width="16"></i> Create Event
-                    </a>
-
                     <a href="notifications.html"
                         class="icon-circle position-relative text-decoration-none bg-white ms-2">
                         <i data-lucide="bell" style="width:20px;height:20px;"></i>
@@ -79,6 +76,9 @@
                             <a href="my-events.html" class="sidebar-item">
                                 <i data-lucide="calendar" class="sidebar-icon"></i> My Events
                             </a>
+                            <a href="offers.html" class="sidebar-item">
+                                <i data-lucide="percent" class="sidebar-icon"></i> Offers
+                            </a>
                             <a href="create-event.html" class="sidebar-item active">
                                 <i data-lucide="plus-circle" class="sidebar-icon"></i> Create
                                 Event
@@ -89,6 +89,10 @@
                             <a href="registrations.html" class="sidebar-item">
                                 <i data-lucide="users" class="sidebar-icon"></i> Registrations
                             </a>
+                            <a href="payments.html" class="sidebar-item">
+                                <i data-lucide="credit-card" class="sidebar-icon"></i> Payments
+                            </a>
+
                             <a href="reports.html" class="sidebar-item">
                                 <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
                             </a>
@@ -122,12 +126,7 @@
                     </nav>
 
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="d-flex align-items-center"><a href="dashboard.html"
-                                class="icon-circle text-decoration-none me-3" title="Back to Dashboard"
-                                style="flex-shrink:0;"><i data-lucide="arrow-left"
-                                    style="width:18px;height:18px;"></i></a>
-                            <h4 class="fw-bold mb-0">Create Event</h4>
-                        </div>
+                        <h4 class="fw-bold mb-0">Create Event</h4>
                     </div>
                     <div class="d-flex align-items-center justify-content-center gap-4 mb-5 mx-auto"
                         style="max-width: 800px;">
@@ -161,17 +160,23 @@
                         <div class="row g-4">
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Event Title *</label>
-                                <input type="text" class="form-control" id="eventTitle" placeholder="Enter event name">
+                                <input type="text" class="form-control" id="eventTitle" placeholder="Enter event name" minlength="15" maxlength="35">
+    <div class="d-flex justify-content-between mt-1">
+        <div class="invalid-feedback d-block" id="titleFeedback" style="display:none;"></div>
+        <small class="text-neutral-400" id="titleCounter">0 / 35</small>
+    </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Category *</label>
                                 <select class="form-select" id="eventCategory">
+                                    <option value="">Select a Category</option>
                                     <option value="Conference">Conference</option>
                                     <option value="Workshop">Workshop</option>
                                     <option value="Music">Music</option>
                                     <option value="Art">Art</option>
                                     <option value="Business">Business</option>
                                 </select>
+                                <div class="invalid-feedback" id="categoryFeedback">Please select a category.</div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Banner Image *</label>
@@ -179,6 +184,7 @@
                                     style="border-style: dashed !important; border-color: #E5E7EB !important; cursor: pointer;">
                                     <i data-lucide="upload" class="text-neutral-400 mb-2"></i>
                                     <div class="small fw-medium text-neutral-900">Click to upload banner</div>
+                                <div class="invalid-feedback d-none" id="bannerFeedback" style="font-size: 0.8125rem;">Banner Image is required.</div>
                                     <div class="small text-neutral-400">PNG, JPG up to 5MB</div>
                                     <img id="bannerPrev" class="img-fluid mt-3 d-none rounded-2"
                                         style="max-height: 200px;">
@@ -186,8 +192,18 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-medium small">Description *</label>
-                                <textarea class="form-control h-auto" rows="5" id="eventDesc"
+                                <textarea class="form-control h-auto" rows="4" id="eventDesc"
                                     placeholder="Tell us about the event"></textarea>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <div class="invalid-feedback d-block" id="descFeedback"></div>
+                                    <small class="text-neutral-400" id="descCounter">0 / 300</small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-medium small">Event Policies *</label>
+                                <textarea class="form-control h-auto" rows="3" id="eventPolicies"
+                                    placeholder="Entry rules, refund guidelines, participant requirements..."></textarea>
+                                <div class="invalid-feedback" id="policiesFeedback">Event policies are required.</div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end gap-3 mt-5">
@@ -217,16 +233,19 @@
                             </div>
                             <div class="col-12" id="physical-details">
                                 <label class="form-label fw-medium small">Venue Name / Location *</label>
-                                <input type="text" class="form-control" id="venueName"
-                                    placeholder="e.g. Grand Ballroom, Hotel Plaza">
+                                <select class="form-select mb-2" id="venueSelect">
+                                    <option value="">Select a Venue</option>
+                                </select>
+                                <div class="invalid-feedback" id="venueFeedback">Please select a venue.</div>
+                                <input type="hidden" id="venueName">
                                 <div class="row mt-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">City</label>
-                                        <input type="text" class="form-control" id="venueCity" placeholder="City">
+                                        <input type="text" class="form-control bg-light" id="venueCity" placeholder="City" readonly>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">Total Capacity</label>
-                                        <input type="number" class="form-control" id="venueCapacity" placeholder="0">
+                                        <input type="number" class="form-control bg-light" id="venueCapacity" placeholder="0" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -238,10 +257,12 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium small">Start Date & Time *</label>
                                 <input type="datetime-local" class="form-control" id="startDate">
+                                <div class="invalid-feedback" id="startDateFeedback">Start date is required and must not be in the past.</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-medium small">End Date & Time *</label>
                                 <input type="datetime-local" class="form-control" id="endDate">
+                                <div class="invalid-feedback" id="endDateFeedback">End date is required and must be strictly after start date.</div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between gap-3 mt-5">
@@ -259,6 +280,15 @@
                             <button class="btn btn-outline-primary btn-sm rounded-pill" onclick="window.addTicketRow()">
                                 <i data-lucide="plus" width="14"></i> Add Type
                             </button>
+                        </div>
+                        <div class="mb-4">
+                            <div class="form-check form-switch pt-2 pb-2 ps-5 bg-light rounded-3 border d-flex align-items-center gap-3">
+                                <input class="form-check-input mt-0 fs-5" type="checkbox" role="switch" id="collectParticipantDetails">
+                                <label class="form-check-label fw-medium text-neutral-800" for="collectParticipantDetails">
+                                    Collect participant details
+                                    <span class="d-block small text-neutral-500 fw-normal">Require attendees to provide names and emails for every ticket.</span>
+                                </label>
+                            </div>
                         </div>
                         <div id="ticketRows" class="d-flex flex-column gap-3">
                             <!-- Ticket rows added here -->
@@ -283,8 +313,7 @@
                             <div class="d-flex gap-2">
                                 <button class="btn btn-outline-primary rounded-pill px-4" id="saveDraftBtn">Save as
                                     Draft</button>
-                                <button class="btn btn-primary rounded-pill px-4" id="submitEventBtn">Publish
-                                    Event</button>
+                                <button class="btn btn-primary rounded-pill px-4" id="submitEventBtn">Submit for Approval</button>
                             </div>
                         </div>
                     </div>

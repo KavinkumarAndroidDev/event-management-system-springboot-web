@@ -3,7 +3,7 @@ import { showToast, setupGenericPagination, showLoading, hideLoading } from '../
 
 function getPaymentActivityDate(payment) {
     // Use refund timestamp as latest activity for refunded transactions.
-    const sourceDate = (payment.status === 'Refunded' || payment.status === 'REFUNDED') ? (payment.refundDate || payment.date) : payment.date;
+    const sourceDate = (payment.status === 'REFUNDED') ? (payment.refundDate || payment.createdAt) : payment.createdAt;
     const parsed = new Date(sourceDate);
     return Number.isNaN(parsed.getTime()) ? new Date(0) : parsed;
 }
@@ -37,14 +37,6 @@ function setupAvatarUpload() {
 }
 
 export function initProfilePage() {
-    const userStr = localStorage.getItem('currentUser');
-    const user = userStr ? JSON.parse(userStr) : null;
-
-    if (user && user.role && user.role.name !== 'ATTENDEE') {
-        hideProfileLoader();
-        return;
-    }
-
     const hideProfileLoader = () => {
         const overlay = document.getElementById('profile-loading-overlay');
         const contentArea = document.getElementById('profile-content-area');
@@ -54,6 +46,9 @@ export function initProfilePage() {
             if (contentArea) contentArea.classList.remove('opacity-0');
         }, 400);
     };
+
+    const userStr = localStorage.getItem('currentUser');
+    const user = userStr ? JSON.parse(userStr) : null;
 
     if (!user) {
         // Handle Guest View
@@ -194,12 +189,14 @@ export function initProfilePage() {
             }
         });
 
-        ['overview', 'profile', 'registrations', 'past-events', 'payments'].forEach(s => {
+        const sections = ['overview', 'profile', 'registrations', 'past-events', 'payments'];
+        sections.forEach(s => {
             document.getElementById(`view-${s}`)?.classList.add('d-none');
         });
 
-        if (section === 'overview') document.getElementById('view-overview').classList.remove('d-none');
-        if (section === 'profile') document.getElementById('view-profile').classList.remove('d-none');
+        const targetView = document.getElementById(`view-${section}`);
+        if (targetView) targetView.classList.remove('d-none');
+
         if (section === 'registrations') renderRegistrations();
         if (section === 'past-events') renderPastEvents();
         if (section === 'payments') renderPayments();
@@ -240,9 +237,20 @@ export function initProfilePage() {
     // Logout handlers
     const profileLogoutBtn = document.getElementById('profileLogoutBtn');
     if (profileLogoutBtn) {
-        profileLogoutBtn.addEventListener('click', () => {
+        profileLogoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             const modalEl = document.getElementById('signOutModal');
-            if (modalEl) new window.bootstrap.Modal(modalEl).show();
+            if (modalEl) {
+                const bsModal = new window.bootstrap.Modal(modalEl);
+                bsModal.show();
+            } else {
+                // Fallback if modal not injected yet
+                import('../../shared/utils.js').then(m => {
+                    m.injectSignOutModal();
+                    const newModalEl = document.getElementById('signOutModal');
+                    if (newModalEl) new window.bootstrap.Modal(newModalEl).show();
+                });
+            }
         });
     }
 
@@ -295,7 +303,7 @@ export function initProfilePage() {
                                     <div>
                                         <h6 class="fw-bold mb-1">${event.title}</h6>
                                         <div class="small text-neutral-400 mb-0">
-                                            <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${locCity}
+                                            <i data-lucide="calendar" width="14" class="me-1"></i> ${dateStr} • ${(venue.name || 'Various')} (${locCity})
                                         </div>
                                     </div>
                                     <button class="btn btn-outline-primary btn-sm rounded-pill btn-view-ticket" data-reg-id="${reg.id}">
@@ -304,7 +312,7 @@ export function initProfilePage() {
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between mt-1 pt-2 border-top border-neutral-100">
                                     <div class="small text-neutral-600">${reg.quantity} Ticket${reg.quantity > 1 ? 's' : ''} • ${reg.ticketType}</div>
-                                    <div class="fw-bold text-primary">₹${reg.price}</div>
+                                    <div class="fw-bold text-primary">₹${reg.totalAmount}</div>
                                 </div>
                             </div>
                         </div>
@@ -340,9 +348,9 @@ export function initProfilePage() {
                 const displayId = String(orderId).includes('-') ? orderId.split('-')[1] : String(orderId).substring(0, 8);
 
                 let badgeClass = '';
-                if (pay.status === 'Confirmed' || pay.status === 'PAID') badgeClass = 'border-success text-success';
-                else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') badgeClass = 'border-info text-info';
-                else if (pay.status === 'Failed') badgeClass = 'border-danger text-danger';
+                if (pay.status === 'CONFIRMED') badgeClass = 'border-success text-success';
+                else if (pay.status === 'REFUNDED') badgeClass = 'border-info text-info';
+                else if (pay.status === 'FAILED') badgeClass = 'border-danger text-danger';
 
                 return `
                 <div class="col-md-6">
@@ -374,9 +382,9 @@ export function initProfilePage() {
             }
         });
     }
-}
 
-// Profile Update Handler
+
+    // Profile Update Handler
 const profileForm = document.getElementById('profile-form');
 if (profileForm) {
     profileForm.addEventListener('submit', (e) => {
@@ -502,6 +510,8 @@ if (cpNewPass && cpConfirmPass) {
         });
     }
 
+    }
+
     if (window.initIcons) window.initIcons();
     hideProfileLoader();
 }
@@ -513,7 +523,6 @@ if (cpNewPass && cpConfirmPass) {
 function renderRegistrations() {
     const view = document.getElementById('view-registrations');
     if (!view) return;
-    view.classList.remove('d-none');
 
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -549,8 +558,8 @@ function renderRegistrations() {
         // Sort
         const sortVal = sortFilter?.value || 'Sort by: Date';
         filtered.sort((a, b) => {
-            if (sortVal.includes('Date')) return new Date(a.date) - new Date(b.date);
-            if (sortVal.includes('Price')) return b.price - a.price;
+            if (sortVal.includes('Date')) return new Date(a.createdAt) - new Date(b.createdAt);
+            if (sortVal.includes('Price')) return b.totalAmount - a.totalAmount;
             return 0;
         });
 
@@ -599,31 +608,31 @@ function renderRegistrations() {
         const locCity = (venue.address && venue.address.city) || venue.city || 'Various';
 
         return `
-        <div class="card card-custom border-0 shadow-sm mb-3 registration-card ${isCancelled ? 'opacity-75' : ''}" data-id="${reg.id}" style="border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s;">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-md-row gap-3">
-                        <div class="position-relative">
-                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 140px; height: 100px; aspect-ratio: 1.4;" alt="${event.title}">
-                                ${isCancelled ? '<div class="position-absolute top-50 start-50 translate-middle badge bg-dark bg-opacity-50 px-2 py-1 rounded-pill">Cancelled</div>' : ''}
+        <div class="card card-custom border-0 shadow-sm mb-2 registration-card ${isCancelled ? 'opacity-75' : ''}" data-id="${reg.id}" style="border-radius: 16px; transition: transform 0.2s, box-shadow 0.2s;">
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex flex-column flex-md-row gap-3 align-items-center">
+                        <div class="position-relative flex-shrink-0">
+                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 110px; height: 70px; aspect-ratio: 1.5;" alt="${event.title}">
+                                ${isCancelled ? '<div class="position-absolute top-50 start-50 translate-middle badge bg-dark bg-opacity-50 px-2 py-1 rounded-pill" style="font-size: 0.6rem;">Cancelled</div>' : ''}
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="flex-grow-1 w-100">
                             <div class="d-flex justify-content-between align-items-start mb-1">
                                 <h6 class="fw-bold mb-0 text-neutral-900 fs-5">${event.title}</h6>
-                                ${!isCancelled ? '<span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-medium" style="font-size: 0.75rem;">Confirmed</span>' : ''}
+                                ${!isCancelled ? '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 rounded-pill px-3 py-1 fw-medium" style="font-size: 0.75rem;">CONFIRMED</span>' : ''}
                             </div>
 
-                            <div class="d-flex flex-wrap gap-3 mb-3">
+                            <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="small text-neutral-400 d-flex align-items-center gap-1">
-                                    <i data-lucide="calendar" width="14"></i> ${dateStr}
+                                    <i data-lucide="calendar" width="12"></i> ${dateStr}
                                 </span>
                                 <span class="small text-neutral-400 d-flex align-items-center gap-1">
-                                    <i data-lucide="map-pin" width="14"></i> ${locName}, ${locCity}
+                                    <i data-lucide="map-pin" width="12"></i> ${locCity}
                                 </span>
-                                <span class="small text-neutral-500 fw-medium bg-neutral-100 px-2 py-0.5 rounded">${reg.quantity} x ${reg.ticketType}</span>
+                                <span class="small text-neutral-500 fw-medium bg-neutral-100 px-2 py-0.5 rounded" style="font-size: 0.7rem;">${reg.quantity} x ${reg.ticketType}</span>
                             </div>
 
-                            <div class="d-flex align-items-center justify-content-between pt-3 border-top border-neutral-100">
-                                <div class="fw-bold text-neutral-900 fs-5">₹${reg.totalAmount}</div>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top border-neutral-100">
+                                <div class="fw-bold text-neutral-900" style="font-size: 1.1rem;">₹${reg.totalAmount}</div>
                                 <div class="d-flex align-items-center gap-3">
                                     ${!isCancelled ? `
                                     <button class="btn btn-link text-danger p-0 small text-decoration-none btn-cancel-reg" data-id="${reg.id}" style="font-size: 0.85rem;">Cancel Booking</button>
@@ -710,7 +719,6 @@ function openRegistrationModal(reg) {
     const bsModal = new window.bootstrap.Modal(modalEl);
     bsModal.show();
 }
-
 function openCancelModal(reg) {
     const modalEl = document.getElementById('cancelBookingModal');
     const modal = new window.bootstrap.Modal(modalEl);
@@ -737,7 +745,7 @@ function openCancelModal(reg) {
         }).catch(err => console.error("Error updating local db", err));
 
         // Correlate and Process Refund on Payment
-        const payment = state.payments.find(p => p.userId == reg.userId && p.eventId == reg.eventId && (p.status === 'Confirmed' || p.status === 'PAID'));
+        const payment = state.payments.find(p => p.userId == reg.userId && p.eventId == reg.eventId && (p.status === 'CONFIRMED'));
         if (payment) {
             payment.status = 'REFUNDED';
             payment.refundDate = new Date().toISOString();
@@ -766,7 +774,6 @@ function openCancelModal(reg) {
 function renderPastEvents() {
     const view = document.getElementById('view-past-events');
     if (!view) return;
-    view.classList.remove('d-none');
 
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -779,12 +786,20 @@ function renderPastEvents() {
     // Filter for past events and deduplicate by eventId
     const seenEventIds = new Set();
     let pastEvents = state.registrations
-        .filter(r => r.userId === userId && (r.status === 'COMPLETED' || r.status === 'CANCELLED'))
+        .filter(r => r.userId === userId)
         .filter(r => {
             const event = getEvent(r.eventId);
             if (!event) return false;
+            
+            const eventDate = new Date(event.schedule.startDateTime);
+            const isPast = eventDate < new Date();
+            
+            // Only show if it's actually in the past
+            // If it's a future event that was cancelled, it belongs elsewhere (or nowhere special)
+            if (!isPast) return false;
+
             const matchesSearch = event.title.toLowerCase().includes(searchQuery);
-            const matchesYear = yearFilter === 'All Years' || new Date(event.schedule.startDateTime).getFullYear().toString() === yearFilter;
+            const matchesYear = yearFilter === 'All Years' || eventDate.getFullYear().toString() === yearFilter;
 
             if (matchesSearch && matchesYear) {
                 if (seenEventIds.has(r.eventId)) return false;
@@ -815,14 +830,14 @@ function renderPastEvents() {
             const date = new Date(event.schedule.startDateTime);
             const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             return `
-            <div class="card card-custom border-0 shadow-sm mb-3 past-event-card" style="border-radius: 12px; transition: all 0.2s;">
-                <div class="card-body p-3">
-                    <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-4">
+            <div class="card card-custom border-0 shadow-sm mb-2 past-event-card" style="border-radius: 12px; transition: all 0.2s;">
+                <div class="card-body py-2 px-3">
+                    <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3">
                         <div class="flex-shrink-0">
-                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 140px; height: 110px; min-width: 140px; filter: grayscale(40%);" alt="${event.title}">
+                            <img src="${event.media.thumbnail}" class="rounded-3 object-fit-cover" style="width: 110px; height: 75px; min-width: 110px; filter: grayscale(40%);" alt="${event.title}">
                         </div>
                         <div class="flex-grow-1 overflow-hidden w-100">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
+                            <div class="d-flex justify-content-between align-items-start mb-0">
                                 <h6 class="fw-bold mb-0 text-neutral-900 text-truncate" style="font-size: 1rem;">${event.title}</h6>
                                 <span class="badge bg-neutral-100 text-neutral-500 rounded-pill px-2 py-1 fw-medium" style="font-size: 0.7rem;">Completed</span>
                             </div>
@@ -946,7 +961,6 @@ function openFeedbackModal(evt) {
 function renderPayments() {
     const view = document.getElementById('view-payments');
     if (!view) return;
-    view.classList.remove('d-none');
 
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -983,37 +997,40 @@ function renderPayments() {
 
             let badgeClass = '';
             let statusText = pay.status;
-            if (pay.status === 'Confirmed' || pay.status === 'PAID') {
-                badgeClass = 'bg-success-subtle text-success border-success-subtle';
+            if (pay.status === 'Confirmed' || pay.status === 'PAID' || pay.status === 'CONFIRMED' || pay.status === 'SUCCESSFUL') {
+                badgeClass = 'bg-success bg-opacity-10 text-success border-success border-opacity-10';
+                statusText = 'CONFIRMED';
             } else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') {
-                badgeClass = 'bg-info-subtle text-info border-info-subtle fw-bold';
+                badgeClass = 'bg-info bg-opacity-10 text-info border-info border-opacity-10';
+                statusText = 'REFUNDED';
             } else {
-                badgeClass = 'bg-danger-subtle text-danger border-danger-subtle';
+                badgeClass = 'bg-danger bg-opacity-10 text-danger border-danger border-opacity-10';
+                statusText = pay.status || 'FAILED';
             }
 
             const event = getEvent(pay.eventId);
             const eventTitle = event ? event.title : (pay.eventTitle || 'Event Payment');
 
             return `
-                <div class="card card-custom border-0 shadow-sm mb-3 payment-card" style="border-radius: 12px; transition: all 0.2s;">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="card card-custom border-0 shadow-sm mb-2 payment-card" style="border-radius: 12px; transition: all 0.2s;">
+                    <div class="card-body py-2 px-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                    <i data-lucide="credit-card" width="18"></i>
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i data-lucide="credit-card" width="16"></i>
                                 </div>
                                 <div>
-                                    <h6 class="fw-bold mb-0 text-neutral-900" style="font-size: 0.95rem;">${eventTitle}</h6>
-                                    <small class="text-neutral-400">ID: #${String(pay.id).toUpperCase().substring(0, 8)}</small>
+                                    <h6 class="fw-bold mb-0 text-neutral-900" style="font-size: 0.9rem;">${eventTitle}</h6>
+                                    <small class="text-neutral-400" style="font-size: 0.7rem;">ID: #${String(pay.id).toUpperCase().substring(0, 8)}</small>
                                 </div>
                             </div>
-                            <span class="badge ${badgeClass} border rounded-pill px-2 py-1 fw-medium" style="font-size: 0.7rem;">${statusText}</span>
+                            <span class="badge ${badgeClass} border rounded-pill px-2 py-0.5 fw-medium" style="font-size: 0.65rem;">${statusText}</span>
                         </div>
 
-                        <div class="d-flex align-items-center justify-content-between mt-3 pt-2 border-top border-neutral-50">
+                        <div class="d-flex align-items-center justify-content-between mt-2 pt-1 border-top border-neutral-50">
                             <div>
-                                <div class="small text-neutral-400">Amount Paid</div>
-                                <div class="fw-bold text-neutral-900 fs-5">₹${pay.amount}</div>
+                                <div class="small text-neutral-400" style="font-size: 0.75rem;">Amount</div>
+                                <div class="fw-bold text-neutral-900" style="font-size: 1rem;">₹${pay.amount}</div>
                             </div>
                             <div class="text-end">
                                 <div class="small text-neutral-400">${dateStr}</div>
@@ -1058,15 +1075,15 @@ function openPaymentModal(pay) {
     document.getElementById('pay-modal-booking').textContent = pay.bookingId ? `#${String(pay.bookingId).toUpperCase().substring(0, 8)}` : 'N/A';
 
     const statusBadge = document.getElementById('pay-modal-status');
-    if (pay.status === 'Confirmed' || pay.status === 'PAID') {
+    if (pay.status === 'Confirmed' || pay.status === 'PAID' || pay.status === 'CONFIRMED' || pay.status === 'SUCCESSFUL') {
         statusBadge.className = 'badge bg-success bg-opacity-10 text-success fw-medium px-3 py-1';
-        statusBadge.textContent = 'SUCCESSFUL';
+        statusBadge.textContent = 'CONFIRMED';
     } else if (pay.status === 'Refunded' || pay.status === 'REFUNDED') {
         statusBadge.className = 'badge bg-info bg-opacity-10 text-info fw-medium px-3 py-1';
         statusBadge.textContent = 'REFUNDED';
     } else {
         statusBadge.className = 'badge bg-danger bg-opacity-10 text-danger fw-medium px-3 py-1';
-        statusBadge.textContent = 'FAILED';
+        statusBadge.textContent = pay.status || 'FAILED';
     }
 
     const downloadBtn = document.getElementById('btn-download-invoice');

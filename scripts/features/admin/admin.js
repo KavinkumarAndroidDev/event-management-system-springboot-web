@@ -26,7 +26,7 @@ function statusBadge(status) {
         PUBLISHED: 'background:#dcfce7;color:#16a34a;',
         REJECTED: 'background:#fee2e2;color:#dc2626;',
         CANCELLED: 'background:#fee2e2;color:#dc2626;',
-        COMPLETED: 'background:#dbeafe;color:#2563eb;',
+        COMPLETED: 'background:#dcfce7;color:#16a34a;',
         INACTIVE: 'background:#F1F5F9;color:#475569;',
         SUSPENDED: 'background:#fff7ed;color:#c2410c;',
         CONFIRMED: 'background:#dcfce7;color:#16a34a;',
@@ -145,42 +145,20 @@ function renderPagination(containerId, totalItems, itemsPerPage, currentPage, on
         return;
     }
 
-    let html = `
-        <div class="d-flex align-items-center justify-content-between mt-4 px-4 pb-2">
-            <div class="text-neutral-400 small">
-                Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, totalItems)} of ${totalItems} entries
-            </div>
-            <nav aria-label="Table pagination">
-                <ul class="pagination pagination-sm mb-0 gap-1">
-                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                        <button class="page-link rounded-circle border-0 d-flex align-items-center justify-content-center p-0" style="width:32px;height:32px;" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>
-                            <i data-lucide="chevron-left" width="16"></i>
-                        </button>
-                    </li>`;
+    container.className = 'd-flex justify-content-center align-items-center gap-2 mt-4';
 
-    // Page Numbers
+    let html = `<button class="pagination-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}><i data-lucide="chevron-left" width="16" height="16"></i></button>`;
+
     for (let i = 1; i <= totalPages; i++) {
-        const isActive = i === currentPage;
-        html += `
-            <li class="page-item ${isActive ? 'active' : ''}">
-                <button class="page-link rounded-circle border-0 d-flex align-items-center justify-content-center p-0 ${isActive ? 'bg-primary text-white shadow-sm' : 'text-neutral-600'}" style="width:32px;height:32px;" data-page="${i}">${i}</button>
-            </li>`;
+        html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
     }
 
-    html += `
-                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                        <button class="page-link rounded-circle border-0 d-flex align-items-center justify-content-center p-0" style="width:32px;height:32px;" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>
-                            <i data-lucide="chevron-right" width="16"></i>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </div>`;
+    html += `<button class="pagination-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}><i data-lucide="chevron-right" width="16" height="16"></i></button>`;
 
     container.innerHTML = html;
     if (window.initIcons) window.initIcons({ root: container });
 
-    container.querySelectorAll('.page-link').forEach(btn => {
+    container.querySelectorAll('.pagination-btn').forEach(btn => {
         btn.onclick = () => {
             const p = parseInt(btn.dataset.page);
             if (p && p !== currentPage && p > 0 && p <= totalPages) {
@@ -211,7 +189,7 @@ export function initAdminPage() {
             .then(function (r) { return r.json(); })
             .then(function (users) {
                 const count = users.filter(function (u) {
-                    return u.role === 'ORGANIZER' &&
+                    return u.role && u.role.name === 'ORGANIZER' &&
                         u.accountStatus && u.accountStatus.status === 'PENDING';
                 }).length;
                 pendingBadge.textContent = count;
@@ -243,9 +221,9 @@ export async function initAdminDashboard() {
 
     // Stat Cards
     if (statsContainer) {
-        const paidPayments = payments.filter(p => p.status === 'PAID' || p.status === 'COMPLETED' || p.status === 'CONFIRMED');
+        const paidPayments = payments.filter(p => p.status === 'CONFIRMED');
         const revenue = paidPayments.reduce((s, p) => s + (p.amount || 0), 0);
-        const activeOrgs = users.filter(u => u.role === 'ORGANIZER' && u.accountStatus && u.accountStatus.status === 'ACTIVE');
+        const activeOrgs = users.filter(u => u.role && u.role.name === 'ORGANIZER' && u.accountStatus && u.accountStatus.status === 'ACTIVE');
 
         const setVal = (label, val) => {
             document.querySelectorAll('.card-custom').forEach(card => {
@@ -299,7 +277,7 @@ export async function initAdminDashboard() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 text-success btn-approve-dash" data-id="${ev.id}" data-org-id="${ev.organizerId || ''}" data-name="${evName.replace(/"/g, '&quot;')}"><i data-lucide="check-circle" width="14"></i> Approve</button></li>
@@ -363,7 +341,7 @@ export async function initEventApprovals() {
     const colspan = 6;
     if (tbody) showTableLoading(tbody, colspan);
 
-    const [events, users] = await Promise.all([apiFetch('events'), apiFetch('users')]);
+    const [events, categories] = await Promise.all([apiFetch('events'), apiFetch('categories')]);
     const searchInput = document.querySelector('.form-control[placeholder="Search events..."]');
 
     function render(list) {
@@ -374,18 +352,19 @@ export async function initEventApprovals() {
         } else {
             tbody.innerHTML = pending.map(ev => {
                 const orgName = (ev.organizer && ev.organizer.name) || 'Unknown';
+                const category = categories.find((c) => c.id === ev.categoryId);
                 const evName = ev.title || ev.name || 'Untitled';
                 return `<tr>
                     <td class="ps-4 fw-medium text-neutral-900">${evName}</td>
                     <td class="text-neutral-400 small">${orgName}</td>
-                    <td class="text-neutral-400 small">${ev.category ? ev.category.name : '—'}</td>
+                    <td class="text-neutral-400 small">${(category && category.name) || (ev.category && ev.category.name) || '—'}</td>
                     <td class="text-neutral-400 small">${fmt(ev.createdAt)}</td>
                     <td class="text-neutral-400 small">${fmt(ev.schedule ? ev.schedule.startDateTime : null)}</td>
                     <td>${statusBadge('PENDING')}</td>
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 text-success btn-approve-event" data-id="${ev.id}" data-org-id="${ev.organizer?.id || ''}" data-name="${evName.replace(/"/g, '&quot;')}"><i data-lucide="check-circle" width="14"></i> Approve</button></li>
@@ -473,7 +452,7 @@ export async function initOrganizerApprovals() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 btn-view-org" data-id="${org.id}"><i data-lucide="eye" width="14"></i> View Details</button></li>
@@ -589,7 +568,7 @@ function showOrganizerDetailsModal(org) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initUserManagement() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
+    const container = document.getElementById('admin-users-card');
     const colspan = 7;
 
     // Loading state
@@ -609,7 +588,7 @@ export async function initUserManagement() {
     if (!pagContainer && container) {
         pagContainer = document.createElement('div');
         pagContainer.id = 'users-pagination';
-        container.appendChild(pagContainer);
+        container.after(pagContainer);
     }
 
     function render() {
@@ -629,7 +608,7 @@ export async function initUserManagement() {
                 const role = (u.role && u.role.name) || '—';
                 const status = (u.accountStatus && u.accountStatus.status) || 'ACTIVE';
                 const initials = name.split(' ').map(function (n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
-                const totalEvents = (u.statistics && u.statistics.totalEvents) || 0;
+                const totalEvents = (u.statistics && u.statistics.eventsCreated) || 0;
                 const isActive = status === 'ACTIVE' || status === 'APPROVED';
 
                 return `<tr>
@@ -647,7 +626,7 @@ export async function initUserManagement() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:160px;">
                                 ${isActive
@@ -749,7 +728,7 @@ function bindUserActions(tbody, users, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminEvents() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
+    const container = document.getElementById('admin-events-card');
     const colspan = 7;
 
     showTableLoading(tbody, colspan);
@@ -768,7 +747,7 @@ export async function initAdminEvents() {
     if (!pagContainer && container) {
         pagContainer = document.createElement('div');
         pagContainer.id = 'events-pagination';
-        container.appendChild(pagContainer);
+        container.after(pagContainer);
     }
 
     function render() {
@@ -799,7 +778,7 @@ export async function initAdminEvents() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:160px;">
                                 <li><a class="dropdown-item d-flex align-items-center gap-2" href="#"><i data-lucide="eye" width="14"></i> View Event</a></li>
@@ -838,7 +817,14 @@ export async function initAdminEvents() {
         filteredEvents = events.filter(function (ev) {
             const name = (ev.title || ev.name || '').toLowerCase();
             const matchSearch = !search || name.includes(search);
-            const matchStatus = status === 'All Status' || (ev.status?.current || '').toLowerCase() === status.toLowerCase();
+            const currentStatus = (ev.status && ev.status.current) || '';
+            const normalized = currentStatus.toLowerCase();
+            const statusFilter = status.toLowerCase();
+            const matchStatus = status === 'All Status' ||
+                (statusFilter === 'active' && (normalized === 'published' || normalized === 'active')) ||
+                (statusFilter === 'completed' && normalized === 'completed') ||
+                (statusFilter === 'cancelled' && normalized === 'cancelled') ||
+                normalized === statusFilter;
             return matchSearch && matchStatus;
         });
         currentPage = 1;
@@ -888,7 +874,6 @@ function bindEventsActions(tbody, events, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminCategories() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
     const colspan = 4;
 
     showTableLoading(tbody, colspan);
@@ -898,7 +883,7 @@ export async function initAdminCategories() {
 
     function getEventCount(catId, catName) {
         return events.filter(function (e) {
-            return e.category && (e.category.id === catId || e.category.name === catName);
+            return e.categoryId === catId || (e.category && (e.category.id === catId || e.category.name === catName));
         }).length;
     }
 
@@ -909,7 +894,7 @@ export async function initAdminCategories() {
         } else {
             tbody.innerHTML = categories.map(function (cat) {
                 const count = getEventCount(cat.id, cat.name);
-                const isActive = cat.status !== 'Disabled' && cat.status !== 'DISABLED';
+                const isActive = (cat.status || '').toUpperCase() === 'ACTIVE';
                 return `<tr>
                     <td class="ps-4 fw-medium text-neutral-900">${cat.name || '—'}</td>
                     <td class="text-neutral-900 small text-end pe-5">${count}</td>
@@ -917,7 +902,7 @@ export async function initAdminCategories() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 btn-edit-cat" data-id="${cat.id}" data-name="${(cat.name || '').replace(/"/g, '&quot;')}" data-status="${cat.status || 'Active'}"><i data-lucide="edit-2" width="14"></i> Edit</button></li>
@@ -948,7 +933,7 @@ export async function initAdminCategories() {
                 const name = nameInput ? nameInput.value.trim() : '';
                 if (!name) { showToast('Error', 'Category name is required.', 'danger'); return; }
                 try {
-                    const newCat = await apiPost('categories', { name, status: statusSel ? statusSel.value : 'Active' });
+                    const newCat = await apiPost('categories', { name, status: statusSel ? statusSel.value : 'ACTIVE' });
                     categories.push(newCat);
                     render();
                     const modalInst = bootstrap.Modal.getInstance(addModal);
@@ -972,13 +957,13 @@ function bindCategoryActions(tbody, categories, render) {
                     <div class="mb-2"><label class="form-label small fw-medium">Name</label><input type="text" class="form-control" id="_editCatName" value="${name}"></div>
                     <div class="mb-2"><label class="form-label small fw-medium">Status</label>
                         <select class="form-select" id="_editCatStatus">
-                            <option ${(status === 'Active' || status === 'ACTIVE') ? 'selected' : ''}>Active</option>
-                            <option ${(status === 'Disabled' || status === 'DISABLED') ? 'selected' : ''}>Disabled</option>
+                            <option value="ACTIVE" ${(status === 'Active' || status === 'ACTIVE') ? 'selected' : ''}>Active</option>
+                            <option value="INACTIVE" ${(status === 'Disabled' || status === 'DISABLED' || status === 'INACTIVE') ? 'selected' : ''}>Inactive</option>
                         </select>
                     </div>`,
                 onConfirm: async function () {
                     const newName = (document.getElementById('_editCatName') || {}).value || '';
-                    const newStatus = (document.getElementById('_editCatStatus') || {}).value || 'Active';
+                    const newStatus = (document.getElementById('_editCatStatus') || {}).value || 'ACTIVE';
                     if (!newName.trim()) { showToast('Error', 'Name required.', 'danger'); return; }
                     try {
                         await apiPatch('categories', id, { name: newName.trim(), status: newStatus });
@@ -995,13 +980,13 @@ function bindCategoryActions(tbody, categories, render) {
         btn.addEventListener('click', async function () {
             const id = btn.dataset.id;
             const isActive = btn.dataset.active === 'true';
-            const newStatus = isActive ? 'Disabled' : 'Active';
+            const newStatus = isActive ? 'INACTIVE' : 'ACTIVE';
             try {
                 await apiPatch('categories', id, { status: newStatus });
                 const cat = categories.find(function (c) { return c.id === id; });
                 if (cat) cat.status = newStatus;
                 render();
-                showToast('Done', `Category ${newStatus === 'Active' ? 'enabled' : 'disabled'}.`, 'success');
+                showToast('Done', `Category ${newStatus === 'ACTIVE' ? 'enabled' : 'disabled'}.`, 'success');
             } catch (e) { showToast('Error', 'Failed.', 'danger'); }
         });
     });
@@ -1029,7 +1014,7 @@ function bindCategoryActions(tbody, categories, render) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminVenues() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
+    const container = document.getElementById('admin-venues-card');
     const colspan = 6;
 
     showTableLoading(tbody, colspan);
@@ -1069,7 +1054,7 @@ export async function initAdminVenues() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 btn-edit-venue" data-id="${v.id}" data-name="${(v.name || '').replace(/"/g, '&quot;')}" data-location="${(v.address ? v.address.city : v.location || '').replace(/"/g, '&quot;')}" data-capacity="${v.capacity || ''}"><i data-lucide="edit-2" width="14"></i> Edit</button></li>
@@ -1184,7 +1169,7 @@ function bindVenueActions(tbody, venues, render, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminTickets() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
+    const container = document.getElementById('admin-tickets-card');
     const colspan = 7;
 
     showTableLoading(tbody, colspan);
@@ -1242,7 +1227,7 @@ export async function initAdminTickets() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 text-warning btn-refund-reg" data-id="${r.id}"><i data-lucide="refresh-cw" width="14"></i> Process Refund</button></li>
@@ -1322,70 +1307,81 @@ function bindRegActions(tbody, registrations, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminPayments() {
     const allTbodies = document.querySelectorAll('.table tbody');
-    const txnTbody = allTbodies[0];
-    const payoutTbody = allTbodies[1];
-    const txnContainer = document.querySelectorAll('.card-custom')[0];
-    const payoutContainer = document.querySelectorAll('.card-custom')[1];
+    const revenueTbody = allTbodies[0];
+    const refundTbody = allTbodies[1];
+    const revenueCard = document.querySelectorAll('.card-custom')[4]; // Index might vary, but usually cards are sequential
+    const refundCard = document.querySelectorAll('.card-custom')[5];
 
-    if (txnTbody) showTableLoading(txnTbody, 9);
-    if (payoutTbody) showTableLoading(payoutTbody, 7);
+    if (revenueTbody) showTableLoading(revenueTbody, 9);
+    if (refundTbody) showTableLoading(refundTbody, 7);
 
     const [payments, events, users, registrations, refundRequests] = await Promise.all([
-        apiFetch('payments'), apiFetch('events'), apiFetch('users'), apiFetch('registrations'), apiFetch('refund-requests') || []
+        apiFetch('payments'),
+        apiFetch('events'),
+        apiFetch('users'),
+        apiFetch('registrations'),
+        apiFetch('refund-requests') || Promise.resolve([])
     ]);
 
-    const paid = payments.filter(function (p) { return p.status === 'PAID' || p.status === 'COMPLETED'; });
+    // Revenue Overview Logic
+    // Group payments by event
+    const revenueData = events.map(ev => {
+        const evPayments = payments.filter(p => p.eventId === ev.id && (p.status === 'PAID' || p.status === 'CONFIRMED' || p.status === 'COMPLETED'));
+        const evRegs = registrations.filter(r => r.eventId === ev.id);
+        const org = users.find(u => u.id === ev.organizerId);
 
-    // Transactions Pagination
-    let txnPage = 1;
-    const txnPerPage = 10;
+        const ticketsSold = evRegs.reduce((sum, r) => sum + (r.quantity || 0), 0);
+        const gross = evPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const platformPercent = 10; // Mock platform fee
+        const platformFee = Math.round(gross * (platformPercent / 100));
+        const net = gross - platformFee;
 
-    let txnPagContainer = document.getElementById('txn-pagination');
-    if (!txnPagContainer && txnContainer) {
-        txnPagContainer = document.createElement('div');
-        txnPagContainer.id = 'txn-pagination';
-        txnContainer.appendChild(txnPagContainer);
-    }
+        return {
+            event: ev,
+            organizer: org,
+            ticketsSold,
+            gross,
+            platformPercent,
+            platformFee,
+            net,
+            status: gross > 0 ? 'PAID' : 'PENDING'
+        };
+    }).filter(d => d.gross > 0 || d.ticketsSold > 0);
 
-    function renderTransactions() {
-        if (!txnTbody) return;
-        const start = (txnPage - 1) * txnPerPage;
-        const end = start + txnPerPage;
-        const pageItems = payments.slice(start, end);
-
-        if (payments.length === 0) {
-            txnTbody.innerHTML = emptyRow(7, 'No transactions found.');
-            if (txnPagContainer) txnPagContainer.innerHTML = '';
+    function renderRevenueOverview() {
+        if (!revenueTbody) return;
+        if (revenueData.length === 0) {
+            revenueTbody.innerHTML = emptyRow(9, 'No revenue data found.');
         } else {
-            txnTbody.innerHTML = pageItems.map(function (p) {
-                const u = users.find(function (u) { return u.id === p.userId; });
-                const ev = events.find(function (e) { return e.id === p.eventId; });
+            revenueTbody.innerHTML = revenueData.map(function (d) {
                 return `<tr>
-                    <td class="ps-4 fw-medium text-neutral-900 small">#${p.id}</td>
-                    <td class="text-neutral-400 small">${(u && u.profile && u.profile.fullName) || p.userName || 'Unknown'}</td>
-                    <td class="text-neutral-400 small">${(ev && ev.title) || p.eventTitle || '—'}</td>
-                    <td class="fw-medium text-neutral-900 small text-end pe-5">${fmtCurrency(p.amount)}</td>
-                    <td class="text-neutral-400 small">${p.method || p.paymentMethod || '—'}</td>
-                    <td class="text-neutral-400 small">${fmt(p.date)}</td>
-                    <td>${statusBadge(p.status)}</td>
+                    <td class="ps-4 fw-medium text-neutral-900 small">${d.event.title || '—'}</td>
+                    <td class="text-neutral-400 small">${(d.organizer && d.organizer.profile && d.organizer.profile.fullName) || '—'}</td>
+                    <td class="text-neutral-900 small">${d.ticketsSold}</td>
+                    <td class="text-neutral-900 small fw-medium">${fmtCurrency(d.gross)}</td>
+                    <td class="text-neutral-400 small">${d.platformPercent}%</td>
+                    <td class="text-neutral-900 small">${fmtCurrency(d.platformFee)}</td>
+                    <td class="text-neutral-900 small fw-bold">${fmtCurrency(d.net)}</td>
+                    <td>${statusBadge(d.status)}</td>
+                    <td class="pe-4 text-end">
+                        <button class="btn btn-sm btn-outline-neutral-900 rounded-pill px-3">View</button>
+                    </td>
                 </tr>`;
             }).join('');
-
-            renderPagination('txn-pagination', payments.length, txnPerPage, txnPage, (p) => {
-                txnPage = p;
-                renderTransactions();
-            });
         }
-        if (window.initIcons) window.initIcons({ root: txnTbody });
     }
 
-    // Payouts Logic
-    function renderPayouts() {
-        if (!payoutTbody) return;
-        if (refundRequests.length === 0) {
-            payoutTbody.innerHTML = emptyRow(7, 'No refund requests.');
+    // Refund Requests Logic
+    function renderRefundRequests() {
+        if (!refundTbody) return;
+
+        // Mock refund requests if none exist for demonstration/test
+        const displayRefunds = refundRequests.length > 0 ? refundRequests : [];
+
+        if (displayRefunds.length === 0) {
+            refundTbody.innerHTML = emptyRow(7, 'No refund requests.');
         } else {
-            payoutTbody.innerHTML = refundRequests.map(function (req) {
+            refundTbody.innerHTML = displayRefunds.map(function (req) {
                 const ev = events.find(e => e.id === req.eventId) || {};
                 const u = users.find(u => u.id === req.userId) || {};
                 return `<tr>
@@ -1398,7 +1394,7 @@ export async function initAdminPayments() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:160px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2 text-success btn-approve-refund" data-id="${req.id}"><i data-lucide="check-circle" width="14"></i> Approve Refund</button></li>
@@ -1409,11 +1405,11 @@ export async function initAdminPayments() {
                 </tr>`;
             }).join('');
         }
-        if (window.initIcons) window.initIcons({ root: payoutTbody });
+        if (window.initIcons) window.initIcons({ root: refundTbody });
     }
 
-    renderTransactions();
-    renderPayouts();
+    renderRevenueOverview();
+    renderRefundRequests();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1424,7 +1420,7 @@ export async function initAdminReports() {
         apiFetch('events'), apiFetch('users'), apiFetch('registrations'), apiFetch('payments'), apiFetch('categories')
     ]);
 
-    const paidPayments = payments.filter(function (p) { return p.status === 'PAID' || p.status === 'COMPLETED'; });
+    const paidPayments = payments.filter(function (p) { return p.status === 'CONFIRMED'; });
     const totalRevenue = paidPayments.reduce(function (s, p) { return s + (p.amount || 0); }, 0);
 
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -1459,7 +1455,7 @@ export async function initAdminReports() {
         });
         const catLabels = Object.keys(catCounts);
         const catData = catLabels.map(function (k) { return catCounts[k]; });
-        const colors = ['#17b978', '#22c55e', '#f59e0b', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#06b6d4'];
+        const colors = ['#17b978', '#22c55e', '#f59e0b', '#16a34a', '#8b5cf6', '#ec4899', '#ef4444', '#06b6d4'];
         new window.Chart(catCanvas, {
             type: 'doughnut',
             data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: colors }] },
@@ -1473,14 +1469,14 @@ export async function initAdminReports() {
         const ec = window.Chart.getChart(orgsCanvas); if (ec) ec.destroy();
         const orgSignups = months.map(function (_, idx) {
             return users.filter(function (u) {
-                if (u.role !== 'ORGANIZER') return false;
+                if (u.role && u.role.name !== 'ORGANIZER') return false;
                 const d = new Date(u.accountStatus && u.accountStatus.createdAt);
                 return d.getFullYear() === now.getFullYear() && d.getMonth() === idx;
             }).length;
         });
         new window.Chart(orgsCanvas, {
             type: 'line',
-            data: { labels: months, datasets: [{ label: 'New Organizers', data: orgSignups, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4, pointRadius: 3 }] },
+            data: { labels: months, datasets: [{ label: 'New Organizers', data: orgSignups, borderColor: '#17b978', backgroundColor: 'rgba(23,185,120,0.12)', fill: true, tension: 0.4, pointRadius: 3 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } } }
         });
     }
@@ -1491,7 +1487,7 @@ export async function initAdminReports() {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function initAdminFeedback() {
     const tbody = document.querySelector('.table tbody');
-    const container = document.querySelector('.card-custom');
+    const container = document.getElementById('admin-feedback-card');
     const colspan = 6;
 
     showTableLoading(tbody, colspan);
@@ -1512,7 +1508,7 @@ export async function initAdminFeedback() {
     if (!pagContainer && container) {
         pagContainer = document.createElement('div');
         pagContainer.id = 'feedback-pagination';
-        container.appendChild(pagContainer);
+        container.after(pagContainer);
     }
 
     function renderStars(rating) {
@@ -1547,7 +1543,7 @@ export async function initAdminFeedback() {
                     <td class="pe-4 text-end">
                         <div class="dropdown">
                             <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
-                                <i data-lucide="more-vertical" width="18"></i>
+                                <span style="font-size: 1.2rem; font-weight: bold; line-height: 1;">&#8942;</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
                                 <li><button class="dropdown-item d-flex align-items-center gap-2"><i data-lucide="eye" width="14"></i> View Full</button></li>
@@ -1605,6 +1601,249 @@ function bindFeedbackActions(tbody, feedbacks, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────────────────
+export async function initAdminOffers() {
+    const tableBody = document.getElementById('offersTableBody');
+    const card = document.getElementById('admin-offers-card');
+    const searchInput = document.getElementById('offerSearch');
+    const eventFilter = document.getElementById('eventFilter');
+    const addBtn = document.getElementById('addOfferBtn');
+    const modalEl = document.getElementById('offerModal');
+    const form = document.getElementById('offerForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const eventSelect = document.getElementById('offerEventSelect');
+    const codeInput = document.getElementById('offerCodeInput');
+    const discountInput = document.getElementById('offerDiscountInput');
+    const codeFeedback = codeInput ? codeInput.parentElement.querySelector('.invalid-feedback') : null;
+    const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+    if (!tableBody || !card || !form || !eventSelect || !codeInput || !discountInput) return;
+
+    let events = await apiFetch('events');
+    let currentPage = 1;
+    const itemsPerPage = 8;
+    let editing = null;
+
+    let pagContainer = document.getElementById('offers-pagination');
+    if (!pagContainer) {
+        pagContainer = document.createElement('div');
+        pagContainer.id = 'offers-pagination';
+        card.after(pagContainer);
+    }
+
+    const isPublished = (ev) => {
+        const status = (ev.status && ev.status.current) || '';
+        return status === 'PUBLISHED' || status === 'ACTIVE';
+    };
+
+    const toOfferRows = () => events.flatMap((ev) => {
+        const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+        return offers.map((offer) => ({
+            eventId: ev.id,
+            eventTitle: ev.title || ev.name || `Event ${ev.id}`,
+            code: (offer.code || '').toUpperCase(),
+            discountPercentage: Number(offer.discountPercentage || 0)
+        }));
+    });
+
+    const populateFilters = () => {
+        if (eventFilter) {
+            eventFilter.innerHTML = '<option value="all">All Events</option>' +
+                events.map((ev) => `<option value="${ev.id}">${ev.title || ev.name || ev.id}</option>`).join('');
+        }
+        eventSelect.innerHTML = events
+            .filter(isPublished)
+            .map((ev) => `<option value="${ev.id}">${ev.title || ev.name || ev.id}</option>`)
+            .join('');
+    };
+
+    const applyFilters = () => {
+        const q = (searchInput ? searchInput.value : '').trim().toLowerCase();
+        const selectedEvent = eventFilter ? eventFilter.value : 'all';
+        return toOfferRows().filter((row) => {
+            const matchEvent = selectedEvent === 'all' || row.eventId === selectedEvent;
+            const matchSearch = !q || row.code.toLowerCase().includes(q) || row.eventTitle.toLowerCase().includes(q);
+            return matchEvent && matchSearch;
+        });
+    };
+
+    const resetForm = () => {
+        editing = null;
+        modalTitle.textContent = 'Create New Offer';
+        form.reset();
+        codeInput.classList.remove('is-invalid');
+        if (codeFeedback) codeFeedback.textContent = 'Code must be unique for this event.';
+        if (eventSelect.options.length > 0) eventSelect.selectedIndex = 0;
+    };
+
+    const validateUniqueForEvent = (eventId, code) => {
+        const normalized = code.trim().toUpperCase();
+        const ev = events.find((x) => x.id === eventId);
+        if (!ev) return false;
+        const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+        return !offers.some((offer) => {
+            const sameCode = (offer.code || '').toUpperCase() === normalized;
+            if (!sameCode) return false;
+            if (!editing) return true;
+            return !(editing.eventId === eventId && editing.code === normalized);
+        });
+    };
+
+    const openForCreate = () => {
+        resetForm();
+        if (bsModal) bsModal.show();
+    };
+
+    const openForEdit = (eventId, code, discount) => {
+        resetForm();
+        editing = { eventId, code: code.toUpperCase() };
+        modalTitle.textContent = 'Edit Offer';
+        eventSelect.value = eventId;
+        codeInput.value = code.toUpperCase();
+        discountInput.value = discount;
+        if (bsModal) bsModal.show();
+    };
+
+    const bindRowActions = () => {
+        tableBody.querySelectorAll('.btn-edit-offer').forEach((btn) => {
+            btn.onclick = () => openForEdit(btn.dataset.eventId, btn.dataset.code, btn.dataset.discount);
+        });
+
+        tableBody.querySelectorAll('.btn-delete-offer').forEach((btn) => {
+            btn.onclick = () => {
+                const eventId = btn.dataset.eventId;
+                const code = btn.dataset.code.toUpperCase();
+                showConfirmModal({
+                    title: 'Delete Offer',
+                    message: `Delete offer "${code}"?`,
+                    confirmLabel: 'Delete',
+                    confirmClass: 'btn-danger',
+                    onConfirm: async () => {
+                        try {
+                            const ev = events.find((x) => x.id === eventId);
+                            if (!ev) return;
+                            const offers = (ev.pricing && Array.isArray(ev.pricing.offers)) ? ev.pricing.offers : [];
+                            const updatedOffers = offers.filter((o) => (o.code || '').toUpperCase() !== code);
+                            await apiPatch('events', eventId, { pricing: Object.assign({}, ev.pricing, { offers: updatedOffers }) });
+                            ev.pricing = Object.assign({}, ev.pricing, { offers: updatedOffers });
+                            showToast('Deleted', `Offer "${code}" removed.`, 'warning');
+                            render();
+                        } catch (e) {
+                            showToast('Error', 'Failed to delete offer.', 'danger');
+                        }
+                    }
+                });
+            };
+        });
+    };
+
+    const render = () => {
+        const rows = applyFilters();
+        const start = (currentPage - 1) * itemsPerPage;
+        const pageRows = rows.slice(start, start + itemsPerPage);
+
+        if (rows.length === 0) {
+            tableBody.innerHTML = emptyRow(4, 'No offers found.');
+            pagContainer.innerHTML = '';
+        } else {
+            tableBody.innerHTML = pageRows.map((row) => `
+                <tr>
+                    <td class="ps-4 fw-medium text-neutral-900 small">${row.code}</td>
+                    <td class="text-neutral-400 small">${row.eventTitle}</td>
+                    <td class="text-neutral-900 small fw-medium">${row.discountPercentage}%</td>
+                    <td class="pe-4 text-end">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-icon border-0 p-0 text-neutral-400 shadow-none" type="button" data-bs-toggle="dropdown">
+                                <span style="font-size:1.2rem;font-weight:bold;line-height:1;">&#8942;</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-2" style="font-size:13px;min-width:140px;">
+                                <li><button class="dropdown-item d-flex align-items-center gap-2 btn-edit-offer" data-event-id="${row.eventId}" data-code="${row.code}" data-discount="${row.discountPercentage}"><i data-lucide="edit-2" width="14"></i> Edit</button></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><button class="dropdown-item d-flex align-items-center gap-2 text-danger btn-delete-offer" data-event-id="${row.eventId}" data-code="${row.code}"><i data-lucide="trash-2" width="14"></i> Delete</button></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            renderPagination('offers-pagination', rows.length, itemsPerPage, currentPage, (p) => {
+                currentPage = p;
+                render();
+            });
+            bindRowActions();
+        }
+
+        if (window.initIcons) window.initIcons({ root: card });
+    };
+
+    if (addBtn) addBtn.addEventListener('click', openForCreate);
+    if (searchInput) searchInput.addEventListener('input', () => {
+        currentPage = 1;
+        render();
+    });
+    if (eventFilter) eventFilter.addEventListener('change', () => {
+        currentPage = 1;
+        render();
+    });
+
+    codeInput.addEventListener('input', () => {
+        codeInput.value = codeInput.value.toUpperCase().replace(/\s+/g, '');
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const eventId = eventSelect.value;
+        const code = codeInput.value.trim().toUpperCase();
+        const discountPercentage = Number(discountInput.value);
+
+        if (!eventId || !code || !(discountPercentage > 0 && discountPercentage <= 100)) return;
+
+        const unique = validateUniqueForEvent(eventId, code);
+        codeInput.classList.toggle('is-invalid', !unique);
+        if (!unique) {
+            if (codeFeedback) codeFeedback.textContent = 'Offer code already exists for this event.';
+            return;
+        }
+
+        try {
+            const targetEvent = events.find((ev) => ev.id === eventId);
+            if (!targetEvent || !isPublished(targetEvent)) {
+                showToast('Error', 'Offers can be created only for published events.', 'danger');
+                return;
+            }
+
+            if (editing && (editing.eventId !== eventId || editing.code !== code)) {
+                const oldEvent = events.find((ev) => ev.id === editing.eventId);
+                if (oldEvent) {
+                    const oldOffers = (oldEvent.pricing && Array.isArray(oldEvent.pricing.offers)) ? oldEvent.pricing.offers : [];
+                    const cleaned = oldOffers.filter((o) => (o.code || '').toUpperCase() !== editing.code);
+                    await apiPatch('events', oldEvent.id, { pricing: Object.assign({}, oldEvent.pricing, { offers: cleaned }) });
+                    oldEvent.pricing = Object.assign({}, oldEvent.pricing, { offers: cleaned });
+                }
+            }
+
+            const currentOffers = (targetEvent.pricing && Array.isArray(targetEvent.pricing.offers)) ? targetEvent.pricing.offers : [];
+            const withoutCurrent = currentOffers.filter((o) => {
+                if (!editing || editing.eventId !== eventId) return true;
+                return (o.code || '').toUpperCase() !== editing.code;
+            });
+            const updatedOffers = [...withoutCurrent, { code, discountPercentage }];
+            await apiPatch('events', eventId, { pricing: Object.assign({}, targetEvent.pricing, { offers: updatedOffers }) });
+            targetEvent.pricing = Object.assign({}, targetEvent.pricing, { offers: updatedOffers });
+
+            showToast('Saved', editing ? 'Offer updated successfully.' : 'Offer created successfully.', 'success');
+            if (bsModal) bsModal.hide();
+            resetForm();
+            currentPage = 1;
+            render();
+        } catch (err) {
+            showToast('Error', 'Failed to save offer.', 'danger');
+        }
+    });
+
+    populateFilters();
+    render();
+}
+
 export async function initAdminNotifications() {
     const events = await apiFetch('events');
     const container = document.getElementById('notifications-list');
@@ -1613,7 +1852,7 @@ export async function initAdminNotifications() {
     const loadNotifications = async () => {
         if (!container) return;
         const notifs = await apiFetch('notifications');
-        const sorted = notifs.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const sorted = notifs.sort((a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0));
 
         if (sorted.length === 0) {
             container.innerHTML = `<div class="p-5 text-center text-neutral-400">No notifications found.</div>`;
@@ -1733,7 +1972,10 @@ export function initAdminProfile() {
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
 
-    const profileCard = document.querySelector('.card-custom:has(h3:contains("Admin Information"))') || document.querySelector('.card-custom');
+    const profileCard = Array.from(document.querySelectorAll('.card-custom')).find(c => {
+        const h3 = c.querySelector('h3');
+        return h3 && h3.textContent.includes('Admin Information');
+    }) || document.querySelector('.card-custom');
     const inputs = profileCard ? profileCard.querySelectorAll('input') : [];
 
     // Fallback: search by label if card-custom is ambiguous

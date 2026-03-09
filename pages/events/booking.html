@@ -135,6 +135,37 @@
             </div>
         </section>
 
+
+        <!-- STATE 1.5: PARTICIPANT DETAILS -->
+        <section id="step-participant-details" class="container-custom d-none" style="max-width: 800px;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="#" id="btn-back-to-tickets" class="text-decoration-none text-neutral-400 d-inline-flex align-items-center gap-1">
+                    <i data-lucide="arrow-left" width="16" height="16"></i> Back to Tickets
+                </a>
+                <h3 class="mb-0 fw-bold">Participant Details</h3>
+                <div style="width: 100px;"></div> <!-- Spacer -->
+            </div>
+            <div class="alert alert-info border-0 bg-primary bg-opacity-10 text-primary d-flex align-items-center gap-3 rounded-3 mb-4">
+                <i data-lucide="info" width="20" height="20"></i>
+                <div>
+                   This event requires details for each attendee. Please fill out the information below.
+                </div>
+            </div>
+            
+            <form id="participant-details-form" class="mb-5">
+                <div id="participant-forms-container" class="d-flex flex-column gap-4">
+                    <!-- Injected dynamically -->
+                </div>
+                
+                <hr class="my-4 border-neutral-200">
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-medium">
+                        Continue to Payment <i data-lucide="arrow-right" width="16" class="ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </section>
+
         <!-- STATE 2: GUEST BLOCKED -->
         <section id="step-guest-blocked" class="container-custom d-none text-center py-5" style="max-width: 600px;">
             <div class="mb-4 mt-5">

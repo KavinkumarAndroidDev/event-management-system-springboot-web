@@ -4,11 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Events - SyncEvent Organizer</title>
+    <title>Payments - SyncEvent Organizer</title>
     <link rel="stylesheet" href="../../css/main.css">
     <link rel="icon" href="../../assets/favicon.svg" type="image/x-icon">
     <style>
-        /* Dashboard UI Refinements */
         body.bg-neutral-50 {
             background-color: #f8fafc !important;
         }
@@ -21,33 +20,22 @@
 </head>
 
 <body class="bg-neutral-50">
-    <!-- Organizer Navbar -->
     <header class="bg-white border-bottom sticky-top" style="height: 64px; z-index: 1000;">
         <div class="container-fluid px-4 h-100">
             <div class="d-flex align-items-center justify-content-between h-100">
-                <!-- Left: Logo -->
                 <div class="d-flex align-items-center gap-4">
                     <a class="brand" href="dashboard.html" style="width: 140px;">
                         <img src="../../assets/logo.SVG" alt="SyncEvent" class="img-fluid">
                     </a>
                 </div>
-
-                <!-- Center: Search -->
                 <div class="position-relative d-none d-md-block mx-auto flex-grow-1 px-4" style="max-width: 600px;">
-                    <i data-lucide="search"
-                        class="position-absolute top-50 start-0 translate-middle-y ms-5 text-neutral-400"
-                        width="18"></i>
-                    <input type="text" class="form-control border-transparent ps-5 bg-neutral-100"
-                        placeholder="Search events, orders..." style="border-radius: 8px;">
+                    <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-5 text-neutral-400" width="18"></i>
+                    <input type="text" class="form-control border-transparent ps-5 bg-neutral-100" placeholder="Search payments, transactions..." style="border-radius: 8px;">
                 </div>
-
-                <!-- Right: Actions & Profile -->
                 <div class="d-flex align-items-center gap-3">
-                    <a href="notifications.html"
-                        class="icon-circle position-relative text-decoration-none bg-white ms-2">
+                    <a href="notifications.html" class="icon-circle position-relative text-decoration-none bg-white ms-2">
                         <i data-lucide="bell" style="width:20px;height:20px;"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle p-1 rounded-circle"
-                            style="width:10px;height:10px;margin-top:8px;margin-left:-8px;background:#17b978;"></span>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 rounded-circle" style="width:10px;height:10px;margin-top:8px;margin-left:-8px;background:#17b978;"></span>
                     </a>
                 </div>
             </div>
@@ -60,7 +48,6 @@
                 <!-- Sidebar -->
                 <div class="col-lg-3">
                     <div class="card-custom p-3">
-                        <!-- User Info -->
                         <div class="d-flex align-items-center gap-3 mb-4">
                             <span class="avatar-circle" id="sidebar-avatar"></span>
                             <div class="overflow-hidden">
@@ -73,8 +60,11 @@
                             <a href="dashboard.html" class="sidebar-item">
                                 <i data-lucide="layout-dashboard" class="sidebar-icon"></i> Dashboard
                             </a>
-                            <a href="my-events.html" class="sidebar-item active">
+                            <a href="my-events.html" class="sidebar-item">
                                 <i data-lucide="calendar" class="sidebar-icon"></i> My Events
+                            </a>
+                            <a href="offers.html" class="sidebar-item">
+                                <i data-lucide="percent" class="sidebar-icon"></i> Offers
                             </a>
                             <a href="create-event.html" class="sidebar-item">
                                 <i data-lucide="plus-circle" class="sidebar-icon"></i> Create Event
@@ -85,10 +75,9 @@
                             <a href="registrations.html" class="sidebar-item">
                                 <i data-lucide="users" class="sidebar-icon"></i> Registrations
                             </a>
-                            <a href="payments.html" class="sidebar-item">
+                            <a href="payments.html" class="sidebar-item active">
                                 <i data-lucide="credit-card" class="sidebar-icon"></i> Payments
                             </a>
-
                             <a href="reports.html" class="sidebar-item">
                                 <i data-lucide="bar-chart-2" class="sidebar-icon"></i> Reports
                             </a>
@@ -110,73 +99,102 @@
 
                 <!-- Main Content -->
                 <div class="col-lg-9">
-
-                    <!-- Breadcrumb -->
                     <nav aria-label="breadcrumb" class="mb-3">
                         <ol class="breadcrumb mb-0" style="font-size:0.8125rem;">
-                            <li class="breadcrumb-item"><a href="dashboard.html"
-                                    class="text-decoration-none text-neutral-400">Dashboard</a></li>
-                            <li class="breadcrumb-item active text-primary fw-medium" aria-current="page">My Events</li>
+                            <li class="breadcrumb-item"><a href="dashboard.html" class="text-decoration-none text-neutral-400">Dashboard</a></li>
+                            <li class="breadcrumb-item active text-primary fw-medium" aria-current="page">Payments</li>
                         </ol>
                     </nav>
 
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold mb-0">My Events</h4>
+                    <div class="mb-4">
+                        <h2 class="h3 fw-bold text-neutral-900 mb-1">Payments</h2>
+                        <p class="text-neutral-400 small mb-0">Track and manage all revenue from your events</p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h2 class="h3 fw-bold text-neutral-900 mb-1">My Events</h2>
-                            <p class="text-neutral-400 small mb-0">Manage and track all your events</p>
+
+                    <div class="card-custom mb-4 py-3 px-4">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="text-neutral-400 small fw-bold text-uppercase ls-1 mb-2" style="font-size: 11px;">Event Filter</label>
+                                <select class="form-select px-3 fw-medium" id="eventFilter">
+                                    <option value="">All Events</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="text-neutral-400 small fw-bold text-uppercase ls-1 mb-2" style="font-size: 11px;">Search</label>
+                                <div class="position-relative">
+                                    <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-neutral-400" style="width:16px; height:16px;"></i>
+                                    <input type="text" class="form-control ps-5 fw-medium" id="paymentSearch" placeholder="Transaction ID or Email">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary rounded-pill w-100 fw-medium d-flex align-items-center justify-content-center gap-2" id="exportPaymentsBtn">
+                                    <i data-lucide="download" style="width:16px;height:16px;"></i> Export Payments
+                                </button>
+                            </div>
                         </div>
-                        <a href="create-event.html" class="btn btn-primary rounded-pill">
-                            <i data-lucide="plus" style="width:18px;height:18px;"></i> Create Event
-                        </a>
                     </div>
+
                     <div class="row g-4 mb-4">
                         <div class="col-6 col-xl-3">
                             <div class="card-custom py-3 px-4 h-100">
-                                <div class="h3 fw-medium text-neutral-900 mb-1">4</div>
-                                <div class="text-neutral-400 small">Total Events</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card-custom py-3 px-4 h-100">
-                                <div class="h3 fw-medium text-success mb-1">2</div>
-                                <div class="text-neutral-400 small">Published</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card-custom py-3 px-4 h-100">
-                                <div class="h3 fw-medium text-neutral-900 mb-1">1</div>
-                                <div class="text-neutral-400 small">Drafts</div>
-                            </div>
-                        </div>
-                        <div class="col-6 col-xl-3">
-                            <div class="card-custom py-3 px-4 h-100">
-                                <div class="h3 fw-medium text-primary mb-1">$118,070</div>
+                                <div class="h3 fw-medium text-neutral-900 mb-1" id="totalRevenue">₹0</div>
                                 <div class="text-neutral-400 small">Total Revenue</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row g-4" id="events-grid">
-                        <!-- Events will be populated by JS -->
+                        <div class="col-6 col-xl-3">
+                            <div class="card-custom py-3 px-4 h-100">
+                                <div class="h3 fw-medium text-primary mb-1" id="todayRevenue">₹0</div>
+                                <div class="text-neutral-400 small fw-medium">Today's Revenue</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card-custom py-3 px-4 h-100">
+                                <div class="h3 fw-medium text-success mb-1" id="confirmedPayments">0</div>
+                                <div class="text-neutral-400 small fw-medium">Confirmed</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-xl-3">
+                            <div class="card-custom py-3 px-4 h-100">
+                                <div class="h3 fw-medium text-warning mb-1" id="pendingPayments">0</div>
+                                <div class="text-neutral-400 small fw-medium">Pending</div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-center align-items-center gap-2 mt-5" id="pagination-controls">
-                        <!-- Pagination controls will be populated by JS -->
+                    <div class="card-custom p-0 overflow-hidden">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="paymentsTable">
+                                <thead class="bg-light bg-opacity-25">
+                                    <tr>
+                                        <th class="ps-4 text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Event</th>
+                                        <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Customer</th>
+                                        <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Amount</th>
+                                        <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Date</th>
+                                        <th class="text-neutral-400 small fw-bold text-uppercase" style="font-size: 11px;">Status</th>
+                                        <th class="pe-4 text-neutral-400 small fw-bold text-uppercase text-end" style="font-size: 11px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-neutral-400">
+                                            <div class="spinner-border spinner-border-sm me-2"></div> Loading payments...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-4" id="pagination-controls"></div>
                 </div>
             </div>
         </div>
-    </main>n>
+    </main>
 
     <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="../../scripts/app.js" type="module"></script>
 
-
-    <!-- Scroll to Top Button -->
     <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" style="display:none;position:fixed;bottom:2rem;right:2rem;z-index:9999;
                width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
                background:#17b978;color:#fff;box-shadow:0 4px 16px rgba(23,185,120,0.35);
@@ -193,7 +211,6 @@
             }
         });
     </script>
-
 </body>
 
 </html>

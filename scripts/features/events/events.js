@@ -2,7 +2,8 @@ import { state, getCategory, getVenue, getUser } from '../../shared/state.js';
 import { showLoading, hideLoading } from '../../shared/utils.js';
 
 export function initializeEvents() {
-    let events = state.events;
+    // Filter to only show PUBLISHED events on public pages
+    let events = state.events ? state.events.filter(e => e.status?.current === 'PUBLISHED') : null;
 
     // Show loading for main grid if it exists
     let eventsGrid = document.getElementById('events-grid');
@@ -65,41 +66,44 @@ export function initializeEvents() {
         });
         const topOrganizers = Array.from(uniqueOrganizersMap.values())
             .sort((a, b) => b.rating - a.rating)
-            .slice(0, 3);
+            .slice(0, 10);
 
         organizersGrid.innerHTML = '';
 
-        // Combine original and a copy for seamless loop
-        const displayOrganizers = [...topOrganizers, ...topOrganizers];
+        // Repeat for seamless loop
+        const displayOrganizers = [...topOrganizers, ...topOrganizers, ...topOrganizers];
 
         displayOrganizers.forEach((org, index) => {
             const item = document.createElement('div');
             item.className = 'marquee-item';
+
+            const displayName = org.fullName || org.name || 'Organizer';
+            const avatarChar = displayName ? displayName.charAt(0) : '?';
+            const rating = org.rating || '4.8';
+
             item.innerHTML = `
-                <div class="card card-custom border-0 shadow-sm p-4 h-100 text-center rounded-4 d-flex flex-column align-items-center">
-                    <div class="org-avatar bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold mb-3 flex-shrink-0" style="width: 72px; height: 72px; font-size: 2rem;"></div>
-                    <div class="mt-auto w-100">
-                        <div class="org-name fw-bold text-neutral-900 fs-5 mb-1"></div>
+                <div class="org-minimal-card d-flex flex-column align-items-center p-3 text-center">
+                    <div class="org-avatar-wrapper mb-3">
+                        ${org.profileImage ?
+                    `<img src="${org.profileImage}" alt="${displayName}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">` :
+                    `<div class="org-avatar-initials rounded-circle d-flex align-items-center justify-content-center fw-bold bg-primary bg-opacity-10 text-primary" style="width: 80px; height: 80px; font-size: 1.75rem; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">${avatarChar}</div>`
+                }
+                        <div class="verified-badge-mini position-absolute bottom-0 end-0 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; margin-right: 5px; margin-bottom: 5px;">
+                            <i data-lucide="check-circle" class="text-primary" width="16" height="16" style="fill: #fff;"></i>
+                        </div>
+                    </div>
+                    <div class="org-info">
+                        <h6 class="org-name fw-bold text-neutral-900 mb-1" style="font-size: 0.95rem;">${displayName}</h6>
                         <div class="d-flex align-items-center justify-content-center gap-2">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-medium d-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                                <i data-lucide="check-circle" width="12"></i> Verified
-                            </span>
-                            <span class="d-flex align-items-center text-warning fw-semibold bg-warning bg-opacity-10 px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
-                                <i data-lucide="star" class="fill-warning me-1" width="12"></i> <span class="org-rating"></span>
-                            </span>
+                             <div class="d-flex align-items-center text-warning" style="font-size: 0.75rem;">
+                                <i data-lucide="star" class="fill-warning me-1" width="12"></i>
+                                <span class="fw-semibold">${rating}</span>
+                            </div>
+                            <span class="text-neutral-400" style="font-size: 0.7rem;">• Top Host</span>
                         </div>
                     </div>
                 </div>
             `;
-            const displayName = org.fullName || org.name || 'Organizer';
-            const avatarChar = displayName ? displayName.charAt(0) : '?';
-            const avatarEl = item.querySelector('.org-avatar');
-            const nameEl = item.querySelector('.org-name');
-            const ratingEl = item.querySelector('.org-rating');
-
-            if (avatarEl) avatarEl.textContent = avatarChar;
-            if (nameEl) nameEl.textContent = displayName;
-            if (ratingEl) ratingEl.textContent = org.rating || '4.8';
             organizersGrid.appendChild(item);
         });
 
@@ -113,6 +117,7 @@ export function initializeEvents() {
     if (eventsGrid && events) {
         setupPagination(events);
         loadDynamicCategories();
+        loadDynamicVenues();
     }
 }
 
@@ -123,7 +128,7 @@ async function loadDynamicCategories() {
     try {
         const res = await fetch('http://localhost:3000/categories');
         const cats = await res.json();
-        const activeCats = cats.filter(c => c.status === 'Active');
+        const activeCats = cats.filter(c => c.status === 'ACTIVE');
 
         const row = container.querySelector('.d-flex.flex-column.gap-2');
         if (row) {
@@ -145,12 +150,48 @@ async function loadDynamicCategories() {
     }
 }
 
+async function loadDynamicVenues() {
+    const container = document.getElementById('collapseCity');
+    if (!container) return;
+
+    try {
+        const res = await fetch('http://localhost:3000/venues');
+        const venues = await res.json();
+        const activeVenues = venues.filter(v => v.status === 'ACTIVE');
+
+        // Extract unique cities
+        const uniqueCities = [...new Set(activeVenues.map(v => v.address?.city || v.city).filter(Boolean))].sort();
+
+        const row = container.querySelector('.d-flex.flex-column.gap-2');
+        if (row) {
+            row.innerHTML = uniqueCities.map((city, idx) => `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="city-${idx}" value="${city}">
+                    <label class="form-check-label text-neutral-900" for="city-${idx}"
+                        style="font-family: 'Inter', sans-serif; font-size: 14px;">${city}</label>
+                </div>
+            `).join('');
+
+            // Re-bind listeners
+            row.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', () => filterEvents());
+            });
+        }
+    } catch (e) {
+        console.error('Error loading venues', e);
+    }
+}
+
 
 export function createEventCard(event) {
     const minPrice = Math.min(...event.tickets.map(t => t.price));
     const date = new Date(event.schedule.startDateTime);
     const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    const loc = getVenue(event.venueId) || { name: 'Multiple Locations', address: { city: 'Various' } };
+    const locName = loc.name || 'Unknown Venue';
+    const locCity = (loc.address && loc.address.city) || loc.city || 'Various';
 
     const path = window.location.pathname;
     let link = 'pages/events/details.html?id=' + event.id;
@@ -163,30 +204,21 @@ export function createEventCard(event) {
 
     const col = document.createElement('div');
     col.className = 'col';
+
     col.innerHTML = `
         <div class="card border-0 shadow-sm h-100 event-card" style="border-radius:16px; overflow:hidden;">
-            <img src="" class="card-img-top ec-img" style="height:200px; object-fit:cover;" alt="Event Image">
+            <img src="${event.media?.thumbnail || 'https://dummyimage.com/600x400/eeeeee/999999&text=No+Image'}" class="card-img-top ec-img" style="height:200px; object-fit:cover;" alt="${event.title}">
             <div class="card-body p-3 d-flex flex-column">
-                <div class="ec-datetime text-primary fw-semibold small mb-2"></div>
-                <h6 class="ec-title fw-semibold text-neutral-900 mb-2" style="line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;"></h6>
-                <p class="ec-location text-neutral-400 small text-truncate mb-2"></p>
-                <div class="ec-price fw-semibold text-neutral-900 small mt-auto"></div>
+                <div class="ec-datetime text-primary fw-semibold small mb-2">${dateStr} • ${timeStr}</div>
+                <h6 class="ec-title fw-semibold text-neutral-900 mb-2" style="line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${event.title}</h6>
+                <p class="ec-location text-neutral-400 small text-truncate mb-2"><i data-lucide="map-pin" width="14" height="14" class="me-1"></i>${locName}, ${locCity}</p>
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <div class="ec-price fw-semibold text-neutral-900 small">${minPrice === 0 ? 'Free' : `₹${minPrice} onwards`}</div>
+                </div>
             </div>
-            <a href="" class="stretched-link ec-link"></a>
+            <a href="${link}" class="stretched-link ec-link"></a>
         </div>
     `;
-
-    const loc = getVenue(event.venueId) || { name: 'Multiple Locations', address: { city: 'Various' } };
-    const locName = loc.name || 'Unknown Venue';
-    const locCity = (loc.address && loc.address.city) || loc.city || 'Various';
-
-    col.querySelector('.ec-img').src = event.media?.thumbnail || 'https://dummyimage.com/600x400/eeeeee/999999&text=No+Image';
-    col.querySelector('.ec-img').alt = event.title;
-    col.querySelector('.ec-datetime').textContent = `${dateStr} • ${timeStr}`;
-    col.querySelector('.ec-title').textContent = event.title;
-    col.querySelector('.ec-location').textContent = `${locName}, ${locCity}`;
-    col.querySelector('.ec-price').textContent = minPrice === 0 ? 'Free' : '₹' + minPrice + ' onwards';
-    col.querySelector('.ec-link').href = link;
 
     return col;
 }

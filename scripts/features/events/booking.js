@@ -24,6 +24,18 @@ export function initBookingPage() {
     const event = state.events.find(e => e.id === eventId);
     if (!event) return;
 
+    // Route Protection: Prevent booking past or unpublished events
+    const isPast = new Date(event.schedule.endDateTime) < new Date();
+    const isNotPublished = event.status.current !== 'PUBLISHED';
+    if (isPast || isNotPublished) {
+        const reason = isPast ? 'This event has ended.' : 'This event is not yet published.';
+        showToast('Access Restricted', reason, 'warning');
+        setTimeout(() => {
+            window.location.replace('index.html');
+        }, 1500);
+        return;
+    }
+
     // Update breadcrumb with icon
     const backBtn = document.querySelector('.breadcrumb-back');
     if (backBtn && !backBtn.querySelector('i')) {
@@ -285,6 +297,47 @@ export function initBookingPage() {
     const proceedBtn = document.getElementById('btn-proceed');
     if (proceedBtn) {
         proceedBtn.addEventListener('click', () => {
+            // Check if participant details are required
+            if (event.collectParticipantDetails) {
+                document.getElementById('step-select-tickets').classList.add('d-none');
+                document.getElementById('step-participant-details').classList.remove('d-none');
+                document.getElementById('sticky-summary').classList.remove('visible');
+
+                const participantContainer = document.getElementById('participant-forms-container');
+                participantContainer.innerHTML = '';
+
+                let pIndex = 1;
+                Object.keys(cart).forEach(id => {
+                    const ticket = event.tickets.find(t => t.id === id);
+                    const qty = cart[id];
+                    for (let i = 0; i < qty; i++) {
+                        const formGroup = document.createElement('div');
+                        formGroup.className = 'card-custom bg-light border-0 p-4 rounded-4';
+                        formGroup.innerHTML = `
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px;">${pIndex}</div>
+                                <h5 class="mb-0 fw-bold text-neutral-900">Participant ${pIndex} <span class="badge bg-white text-primary border border-primary-subtle ms-2 fw-medium" style="font-size: 0.7rem;">${ticket.type.replace('_', ' ')}</span></h5>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-medium">Full Name *</label>
+                                    <input type="text" class="form-control participant-name" placeholder="Enter full name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-medium">Email Address *</label>
+                                    <input type="email" class="form-control participant-email" placeholder="Enter email address" required>
+                                </div>
+                            </div>
+                        `;
+                        participantContainer.appendChild(formGroup);
+                        pIndex++;
+                    }
+                });
+
+                if (window.initIcons) window.initIcons({ root: participantContainer });
+                return;
+            }
+
             document.getElementById('step-select-tickets').classList.add('d-none');
             document.getElementById('step-payment').classList.remove('d-none');
             document.getElementById('sticky-summary').classList.remove('visible');
@@ -292,11 +345,10 @@ export function initBookingPage() {
             document.getElementById('step1-indicator').classList.remove('active');
             document.getElementById('step2-indicator').classList.add('active');
 
-            // Render booking summary items and interactive controls
             const summaryContainer = document.getElementById('booking-summary-items');
             const controlsContainer = document.getElementById('payment-ticket-controls');
 
-            function renderPaymentStepItems() {
+            window.renderPaymentStepItems = () => {
                 if (summaryContainer) summaryContainer.innerHTML = '';
                 if (controlsContainer) controlsContainer.innerHTML = '';
 
@@ -353,7 +405,7 @@ export function initBookingPage() {
                                 cart[id]--;
                                 if (cart[id] === 0) delete cart[id];
                                 updateSummary(cart, event.tickets);
-                                renderPaymentStepItems(); // Re-render this view
+                                window.renderPaymentStepItems(); // Re-render this view
                                 if (window.initIcons) window.initIcons();
                             }
                         });
@@ -363,7 +415,7 @@ export function initBookingPage() {
                             if (total < 10 && cart[id] < ticket.availableQuantity) {
                                 cart[id]++;
                                 updateSummary(cart, event.tickets);
-                                renderPaymentStepItems(); // Re-render this view
+                                window.renderPaymentStepItems(); // Re-render this view
                                 if (window.initIcons) window.initIcons();
                             } else if (total >= 10) {
                                 showToast('Max Limit Reached', 'You can only select up to 10 tickets per transaction', 'warning');
@@ -373,9 +425,9 @@ export function initBookingPage() {
                         controlsContainer.appendChild(controlRow);
                     }
                 });
-            }
+            };
 
-            renderPaymentStepItems();
+            window.renderPaymentStepItems();
             if (window.initIcons) window.initIcons();
         });
     }
@@ -529,6 +581,7 @@ export function initBookingPage() {
                 totalAmount: totalAmount,
                 status: 'CONFIRMED',
                 paymentId: payId,
+                participants: window.currentParticipants || [],
                 createdAt: new Date().toISOString()
             };
 
@@ -588,6 +641,51 @@ export function initBookingPage() {
                     showToast('Payment Failed', 'There was an issue committing your booking to the server.', 'danger');
                     showFailureModal('Payment succeeded but your booking failed to save. Please contact support.');
                 });
+        });
+    }
+    // Participant Details Form Submission
+    const participantForm = document.getElementById('participant-details-form');
+    if (participantForm) {
+        participantForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Collect participant data if needed (optional for UI flow)
+            const participants = [];
+            const forms = document.querySelectorAll('#participant-forms-container > div');
+            forms.forEach(f => {
+                participants.push({
+                    name: f.querySelector('.participant-name').value,
+                    email: f.querySelector('.participant-email').value
+                });
+            });
+
+            // Store participants in registration metadata if necessary
+            window.currentParticipants = participants;
+
+            document.getElementById('step-participant-details').classList.add('d-none');
+            document.getElementById('step-payment').classList.remove('d-none');
+
+            document.getElementById('step1-indicator').classList.remove('active');
+            document.getElementById('step2-indicator').classList.add('active');
+
+            // Trigger payment summary render
+            if (window.renderPaymentStepItems) {
+                window.renderPaymentStepItems();
+            }
+            updateSummary(cart, event.tickets);
+        });
+    }
+
+    // Back to tickets from participant details
+    const btnBackToTickets = document.getElementById('btn-back-to-tickets');
+    if (btnBackToTickets) {
+        btnBackToTickets.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('step-participant-details').classList.add('d-none');
+            document.getElementById('step-select-tickets').classList.remove('d-none');
+            if (Object.keys(cart).length > 0) {
+                document.getElementById('sticky-summary').classList.add('visible');
+            }
         });
     }
 }

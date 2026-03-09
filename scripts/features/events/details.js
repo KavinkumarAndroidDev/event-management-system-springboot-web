@@ -247,6 +247,17 @@ export function populateSingleEvent(event) {
 
     const bookBtn = document.getElementById('btn-book-tickets');
     if (bookBtn) {
+        const isPast = new Date(event.schedule.endDateTime) < new Date();
+        const isNotPublished = event.status.current !== 'PUBLISHED';
+
+        if (isPast || isNotPublished) {
+            bookBtn.disabled = true;
+            bookBtn.textContent = isPast ? 'Event Ended' : 'Booking Closed';
+            bookBtn.classList.add('btn-secondary');
+            bookBtn.classList.remove('btn-primary');
+            return; // Don't attach click listener
+        }
+
         const userStr = localStorage.getItem('currentUser');
         const user = userStr ? JSON.parse(userStr) : null;
 
