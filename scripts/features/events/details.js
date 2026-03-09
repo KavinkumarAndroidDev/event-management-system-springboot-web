@@ -249,7 +249,7 @@ export function populateSingleEvent(event) {
     if (bookBtn) {
         const isPast = new Date(event.schedule.endDateTime) < new Date();
         const isNotPublished = event.status.current !== 'PUBLISHED';
-
+        
         if (isPast || isNotPublished) {
             bookBtn.disabled = true;
             bookBtn.textContent = isPast ? 'Event Ended' : 'Booking Closed';

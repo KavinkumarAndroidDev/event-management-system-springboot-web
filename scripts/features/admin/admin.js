@@ -1316,10 +1316,10 @@ export async function initAdminPayments() {
     if (refundTbody) showTableLoading(refundTbody, 7);
 
     const [payments, events, users, registrations, refundRequests] = await Promise.all([
-        apiFetch('payments'),
-        apiFetch('events'),
-        apiFetch('users'),
-        apiFetch('registrations'),
+        apiFetch('payments'), 
+        apiFetch('events'), 
+        apiFetch('users'), 
+        apiFetch('registrations'), 
         apiFetch('refund-requests') || Promise.resolve([])
     ]);
 
@@ -1329,7 +1329,7 @@ export async function initAdminPayments() {
         const evPayments = payments.filter(p => p.eventId === ev.id && (p.status === 'PAID' || p.status === 'CONFIRMED' || p.status === 'COMPLETED'));
         const evRegs = registrations.filter(r => r.eventId === ev.id);
         const org = users.find(u => u.id === ev.organizerId);
-
+        
         const ticketsSold = evRegs.reduce((sum, r) => sum + (r.quantity || 0), 0);
         const gross = evPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
         const platformPercent = 10; // Mock platform fee
@@ -1374,7 +1374,7 @@ export async function initAdminPayments() {
     // Refund Requests Logic
     function renderRefundRequests() {
         if (!refundTbody) return;
-
+        
         // Mock refund requests if none exist for demonstration/test
         const displayRefunds = refundRequests.length > 0 ? refundRequests : [];
 

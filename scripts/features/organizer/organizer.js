@@ -972,31 +972,31 @@ export function initTicketManagement() {
     // };
 
     const updateStats = () => {
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        let totalCapacity = 0, potentialRevenue = 0;
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    let totalCapacity = 0, potentialRevenue = 0;
 
-        rows.forEach(row => {
-            const tds = row.querySelectorAll('td');
-            const priceEl = tds[1]?.querySelector('input') || tds[1];
-            const qtyEl = tds[2]?.querySelector('input') || tds[2];
-            const price = parseFloat(priceEl?.value ?? priceEl?.textContent?.replace(/[^\d.-]/g, '')) || 0;
-            const qty = parseInt(qtyEl?.value ?? qtyEl?.textContent) || 0;
-            totalCapacity += qty;
-            potentialRevenue += price * qty;
-        });
+    rows.forEach(row => {
+        const tds = row.querySelectorAll('td');
+        const priceEl = tds[1]?.querySelector('input') || tds[1];
+        const qtyEl = tds[2]?.querySelector('input') || tds[2];
+        const price = parseFloat(priceEl?.value ?? priceEl?.textContent?.replace(/[^\d.-]/g, '')) || 0;
+        const qty = parseInt(qtyEl?.value ?? qtyEl?.textContent) || 0;
+        totalCapacity += qty;
+        potentialRevenue += price * qty;
+    });
 
-        const totalSold = currentEvent.tickets.reduce(
-            (sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0
-        );
+    const totalSold = currentEvent.tickets.reduce(
+        (sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0
+    );
 
-        const statsRow = document.querySelector('.row.g-4:last-of-type');
-        if (statsRow) {
-            const nums = statsRow.querySelectorAll('.h3');
-            if (nums[0]) nums[0].textContent = totalCapacity.toLocaleString('en-IN');
-            if (nums[1]) nums[1].textContent = totalSold.toLocaleString('en-IN');
-            if (nums[2]) nums[2].textContent = formatCurrency(potentialRevenue);
-        }
-    };
+    const statsRow = document.querySelector('.row.g-4:last-of-type');
+    if (statsRow) {
+        const nums = statsRow.querySelectorAll('.h3');
+        if (nums[0]) nums[0].textContent = totalCapacity.toLocaleString('en-IN');
+        if (nums[1]) nums[1].textContent = totalSold.toLocaleString('en-IN');
+        if (nums[2]) nums[2].textContent = formatCurrency(potentialRevenue);
+    }
+};
 
     const renderTickets = (evt) => {
         if (!tbody) return;
@@ -1254,7 +1254,7 @@ export function initOrganizerProfile() {
 
             localStorage.setItem('currentUser', JSON.stringify(user));
             populateSidebarUserInfo();
-
+            
             try {
                 await apiPatch('users', user.id, { profile: user.profile });
                 showToast('Saved', 'Basic information updated.', 'success');
@@ -1274,7 +1274,7 @@ export function initOrganizerProfile() {
             user.profile.linkedIn = fields.linkedIn.value;
 
             localStorage.setItem('currentUser', JSON.stringify(user));
-
+            
             try {
                 await apiPatch('users', user.id, { profile: user.profile });
                 showToast('Updated', 'Public profile updated.', 'success');
@@ -1715,7 +1715,7 @@ export function initCreateEventWizard() {
                 const titleInput = document.getElementById('eventTitle');
                 const titleFeedback = document.getElementById('titleFeedback');
                 const title = titleInput ? titleInput.value.trim() : '';
-
+                
                 if (!title) {
                     titleInput?.classList.add('is-invalid');
                     if (titleFeedback) titleFeedback.textContent = 'Event Title is required.';
@@ -1981,7 +1981,7 @@ export function initCreateEventWizard() {
                 </div>
             </div>
         `;
-
+        
         const nameInput = div.querySelector('.ticket-name-input');
         const nameCounter = div.querySelector('.ticket-name-counter');
         nameInput.addEventListener('input', () => {
@@ -2047,17 +2047,17 @@ export function initCreateEventWizard() {
                     eventData.venueId = opt.value;
                     const vNameInput = document.getElementById('venueName');
                     if (vNameInput) vNameInput.value = opt.text;
-
+                    
                     document.getElementById('venueCity').value = opt.dataset.city || '';
                     document.getElementById('venueCapacity').value = opt.dataset.capacity || '';
-
+                    
                     // Trigger validation hide
                     select.classList.remove('is-invalid');
                 } else {
                     eventData.venueId = null;
                     const vNameInput = document.getElementById('venueName');
                     if (vNameInput) vNameInput.value = '';
-
+                    
                     document.getElementById('venueCity').value = '';
                     document.getElementById('venueCapacity').value = '';
                 }
@@ -2438,7 +2438,7 @@ export function initOrganizerPayments() {
     // Stats calculation
     const calcStats = (regs) => {
         const totalRevenue = regs.reduce((sum, r) => sum + (r.totalAmount || r.price), 0);
-
+        
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const todayRevenue = regs

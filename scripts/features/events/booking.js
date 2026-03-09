@@ -302,10 +302,10 @@ export function initBookingPage() {
                 document.getElementById('step-select-tickets').classList.add('d-none');
                 document.getElementById('step-participant-details').classList.remove('d-none');
                 document.getElementById('sticky-summary').classList.remove('visible');
-
+                
                 const participantContainer = document.getElementById('participant-forms-container');
                 participantContainer.innerHTML = '';
-
+                
                 let pIndex = 1;
                 Object.keys(cart).forEach(id => {
                     const ticket = event.tickets.find(t => t.id === id);
@@ -333,7 +333,7 @@ export function initBookingPage() {
                         pIndex++;
                     }
                 });
-
+                
                 if (window.initIcons) window.initIcons({ root: participantContainer });
                 return;
             }
@@ -648,7 +648,7 @@ export function initBookingPage() {
     if (participantForm) {
         participantForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
+            
             // Collect participant data if needed (optional for UI flow)
             const participants = [];
             const forms = document.querySelectorAll('#participant-forms-container > div');
@@ -658,16 +658,16 @@ export function initBookingPage() {
                     email: f.querySelector('.participant-email').value
                 });
             });
-
+            
             // Store participants in registration metadata if necessary
             window.currentParticipants = participants;
 
             document.getElementById('step-participant-details').classList.add('d-none');
             document.getElementById('step-payment').classList.remove('d-none');
-
+            
             document.getElementById('step1-indicator').classList.remove('active');
             document.getElementById('step2-indicator').classList.add('active');
-
+            
             // Trigger payment summary render
             if (window.renderPaymentStepItems) {
                 window.renderPaymentStepItems();

@@ -76,7 +76,7 @@ export function initializeEvents() {
         displayOrganizers.forEach((org, index) => {
             const item = document.createElement('div');
             item.className = 'marquee-item';
-
+            
             const displayName = org.fullName || org.name || 'Organizer';
             const avatarChar = displayName ? displayName.charAt(0) : '?';
             const rating = org.rating || '4.8';
@@ -84,10 +84,10 @@ export function initializeEvents() {
             item.innerHTML = `
                 <div class="org-minimal-card d-flex flex-column align-items-center p-3 text-center">
                     <div class="org-avatar-wrapper mb-3">
-                        ${org.profileImage ?
-                    `<img src="${org.profileImage}" alt="${displayName}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">` :
-                    `<div class="org-avatar-initials rounded-circle d-flex align-items-center justify-content-center fw-bold bg-primary bg-opacity-10 text-primary" style="width: 80px; height: 80px; font-size: 1.75rem; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">${avatarChar}</div>`
-                }
+                        ${org.profileImage ? 
+                            `<img src="${org.profileImage}" alt="${displayName}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">` :
+                            `<div class="org-avatar-initials rounded-circle d-flex align-items-center justify-content-center fw-bold bg-primary bg-opacity-10 text-primary" style="width: 80px; height: 80px; font-size: 1.75rem; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">${avatarChar}</div>`
+                        }
                         <div class="verified-badge-mini position-absolute bottom-0 end-0 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; margin-right: 5px; margin-bottom: 5px;">
                             <i data-lucide="check-circle" class="text-primary" width="16" height="16" style="fill: #fff;"></i>
                         </div>
@@ -158,7 +158,7 @@ async function loadDynamicVenues() {
         const res = await fetch('http://localhost:3000/venues');
         const venues = await res.json();
         const activeVenues = venues.filter(v => v.status === 'ACTIVE');
-
+        
         // Extract unique cities
         const uniqueCities = [...new Set(activeVenues.map(v => v.address?.city || v.city).filter(Boolean))].sort();
 
