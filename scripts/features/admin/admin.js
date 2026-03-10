@@ -3,8 +3,15 @@ import { injectSignOutModal, populateSidebarUserInfo, showToast } from '../../sh
 // ─────────────────────────────────────────────────────────────────────────────
 // API BASE URL
 // ─────────────────────────────────────────────────────────────────────────────
+/** The base URL for the mock API server. */
 const API = 'http://localhost:3000';
 
+/**
+ * Normalizes legacy event status formats to a consistent modern structure.
+ * Handles cases where status might be a string or a legacy object with ACTIVE instead of APPROVED.
+ * @param {Object} event - The event object to normalize.
+ * @returns {Object} - The normalized event object.
+ */
 function normalizeLegacyEventStatus(event) {
     if (!event || !event.status || typeof event.status !== 'object') return event;
     if (event.status.current === 'ACTIVE') event.status.current = 'APPROVED';
@@ -17,16 +24,32 @@ function normalizeLegacyEventStatus(event) {
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Formats a date string into a localized long format (en-IN).
+ * @param {string|Date} date - The date to format.
+ * @returns {string} - Formatted date string or '—' if empty.
+ */
 function fmt(date) {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+/**
+ * Formats a numeric amount as Indian Rupee (INR) currency.
+ * @param {number|string} amount - The numeric value to format.
+ * @returns {string} - Formatted currency string (e.g., ₹1,000).
+ */
 function fmtCurrency(amount) {
     if (amount == null) return '₹0';
     return '₹' + Number(amount).toLocaleString('en-IN');
 }
 
+/**
+ * Generates an HTML badge element for a given status.
+ * Maps status strings to specific CSS color themes.
+ * @param {string|Object} status - The status string or object.
+ * @returns {string} - HTML string for the badge.
+ */
 function statusBadge(status) {
     const map = {
         DRAFT: 'background:#F1F5F9;color:#475569;',
@@ -58,6 +81,12 @@ function statusBadge(status) {
     return `<span class="badge rounded-pill px-3 py-2 fw-medium" style="font-size:11px;${style}">${display}</span>`;
 }
 
+/**
+ * Generates an HTML row representing an empty state in a table.
+ * @param {number} colspan - Number of columns to span.
+ * @param {string} [message] - Custom message to display.
+ * @returns {string} - HTML string for the empty row.
+ */
 function emptyRow(colspan, message) {
     const msg = message || 'No records found.';
     return `<tr><td colspan="${colspan}" class="text-center py-5 text-neutral-400">
@@ -66,6 +95,12 @@ function emptyRow(colspan, message) {
     </td></tr>`;
 }
 
+/**
+ * Generic fetch wrapper for GET requests to the mock API.
+ * Automatically normalizes event objects if the 'events' endpoint is used.
+ * @param {string} endpoint - The API endpoint relative to the base URL.
+ * @returns {Promise<any>} - The JSON response or an empty array on error.
+ */
 async function apiFetch(endpoint) {
     try {
         const res = await fetch(`${API}/${endpoint}`);
@@ -82,6 +117,13 @@ async function apiFetch(endpoint) {
     }
 }
 
+/**
+ * Generic fetch wrapper for PATCH requests.
+ * @param {string} endpoint - The API endpoint.
+ * @param {string|number} id - The unique ID of the resource.
+ * @param {Object} body - The data to patch.
+ * @returns {Promise<Object>} - The updated resource.
+ */
 async function apiPatch(endpoint, id, body) {
     const res = await fetch(`${API}/${endpoint}/${id}`, {
         method: 'PATCH',
@@ -92,6 +134,12 @@ async function apiPatch(endpoint, id, body) {
     return res.json();
 }
 
+/**
+ * Generic fetch wrapper for POST requests.
+ * @param {string} endpoint - The API endpoint.
+ * @param {Object} body - The data to create.
+ * @returns {Promise<Object>} - The created resource.
+ */
 async function apiPost(endpoint, body) {
     const res = await fetch(`${API}/${endpoint}`, {
         method: 'POST',
@@ -102,12 +150,26 @@ async function apiPost(endpoint, body) {
     return res.json();
 }
 
+/**
+ * Generic fetch wrapper for DELETE requests.
+ * @param {string} endpoint - The API endpoint.
+ * @param {string|number} id - The ID to delete.
+ * @returns {Promise<boolean>} - True if deletion was successful.
+ */
 async function apiDelete(endpoint, id) {
     const res = await fetch(`${API}/${endpoint}/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return true;
 }
 
+/**
+ * Constructs a new status object with transitions and history.
+ * Ensures the status history is updated correctly.
+ * @param {Object} event - The event object.
+ * @param {string} nextStatus - The target status.
+ * @param {Object} [extra={}] - Additional metadata (e.g., rejection reason).
+ * @returns {Object} - The new status object.
+ */
 function buildEventStatus(event, nextStatus, extra = {}) {
     const currentStatus = event?.status?.current || 'DRAFT';
     const history = Array.isArray(event?.status?.history) ? [...event.status.history] : [currentStatus];
@@ -124,12 +186,27 @@ function buildEventStatus(event, nextStatus, extra = {}) {
     return status;
 }
 
+/**
+ * Updates an event's status and pushes a notification to the organizer.
+ * 
+ * @param {Object} event - The event object.
+ * @param {string} nextStatus - The new status (APPROVED, REJECTED, etc.).
+ * @param {Object} [extra={}] - Additional status metadata (e.g., rejection reason).
+ */
 async function updateEventStatus(event, nextStatus, extra = {}) {
     const status = buildEventStatus(event, nextStatus, extra);
     await apiPatch('events', event.id, { status });
     event.status = status;
 }
 
+/**
+ * Creates a system notification for an organicer.
+ * 
+ * @param {Object} event - The subject event.
+ * @param {string} title - Notification title.
+ * @param {string} message - Notification body.
+ * @param {string} [type='INFO'] - UI style (SUCCESS, DANGER, INFO).
+ */
 async function notifyOrganizerForEvent(event, title, message, type) {
     const targetUserId = event.organizerId || event.organizer?.id || '';
     if (!targetUserId) return;
@@ -148,6 +225,16 @@ async function notifyOrganizerForEvent(event, title, message, type) {
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIRMATION MODAL HELPER
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Displays a customizable Bootstrap confirmation modal.
+ * @param {Object} opts - Modal configuration options.
+ * @param {string} opts.title - Modal title.
+ * @param {string} opts.message - Modal body message.
+ * @param {string} [opts.confirmLabel='Confirm'] - Text for the confirm button.
+ * @param {string} [opts.confirmClass='btn-primary'] - CSS class for the confirm button.
+ * @param {string} [opts.extraHtml=''] - Additional HTML content (e.g., textareas).
+ * @param {Function} [opts.onConfirm] - Callback function called when confirmed.
+ */
 function showConfirmModal(opts) {
     const title = opts.title || 'Confirm';
     const message = opts.message || '';
@@ -186,6 +273,14 @@ function showConfirmModal(opts) {
 // ─────────────────────────────────────────────────────────────────────────────
 // PAGINATION HELPER
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Renders a pagination control for a list of items.
+ * @param {string} containerId - The ID of the container element for pagination.
+ * @param {number} totalItems - Total number of items in the list.
+ * @param {number} itemsPerPage - Number of items shown per page.
+ * @param {number} currentPage - The current active page.
+ * @param {Function} onPageChange - Callback function when a page is changed.
+ */
 function renderPagination(containerId, totalItems, itemsPerPage, currentPage, onPageChange) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -219,6 +314,11 @@ function renderPagination(containerId, totalItems, itemsPerPage, currentPage, on
     });
 }
 
+/**
+ * Injects a loading spinner row into a table body.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {number} colspan - Number of columns to span.
+ */
 function showTableLoading(tbody, colspan) {
     if (!tbody) return;
     tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-5">
@@ -230,6 +330,11 @@ function showTableLoading(tbody, colspan) {
 // ─────────────────────────────────────────────────────────────────────────────
 // GLOBAL ADMIN INITIALIZATION
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Global entry point for typical admin pages.
+ * Injects shared UI components like sign-out modal and sidebar user info.
+ * Also fetches and updates the pending organizer count badge.
+ */
 export function initAdminPage() {
     injectSignOutModal();
     populateSidebarUserInfo();
@@ -258,6 +363,12 @@ export function initAdminPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 // DASHBOARD
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Admin Dashboard view.
+ * Fetches events, users, and payments to populate stat cards and recent activity tables.
+ * Also handles initial rendering of pending event approvals.
+ * @returns {Promise<void>}
+ */
 export async function initAdminDashboard() {
     const statsContainer = document.querySelector('.row.g-4.mb-5');
     const activityList = document.querySelector('.list-group');
@@ -390,6 +501,11 @@ export async function initAdminDashboard() {
 // ─────────────────────────────────────────────────────────────────────────────
 // EVENT APPROVALS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Event Approvals view.
+ * Displays events with 'PENDING' status and provides options to approve or reject them.
+ * @returns {Promise<void>}
+ */
 export async function initEventApprovals() {
     const tbody = document.querySelector('.table tbody');
     const colspan = 6;
@@ -482,6 +598,11 @@ export async function initEventApprovals() {
 // ─────────────────────────────────────────────────────────────────────────────
 // ORGANIZER APPROVALS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Organizer Approvals view.
+ * Fetches and displays organizer applications that are pending review.
+ * @returns {Promise<void>}
+ */
 export async function initOrganizerApprovals() {
     const tbody = document.getElementById('approvalList');
     if (!tbody) return;
@@ -525,7 +646,11 @@ export async function initOrganizerApprovals() {
         bindOrgActions(list);
     }
 
-    function bindOrgActions(list) {
+    /**
+ * Binds action listeners (Approve, Reject, View) to organizer approval table rows.
+ * @param {Array<Object>} list - The list of pending organizer objects.
+ */
+function bindOrgActions(list) {
         tbody.querySelectorAll('.btn-approve-org').forEach(btn => {
             btn.onclick = () => {
                 showConfirmModal({
@@ -589,6 +714,10 @@ export async function initOrganizerApprovals() {
     }
 }
 
+/**
+ * Displays a detailed modal for a specific organizer's application.
+ * @param {Object} org - The organizer object to display.
+ */
 function showOrganizerDetailsModal(org) {
     const modalEl = document.getElementById('requestDetailsModal');
     const body = document.getElementById('modal-content-body');
@@ -623,6 +752,11 @@ function showOrganizerDetailsModal(org) {
 // ─────────────────────────────────────────────────────────────────────────────
 // USER MANAGEMENT
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the User Management view.
+ * Provides a searchable and filterable table of all system users.
+ * @returns {Promise<void>}
+ */
 export async function initUserManagement() {
     const tbody = document.querySelector('.table tbody');
     const container = document.getElementById('admin-users-card');
@@ -732,6 +866,12 @@ export async function initUserManagement() {
     render();
 }
 
+/**
+ * Binds user-level actions (Suspend, Activate, Delete) to table rows.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {Array<Object>} users - The full list of users for local state updates.
+ * @param {Function} applyFilters - The filter application function to trigger re-renders.
+ */
 function bindUserActions(tbody, users, applyFilters) {
     tbody.querySelectorAll('.btn-suspend-user').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -783,6 +923,11 @@ function bindUserActions(tbody, users, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // ALL EVENTS (events.html - admin view)
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Admin Events management view.
+ * Displays a comprehensive list of all events across the platform with moderation options.
+ * @returns {Promise<void>}
+ */
 export async function initAdminEvents() {
     const tbody = document.querySelector('.table tbody');
     const container = document.getElementById('admin-events-card');
@@ -899,6 +1044,12 @@ export async function initAdminEvents() {
     render();
 }
 
+/**
+ * Binds event-level status changes and deletion actions to management table rows.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {Array<Object>} events - Local reference to events list.
+ * @param {Function} applyFilters - Local filter trigger.
+ */
 function bindEventsActions(tbody, events, applyFilters) {
     tbody.querySelectorAll('.btn-status-change').forEach(function (btn) {
         btn.addEventListener('click', async function () {
@@ -968,6 +1119,11 @@ function bindEventsActions(tbody, events, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // CATEGORIES
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Categories management view.
+ * Allows admins to view, create, edit, and toggle event categories.
+ * @returns {Promise<void>}
+ */
 export async function initAdminCategories() {
     const tbody = document.querySelector('.table tbody');
     const colspan = 4;
@@ -1042,6 +1198,12 @@ export async function initAdminCategories() {
     }
 }
 
+/**
+ * Binds category actions (Edit, Toggle, Delete) to the table rows.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {Array<Object>} categories - Data list of categories.
+ * @param {Function} render - Re-render function.
+ */
 function bindCategoryActions(tbody, categories, render) {
     tbody.querySelectorAll('.btn-edit-cat').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1108,6 +1270,11 @@ function bindCategoryActions(tbody, categories, render) {
 // ─────────────────────────────────────────────────────────────────────────────
 // VENUES
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Venues management view.
+ * Provides tools for managing physical event locations and their capacities.
+ * @returns {Promise<void>}
+ */
 export async function initAdminVenues() {
     const tbody = document.querySelector('.table tbody');
     const container = document.getElementById('admin-venues-card');
@@ -1209,6 +1376,13 @@ export async function initAdminVenues() {
     }
 }
 
+/**
+ * Binds venue-level editing and deletion actions to table rows.
+ * @param {HTMLElement} tbody - The table body.
+ * @param {Array<Object>} venues - Data list.
+ * @param {Function} render - Internal render.
+ * @param {Function} applyFilters - Internal filter applier.
+ */
 function bindVenueActions(tbody, venues, render, applyFilters) {
     tbody.querySelectorAll('.btn-edit-venue').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1263,6 +1437,11 @@ function bindVenueActions(tbody, venues, render, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // TICKETS & REGISTRATIONS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Tickets and Registrations management view.
+ * Displays all event registrations and allows for refund processing or cancellation.
+ * @returns {Promise<void>}
+ */
 export async function initAdminTickets() {
     const tbody = document.querySelector('.table tbody');
     const container = document.getElementById('admin-tickets-card');
@@ -1361,6 +1540,12 @@ export async function initAdminTickets() {
     render();
 }
 
+/**
+ * Binds actions (Refund, Cancel) to registration table rows.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {Array<Object>} registrations - Local registrations list.
+ * @param {Function} applyFilters - Filter trigger.
+ */
 function bindRegActions(tbody, registrations, applyFilters) {
     tbody.querySelectorAll('.btn-refund-reg').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1401,6 +1586,11 @@ function bindRegActions(tbody, registrations, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // PAYMENTS & REVENUE
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Payments and Revenue tracking view.
+ * Consists of a revenue overview by event and a moderation queue for refund requests.
+ * @returns {Promise<void>}
+ */
 export async function initAdminPayments() {
     const allTbodies = document.querySelectorAll('.table tbody');
     const revenueTbody = allTbodies[0];
@@ -1444,7 +1634,11 @@ export async function initAdminPayments() {
         };
     }).filter(d => d.gross > 0 || d.ticketsSold > 0);
 
-    function renderRevenueOverview() {
+    /**
+ * Renders the gross revenue overview table, grouping data by event.
+ * Performs internal calculations for платформа fees and net earnings.
+ */
+function renderRevenueOverview() {
         if (!revenueTbody) return;
         if (revenueData.length === 0) {
             revenueTbody.innerHTML = emptyRow(9, 'No revenue data found.');
@@ -1468,7 +1662,10 @@ export async function initAdminPayments() {
     }
 
     // Refund Requests Logic
-    function renderRefundRequests() {
+    /**
+ * Renders the queue of pending refund requests from users or organizers.
+ */
+function renderRefundRequests() {
         if (!refundTbody) return;
         
         // Mock refund requests if none exist for demonstration/test
@@ -1511,6 +1708,11 @@ export async function initAdminPayments() {
 // ─────────────────────────────────────────────────────────────────────────────
 // REPORTS & ANALYTICS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Reports and Analytics view.
+ * Renders multiple Chart.js visualizations for revenue, categories, and organicer signups.
+ * @returns {Promise<void>}
+ */
 export async function initAdminReports() {
     const [events, users, registrations, payments, categories] = await Promise.all([
         apiFetch('events'), apiFetch('users'), apiFetch('registrations'), apiFetch('payments'), apiFetch('categories')
@@ -1581,6 +1783,11 @@ export async function initAdminReports() {
 // ─────────────────────────────────────────────────────────────────────────────
 // FEEDBACK MODERATION
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Feedback and Reviews moderation view.
+ * Displays all platform feedback and allows for deletion of inappropriate content.
+ * @returns {Promise<void>}
+ */
 export async function initAdminFeedback() {
     const tbody = document.querySelector('.table tbody');
     const container = document.getElementById('admin-feedback-card');
@@ -1607,7 +1814,12 @@ export async function initAdminFeedback() {
         container.after(pagContainer);
     }
 
-    function renderStars(rating) {
+    /**
+ * Utility to render star icons based on a numeric rating.
+ * @param {number} rating - The rating value (0-5).
+ * @returns {string} - HTML string for stars.
+ */
+function renderStars(rating) {
         let s = '';
         for (let i = 1; i <= 5; i++) {
             s += `<i data-lucide="star" width="12" height="12" style="color:${i <= rating ? '#f59e0b' : '#d1d5db'};fill:${i <= rating ? '#f59e0b' : 'none'};"></i>`;
@@ -1674,6 +1886,12 @@ export async function initAdminFeedback() {
     render();
 }
 
+/**
+ * Binds feedback-specific actions (Delete) to table rows.
+ * @param {HTMLElement} tbody - The table body element.
+ * @param {Array<Object>} feedbacks - Local feedback data list.
+ * @param {Function} applyFilters - Filter trigger for re-renders.
+ */
 function bindFeedbackActions(tbody, feedbacks, applyFilters) {
     tbody.querySelectorAll('.btn-delete-fb').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1697,6 +1915,11 @@ function bindFeedbackActions(tbody, feedbacks, applyFilters) {
 // ─────────────────────────────────────────────────────────────────────────────
 // NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Admin Offers management view.
+ * Allows for system-wide offer code creation and management.
+ * @returns {Promise<void>}
+ */
 export async function initAdminOffers() {
     const tableBody = document.getElementById('offersTableBody');
     const card = document.getElementById('admin-offers-card');
@@ -1940,6 +2163,11 @@ export async function initAdminOffers() {
     render();
 }
 
+/**
+ * Initializes the Admin Notifications center.
+ * Displays broadcast and targeted administrative notifications.
+ * @returns {Promise<void>}
+ */
 export async function initAdminNotifications() {
     const events = await apiFetch('events');
     const container = document.getElementById('notifications-list');
@@ -2063,6 +2291,11 @@ export async function initAdminNotifications() {
 // ─────────────────────────────────────────────────────────────────────────────
 // ADMIN PROFILE
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Initializes the Admin Profile management view.
+ * Handles password updates and personal information changes for the current admin.
+ * @returns {Promise<void>}
+ */
 export function initAdminProfile() {
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -2133,6 +2366,11 @@ export function initAdminProfile() {
 // ─────────────────────────────────────────────────────────────────────────────
 // LEGACY GLOBALS for inline onclick= in HTML
 // ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Legacy global helper for approving an event (used for inline onclick handlers).
+ * @param {string} name - Event name.
+ * @param {Function} [onConfirm] - Success callback.
+ */
 export function showApproveModal(name, onConfirm) {
     showConfirmModal({
         title: 'Approve Event', message: `Approve "${name}"?`,
@@ -2141,6 +2379,11 @@ export function showApproveModal(name, onConfirm) {
     });
 }
 
+/**
+ * Legacy global helper for rejecting an event (used for inline onclick handlers).
+ * @param {string} name - Event name.
+ * @param {Function} [onConfirm] - Success callback.
+ */
 export function showRejectModal(name, onConfirm) {
     showConfirmModal({
         title: 'Reject Event', message: `Reject "${name}"?`,

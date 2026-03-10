@@ -1,82 +1,71 @@
-# SyncEvent - Event Management System (EMS)
+# SyncEvent (EMS) - Event Management System
 
-## 📌 Overview
-**SyncEvent** is a modern, high-performance web application designed for seamless event discovery and management. It bridges the gap between event enthusiasts and organizers by providing a robust platform for booking tickets, tracking attendance, and managing event lifecycles.
+SyncEvent is a premium, modular Event Management System built with modern Vanilla JavaScript and Bootstrap. It provides a seamless experience for Admins, Organizers, and Attendees to manage and discover events.
 
 ## 🚀 Key Features
 
-### 🔐 Advanced Authentication (RBAC)
-- **Granular Roles:** Optimized workflows for Attendees, Organizers, and Admins.
-- **Security First:** Real-time password validation (min 8 chars, mixed case, special symbols).
-- **Session Continuity:** "Remember Me" logic leveraging LocalStorage and persistent state monitoring.
+- **Multi-Role Support**: RBAC (Role-Based Access Control) for Admin, Organizer, and Attendee.
+- **Dynamic Module Loading**: Optimized performance through lazy-loading feature-specific JS modules.
+- **Real-time Validation**: Robust form handling with instant user feedback.
+- **Responsive UI**: Sleek, mobile-first design using Bootstrap 5 and Lucide icons.
+- **Centralized State**: Single-source-of-truth architecture for predictable data management.
 
-### 📅 Event Lifecycle & Booking
-- **Smart Discovery:** Categorized event browsing (Music, Tech, Workshops) with real-time filtering.
-- **Seamless Booking:** Integrated logic for ticket selection, discount application, and secure payment processing.
-- **Automated Refunds:** Cancelled registrations now automatically trigger payment status updates to `Refunded`.
-
-### 🛠 Organizer Excellence
-- **Centralized Dashboard:** A premium, dark-themed experience for monitoring event performance.
-- **Attendee Insights:** Real-time registration tracking and verification tools.
-- **Ticket Management:** Dynamic ticket type creation and inventory management.
-
-## 💻 Tech Stack
-
-- **Frontend:** Semantic HTML5, Vanilla JavaScript (ES6+), and Modular SCSS.
-- **Styling:** [Bootstrap 5.3](https://getbootstrap.com/) for grid systems and premium UI components.
-- **Visuals:** [Lucide Icons](https://lucide.dev/) for high-quality SVG iconography.
-- **Backend Infrastructure:** [JSON Server](https://github.com/typicode/json-server) providing a high-fidelity REST API simulation.
-
-## 📂 Project Structure
+## 📁 Project Structure
 
 ```text
 EMS/
-├── index.html                  # Main Entry Point
-├── assets/                     # Design Assets & Iconography
-├── scss/                       # Modular Stylesheets (Tokens, Components, Layouts)
-├── css/                        # Optimized Production Styles
-├── scripts/
-│   ├── core/                   # Bootstrap logic & Icon initialization
-│   ├── shared/                 # Central State Store & Shared Utilities
-│   ├── components/             # Reusable UI Elements (Navbar, Toasts)
-│   └── features/               # 🔥 Domain-Specific Logic
-│       ├── auth/               # Secure Login & Identity Management
-│       ├── events/             # Discovery, Details, & Booking Orchestration
-│       ├── profile/            # User History & Registration Management
-│       └── organizer/          # Professional Dashboard & Signup Flow
-├── data/
-│   └── data.json               # Local Mock Database
-└── package.json                # Dependency Manifest
+├── css/                   # Compiled CSS and theme variables
+├── data/                  # Mock API data (db.json)
+├── pages/                 # HTML templates
+│   ├── admin/             # Admin-only dashboard & management
+│   ├── auth/              # Login/Signup flows
+│   ├── events/            # Public event browsing & booking
+│   ├── organizer/         # Organizer-only dashboard & signup
+│   └── profile/           # User profile & registration history
+├── scripts/               # JavaScript logic
+│   ├── features/          # Feature-specific modules (Admin, Organizer, etc.)
+│   ├── shared/            # Shared state, utilities, and helpers
+│   └── app.js             # Main application entry & orchestrator
+├── scss/                  # Styling source files
+└── index.html             # Application landing page
 ```
 
-## 🔧 Rapid Setup
+## 🏗️ Architecture & Logic Flow
 
-1.  **Clone & Install**
-    ```bash
-    git clone <repository-url>
-    cd EMS
-    npm install
-    ```
+### 1. Data Flow
+The application follows a unidirectional data flow:
+- **API**: Data is fetched from `http://localhost:3000` (json-server).
+- **State Store (`state.js`)**: Fetched data is normalized and stored in a central global object.
+- **UI Component**: JavaScript modules observe the state (or use lookup helpers) to render dynamic content.
 
-2.  **Launch the Backend**
-    ```bash
-    # Install json-server if needed
-    npm install -g json-server
-    
-    # Start the data engine
-    json-server --watch data/data.json --port 3000
-    ```
+### 2. Orchestration (`app.js`)
+The `app.js` file acts as the brain of the app. It manages:
+- **Initialization**: Sets up global components (Toasts, Modals, Icons).
+- **Data Sync**: Runs a `Promise.all` fetch to ensure all data is ready before rendering.
+- **Routing**: Detects the current URL path and dynamically imports the necessary feature script.
 
-3.  **Run Development Server**
-    Serve `index.html` using a local server (e.g., Live Server in VS Code) to ensure ES module compatibility.
+### 3. Access Control (RBAC)
+Permissions are enforced at the orchestrator level. Before a module is loaded, `checkPageAccess()` verifies if the user's role matches the requirements for that specific URL pattern.
 
-## 🤝 Contribution Guide
+## 🛠️ Development Guide
 
-We maintain a high bar for visual and code quality. 
+### Setup
+1. Clone the repository.
+2. Ensure you have Node.js installed.
+3. Start the mock server: `npx json-server data/db.json --port 3000`.
+4. Open `index.html` via a Live Server.
 
-- **UI Consistency:** Follow the [Design System](file:///d:/project-vsc/EMS/DESIGN_SYSTEM.md).
-- **Styling:** Modify styles only in `.scss` files. Compile before pushing:
-  ```bash
-  npx sass scss/main.scss css/main.css
-  ```
-- **State Management:** Always use the centralized `state.js` store for data persistence.
+### Coding Standards
+- **Modules**: Keep feature logic separate from shared utilities.
+- **Documentation**: Use JSDoc for all public functions. Include `@param` and `@returns` tags.
+- **UI Integrity**: Use the shared `utils.js` for toasts, loading spinners, and modals to maintain visual consistency.
+
+## 📜 Role Definitions
+| Role | Capabilities |
+| :--- | :--- |
+| **Admin** | System stats, User moderation, Event approvals, Category management. |
+| **Organizer** | Create events, Manage tickets, View attendee reports, Manage offers. |
+| **Attendee** | Browse events, Book tickets, Manage personal profile. |
+
+---
+*Built with ❤️ for Event Enthusiasts.*

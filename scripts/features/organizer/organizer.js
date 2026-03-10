@@ -4,6 +4,12 @@ import { showToast, populateSidebarUserInfo } from '../../shared/utils.js';
 // ─── Shared Helpers ───────────────────────────────────────────────────────────
 const API_BASE = 'http://localhost:3000';
 
+/**
+ * Normalizes legacy event status formats to a consistent modern structure.
+ * 
+ * @param {Object} event - The event object to normalize.
+ * @returns {Object} - The normalized event object.
+ */
 function normalizeLegacyEventStatus(event) {
     if (!event || !event.status || typeof event.status !== 'object') return event;
     if (event.status.current === 'ACTIVE') event.status.current = 'APPROVED';
@@ -13,6 +19,12 @@ function normalizeLegacyEventStatus(event) {
     return event;
 }
 
+/**
+ * Fetches data from the API and automatically normalizes events.
+ * 
+ * @param {string} endpoint - The API endpoint (e.g., 'events').
+ * @returns {Promise<any>} - The fetched data.
+ */
 async function apiFetch(endpoint) {
     const res = await fetch(`${API_BASE}/${endpoint}`);
     if (!res.ok) throw new Error(`Fetch failed: ${endpoint}`);
@@ -24,6 +36,12 @@ async function apiFetch(endpoint) {
     return data;
 }
 
+/**
+ * Sends a POST request to the API.
+ * @param {string} endpoint - API endpoint.
+ * @param {Object} data - Payload to send.
+ * @returns {Promise<any>} - JSON response.
+ */
 async function apiPost(endpoint, data) {
     const res = await fetch(`${API_BASE}/${endpoint}`, {
         method: 'POST',
@@ -36,6 +54,13 @@ async function apiPost(endpoint, data) {
     return res.json();
 }
 
+/**
+ * Sends a PATCH request to a specific resource.
+ * @param {string} endpoint - API endpoint.
+ * @param {string|number} id - Resource ID.
+ * @param {Object} data - Data to update.
+ * @returns {Promise<any>} - JSON response.
+ */
 async function apiPatch(endpoint, id, data) {
     const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
         method: 'PATCH',
@@ -48,6 +73,12 @@ async function apiPatch(endpoint, id, data) {
     return res.json();
 }
 
+/**
+ * Sends a DELETE request.
+ * @param {string} endpoint - API endpoint.
+ * @param {string|number} id - Resource ID.
+ * @returns {Promise<any>} - JSON response.
+ */
 async function apiDelete(endpoint, id) {
     const res = await fetch(`${API_BASE}/${endpoint}/${id}`, {
         method: 'DELETE'
@@ -56,6 +87,13 @@ async function apiDelete(endpoint, id) {
     return res.json();
 }
 
+/**
+ * Constructs a full status payload with history tracking.
+ * @param {Object} event - The current event object.
+ * @param {string} nextStatus - The status to transition to.
+ * @param {Object} [extra={}] - Additional status metadata.
+ * @returns {Object} - The updated status object.
+ */
 function buildStatusPayload(event, nextStatus, extra = {}) {
     const currentStatus = event?.status?.current || 'DRAFT';
     const history = Array.isArray(event?.status?.history) ? [...event.status.history] : [currentStatus];
@@ -72,27 +110,53 @@ function buildStatusPayload(event, nextStatus, extra = {}) {
     return status;
 }
 
+/**
+ * Updates an event's status with full history tracking.
+ * 
+ * @param {Object} event - The target event.
+ * @param {string} nextStatus - The new status.
+ * @param {Object} [extra={}] - Additional status metadata.
+ */
 async function patchEventStatus(event, nextStatus, extra = {}) {
     const status = buildStatusPayload(event, nextStatus, extra);
     await apiPatch('events', event.id, { status });
     event.status = status;
 }
 
+/**
+ * Retrieves the currently logged-in user from localStorage.
+ * @returns {Object|null} - The user object or null.
+ */
 function getCurrentUser() {
     const str = localStorage.getItem('currentUser');
     return str ? JSON.parse(str) : null;
 }
 
+/**
+ * Formats a number as Indian Currency (INR).
+ * @param {number|string} amount - The amount.
+ * @returns {string} - Formatted currency.
+ */
 function formatCurrency(amount) {
     return '₹' + Number(amount).toLocaleString('en-IN');
 }
 
+/**
+ * Formats a date string into a localized short date (en-IN).
+ * @param {string} dateStr - The raw date string.
+ * @returns {string} - Formatted date.
+ */
 function formatDate(dateStr) {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+/**
+ * Converts a date string into a "time ago" human-readable format.
+ * @param {string} dateStr - The past date.
+ * @returns {string} - Relative time string (e.g., "5m ago").
+ */
 function timeAgo(dateStr) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
@@ -104,6 +168,12 @@ function timeAgo(dateStr) {
     return `${days}d ago`;
 }
 
+/**
+ * Filters the global state for events belonging to a specific organizer.
+ * 
+ * @param {Object} user - The organizer user object.
+ * @returns {Array} - List of normalized event objects.
+ */
 function getOrganizerEvents(user) {
     if (!user) return [];
     return state.events
@@ -111,6 +181,12 @@ function getOrganizerEvents(user) {
         .map(normalizeLegacyEventStatus);
 }
 
+/**
+ * Computes the unified list of registrations across multiple events.
+ * Enriches each registration with its corresponding event title.
+ * @param {Array<Object>} events - List of events.
+ * @returns {Array<Object>} - Enriched registrations list.
+ */
 function getEventRegistrations(events) {
     const eventIds = new Set(events.map(e => e.id));
     const eventMap = new Map(events.map(e => [e.id, e.title]));
@@ -122,16 +198,32 @@ function getEventRegistrations(events) {
         }));
 }
 
+/**
+ * Calculates total tickets sold for a specific event.
+ * @param {Object} event - The event object.
+ * @returns {number} - Total sold quantity.
+ */
 function getTicketsSoldForEvent(event) {
     return event.tickets.reduce((sum, t) => sum + (t.totalQuantity - t.availableQuantity), 0);
 }
 
+/**
+ * Calculates total revenue from a list of registrations.
+ * Only includes 'CONFIRMED' registrations.
+ * @param {Array<Object>} registrations - List of registrations.
+ * @returns {number} - Total revenue.
+ */
 function getRevenueFromRegistrations(registrations) {
     return registrations
         .filter(r => r.status === 'CONFIRMED')
         .reduce((sum, r) => sum + (r.totalAmount || 0), 0);
 }
 
+/**
+ * Triggers a client-side download of data as a CSV file.
+ * @param {Array<Array>} rows - 2D array of CSV rows/cells.
+ * @param {string} filename - Targeted file name.
+ */
 function downloadCSV(rows, filename) {
     const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -143,6 +235,9 @@ function downloadCSV(rows, filename) {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * Injects the registration detail modal into the document body if not already present.
+ */
 function injectRegistrationModal() {
     if (document.getElementById('registrationDetailModal')) return;
     const modalHtml = `
@@ -166,6 +261,10 @@ function injectRegistrationModal() {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
+/**
+ * Global helper to populate and display registration details in a modal.
+ * @param {string|number} id - Registration ID.
+ */
 window.viewRegistrationDetails = (id) => {
     const reg = state.registrations.find(r => r.id === id);
     if (!reg) {
@@ -261,6 +360,11 @@ window.viewRegistrationDetails = (id) => {
     modal.show();
 };
 
+/**
+ * Generates an HTML badge element for an event status.
+ * @param {string} status - Status string.
+ * @returns {string} - HTML string for the badge.
+ */
 function getStatusBadge(status) {
     if (status === 'PUBLISHED') return '<span class="badge rounded-pill bg-success text-white px-3 py-2 fw-bold" style="font-size:11px;">Published</span>';
     if (status === 'APPROVED') return '<span class="badge rounded-pill bg-info text-white px-3 py-2 fw-bold" style="font-size:11px;">Approved</span>';
@@ -271,6 +375,13 @@ function getStatusBadge(status) {
     return `<span class="badge rounded-pill px-3 py-2 fw-bold" style="font-size:11px;background:#F1F5F9;color:#475569;">${status || 'Draft'}</span>`;
 }
 
+/**
+ * Generic pagination setup helper for organizer lists.
+ * @param {Array} items - Full list of items to paginate.
+ * @param {number} itemsPerPage - Page size.
+ * @param {string} containerId - Pagination container ID.
+ * @param {Function} renderFn - Callback to render the current page of items.
+ */
 function setupPagination(items, itemsPerPage, containerId, renderFn) {
     let currentPage = 1;
     let paginationContainer = document.getElementById(containerId);
@@ -332,6 +443,10 @@ function setupPagination(items, itemsPerPage, containerId, renderFn) {
 
 // ─── Organizer Signup Form (existing, preserved) ──────────────────────────────
 
+/**
+ * Sets up the multi-step organizer registration form.
+ * Handles validation, step transitions, and final submission.
+ */
 export function setupOrganizerForm() {
     const form = document.getElementById('organizerForm');
     if (!form) return;
@@ -520,6 +635,10 @@ export function setupOrganizerForm() {
     });
 }
 
+/**
+ * Configures drag-and-drop and manual file uploads for organizer documents.
+ * Updates UI state based on file selection and provides removal/change options.
+ */
 export function setupFileUploads() {
     document.querySelectorAll('.upload-box').forEach(box => {
         const wrapper = box.closest('.position-relative');
@@ -569,6 +688,12 @@ export function setupFileUploads() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Organizer Dashboard.
+ * Fetches and displays stats for events, registrations, and revenue.
+ * Also renders recent notifications and events summary.
+ * @returns {Promise<void>}
+ */
 export function initOrganizerDashboard() {
     const user = getCurrentUser();
     if (!user) return;
@@ -667,6 +792,11 @@ export function initOrganizerDashboard() {
 
 // ─── My Events ────────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the "My Events" management page for organizers.
+ * Handles event grid rendering, status filtering, and management actions (Publish, Cancel, Delete).
+ * @returns {Promise<void>}
+ */
 export function initMyEvents() {
     const user = getCurrentUser();
     if (!user) return;
@@ -960,6 +1090,11 @@ export function initMyEvents() {
 
 // ─── Registrations ────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Registrations management view for an organizer.
+ * Displays a sortable and filterable table of all attendees for the organizer's events.
+ * @returns {Promise<void>}
+ */
 export function initRegistrations() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1078,6 +1213,11 @@ export function initRegistrations() {
 
 // ─── Ticket Management ────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Ticket Management view.
+ * Allows organizers to update ticket prices for their events.
+ * @returns {Promise<void>}
+ */
 export function initTicketManagement() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1224,6 +1364,12 @@ export function initTicketManagement() {
 
 // ─── Reports ──────────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Reports and Analytics view.
+ * Renders revenue charts and ticket sales breakdown using Chart.js.
+ * Provides CSV export functionality for financial data.
+ * @returns {Promise<void>}
+ */
 export function initReports() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1348,6 +1494,12 @@ export function initReports() {
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Organizer Profile management view.
+ * Handles updates for organization details, social links, bio, and passwords.
+ * Also manages profile image uploads via FileReader.
+ * @returns {Promise<void>}
+ */
 export function initOrganizerProfile() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1497,6 +1649,12 @@ export function initOrganizerProfile() {
 
 // ─── Notifications ────────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Organizer Notifications view.
+ * Aggregates server-side alerts, registration updates, and low-inventory warnings.
+ * Handles mark-as-read and dismissal logic for notifications.
+ * @returns {Promise<void>}
+ */
 export async function initOrganizerNotifications() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1748,6 +1906,12 @@ export async function initOrganizerNotifications() {
 
 // ─── Create Event Flow ────────────────────────────────────────────────────────
 
+/**
+ * Initializes the Multi-step Create Event Wizard.
+ * Guides the organizer through basic info, venue selection, ticketing, and media uploads.
+ * Includes status gating to ensure only ACTIVE organizers can create events.
+ * @returns {Promise<void>}
+ */
 export function initCreateEventWizard() {
     const user = getCurrentUser();
     if (!user) return;
@@ -1782,7 +1946,11 @@ export function initCreateEventWizard() {
         media: { thumbnail: '../../assets/about_the_eif.jpg', gallery: [] }
     };
 
-    const updateStepper = (step) => {
+    /**
+ * Updates the visual state of the stepper indicators in the event wizard.
+ * @param {number} step - The current active step number (1-4).
+ */
+const updateStepper = (step) => {
         for (let i = 1; i <= 4; i++) {
             const circle = document.getElementById(`sc${i}`);
             const label = document.getElementById(`sl${i}`);
@@ -1804,7 +1972,10 @@ export function initCreateEventWizard() {
     };
 
     // Premium Live Character Counters
-    const setupCounters = () => {
+    /**
+ * Sets up live character counters and validation feedback for the event title and description.
+ */
+const setupCounters = () => {
         const titleInput = document.getElementById('eventTitle');
         const titleCounter = document.getElementById('titleCounter');
         const titleFeedback = document.getElementById('titleFeedback');
@@ -1855,7 +2026,12 @@ export function initCreateEventWizard() {
     };
     setupCounters();
 
-    window.nextStep = (n) => {
+    /**
+ * Global helper to navigate to the next step in the event wizard.
+ * Performs validation for the current step before proceeding.
+ * @param {number} n - The target step number.
+ */
+window.nextStep = (n) => {
         if (n > currentStep) {
             // Validation for Step 1
             if (currentStep === 1) {
@@ -2104,7 +2280,10 @@ export function initCreateEventWizard() {
     }
 
     // Tickets
-    window.addTicketRow = () => {
+    /**
+ * Global helper to add a new ticket type row to the event wizard.
+ */
+window.addTicketRow = () => {
         const rowCont = document.getElementById('ticketRows');
         const div = document.createElement('div');
         div.className = 'p-3 border rounded-3 d-flex flex-column gap-2 bg-white';
@@ -2142,7 +2321,12 @@ export function initCreateEventWizard() {
     };
 
     // Load Categories (Filtered by ACTIVE)
-    const loadCategories = async () => {
+    /**
+ * Fetches and populates the category selection dropdown for the event wizard.
+ * Filters for ACTIVE categories only.
+ * @returns {Promise<void>}
+ */
+const loadCategories = async () => {
         const select = document.getElementById('eventCategory');
         if (!select) return;
 
@@ -2170,7 +2354,12 @@ export function initCreateEventWizard() {
     };
 
     // Load Venues
-    const loadVenues = async () => {
+    /**
+ * Fetches and populates the venue selection dropdown for the event wizard.
+ * Filters for ACTIVE venues only.
+ * @returns {Promise<void>}
+ */
+const loadVenues = async () => {
         const select = document.getElementById('venueSelect');
         if (!select) return;
 
@@ -2220,7 +2409,13 @@ export function initCreateEventWizard() {
     loadCategories();
     loadVenues();
 
-    const saveEvent = async (published = false) => {
+    /**
+ * Gathers all form data and saves the event as either a DRAFT or PENDING (submitted).
+ * Redirects to the "My Events" page upon success.
+ * @param {boolean} [published=false] - Whether to submit for review immediately.
+ * @returns {Promise<void>}
+ */
+const saveEvent = async (published = false) => {
         const user = getCurrentUser();
         if (!user) return;
 
@@ -2574,6 +2769,12 @@ export async function initOrganizerOffers() {
     render();
 }
 
+/**
+ * Initializes the Organizer Payments view.
+ * Displays a table of all payments across events and calculates revenue stats.
+ * Provides CSV export for transaction history.
+ * @returns {Promise<void>}
+ */
 export function initOrganizerPayments() {
     const user = getCurrentUser();
     if (!user) return;

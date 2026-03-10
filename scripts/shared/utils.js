@@ -1,3 +1,19 @@
+/**
+ * UI Utilities and Global Helpers
+ * ===============================
+ * This module provides a collection of shared functions used across the application.
+ * It includes UI component injection, loading states, notifications (toasts),
+ * access control, and generic pagination logic.
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UI COMPONENT INJECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Injects a container for Bootstrap toasts into the DOM.
+ * This container is fixed to the bottom-right and is required for showToast() to work.
+ */
 export function injectToastContainer() {
     const container = document.createElement('div');
     container.id = 'toast-container';
@@ -7,7 +23,8 @@ export function injectToastContainer() {
 }
 
 /**
- * Back to Top Button Logic
+ * Injects a "Back to Top" button and sets up its visibility logic on scroll.
+ * The button appears after scrolling 300px and smoothly scrolls back to the top when clicked.
  */
 export function injectBackToTopButton() {
     if (document.getElementById('back-to-top-btn')) return;
@@ -37,8 +54,16 @@ export function injectBackToTopButton() {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// LOADING & NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Global Loading Indicators
+ * Shows a loading indicator within a specified container.
+ * It temporarily replaces the container's content with a spinner.
+ * 
+ * @param {string} containerId - The ID of the container element.
+ * @param {string} [message='Loading content...'] - Optional loading message shown below the spinner.
  */
 export function showLoading(containerId, message = 'Loading content...') {
     const container = document.getElementById(containerId);
@@ -53,6 +78,13 @@ export function showLoading(containerId, message = 'Loading content...') {
     `;
 }
 
+/**
+ * Hides the loading indicator.
+ * Note: Usually, new content is written directly over the spinner, but this 
+ * helper exists for explicit state management.
+ * 
+ * @param {string} containerId - The ID of the container element.
+ */
 export function hideLoading(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -61,6 +93,14 @@ export function hideLoading(containerId) {
     // container.innerHTML = container.getAttribute('data-previous-html') || '';
 }
 
+/**
+ * Displays a non-intrusive Bootstrap toast message.
+ * Newest toasts overwrite the old ones to prevent UI clutter.
+ * 
+ * @param {string} title - The title of the toast (internal use).
+ * @param {string} message - The message content to show the user.
+ * @param {string} [type='primary'] - The semantic type ('primary', 'success', 'danger', 'warning').
+ */
 export function showToast(title, message, type = 'primary') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -93,6 +133,14 @@ export function showToast(title, message, type = 'primary') {
     });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH & ACCESS CONTROL
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Injects a global sign-out confirmation modal into the DOM.
+ * This ensures that logout attempts are always verified by the user.
+ */
 export function injectSignOutModal() {
     if (document.getElementById('signOutModal')) return;
 
@@ -138,6 +186,10 @@ export function injectSignOutModal() {
     }
 }
 
+/**
+ * Populates current user information (name, email, avatar) in the sidebar.
+ * It also attaches click listeners to all logout buttons to trigger the sign-out modal.
+ */
 export function populateSidebarUserInfo() {
     const userStr = localStorage.getItem('currentUser');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -168,6 +220,9 @@ export function populateSidebarUserInfo() {
     });
 }
 
+/**
+ * Initializes Bootstrap tooltips and popovers globally.
+ */
 export function initializeBootstrapComponents() {
     if (typeof bootstrap === 'undefined') return;
     const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -177,6 +232,22 @@ export function initializeBootstrapComponents() {
     [...popoverTriggerList].map(popoverTriggerEl => new window.bootstrap.Popover(popoverTriggerEl));
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGINATION & DATA DISPLAY
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Set up generic pagination logic for a list of items.
+ * This handles rendering a subset of items and generating pagination controls.
+ * 
+ * @param {Object} options - Configuration object.
+ * @param {Array} options.items - The full list of data items.
+ * @param {string} options.containerId - ID of the element to render items into.
+ * @param {string} options.paginationId - ID of the element to render controls into.
+ * @param {Function} options.renderItem - Mapper function: (item) => string|Node.
+ * @param {number} [options.itemsPerPage=5] - How many items per page.
+ * @param {Function} [options.onRender] - Callback executed after setiap rendering.
+ */
 export function setupGenericPagination({ items, containerId, paginationId, renderItem, itemsPerPage = 5, onRender }) {
     let currentPage = 1;
     let paginationContainer = document.getElementById(paginationId);
@@ -261,6 +332,16 @@ export function setupGenericPagination({ items, containerId, paginationId, rende
     renderPage(1);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FORM VALIDATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sets up real-time form validation using the HTML5 constraint validation API.
+ * It provides instant feedback as the user types and handles the 'submit' event.
+ * 
+ * @param {string} formId - The ID of the form to observe.
+ */
 export function setupRealtimeValidation(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
@@ -382,7 +463,8 @@ export function setupRealtimeValidation(formId) {
 }
 
 /**
- * Professional Restricted Access Modal with Countdown
+ * Shows a "Restricted Access" modal with a countdown before redirecting.
+ * @param {string} [redirectUrl='../../index.html'] - The URL to redirect to after countdown.
  */
 export function showRestrictedAccessModal(redirectUrl = '../../index.html') {
     if (document.getElementById('restrictedAccessModal')) return;
@@ -427,8 +509,15 @@ export function showRestrictedAccessModal(redirectUrl = '../../index.html') {
     }, 1000);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RBAC & PERMISSIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
 /**
- * Robust helper to check if current user has access to current page
+ * Checks if the currently logged-in user has permission to view the current page.
+ * It maps URL patterns to required roles (ADMIN, ORGANIZER, ATTENDEE).
+ * 
+ * @returns {Object} - { hasAccess: boolean, redirect: string|undefined }.
  */
 export function checkPageAccess() {
     const path = window.location.pathname;
